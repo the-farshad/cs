@@ -1,0 +1,50 @@
+# Deploy the backend API stack to the VPS over SSH.
+#
+# Required GitHub Actions secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST     — public hostname or IP of the VPS (e.g. api.cs.thefarshad.com)
+#   DEPLOY_USER     — SSH login user on the VPS
+#   DEPLOY_SSH_KEY  — private SSH key (PEM) authorized for DEPLOY_USER on the VPS
+#
+# Optional (uncomment the matching lines in the step below to use them):
+#   DEPLOY_PORT     — SSH port if not 22
+#   DEPLOY_PATH     — path to the cloned repo on the VPS if not ~/cs
+#
+# Do NOT hardcode any real values here — everything sensitive comes from secrets.
+
+name: Deploy API
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'infra/**'
+      - '.github/workflows/deploy-api.yml'
+
+# Avoid overlapping deploys stepping on each other.
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          # port: ${{ secrets.DEPLOY_PORT }}      # uncomment if SSH is not on 22
+          script: |
+            set -euo pipefail
+            cd "${DEPLOY_PATH:-$HOME/cs}"
+            git pull --ff-only
+            docker compose -f infra/docker-compose.yml up -d --build
+            docker compose -f infra/docker-compose.yml ps
+          # Pass optional overrides through to the remote shell.
+          envs: DEPLOY_PATH
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}

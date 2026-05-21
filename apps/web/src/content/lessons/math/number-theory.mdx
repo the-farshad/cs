@@ -1,0 +1,69 @@
+---
+title: Number Theory
+track: math
+order: 9
+summary: Primes, gcd, and modular arithmetic — the math that powers cryptography and hashing.
+difficulty: medium
+---
+
+import SieveAndClock from '@/components/viz/SieveAndClock.tsx';
+
+**Number theory** studies the whole numbers and their hidden structure: which numbers
+are prime, how they divide one another, and how they behave when you wrap them around
+a clock. It is the foundation of modern **cryptography**, hashing, and error
+detection.
+
+Run the sieve to watch composite numbers get crossed out, then switch to the modular
+clock to see how numbers wrap around.
+
+<SieveAndClock client:visible />
+
+## Primes
+
+A **prime** is a whole number greater than 1 divisible only by 1 and itself: 2, 3, 5,
+7, 11, … Every other number factors uniquely into primes (the **Fundamental Theorem
+of Arithmetic**), so primes are the "atoms" of multiplication. The **Sieve of
+Eratosthenes** finds them efficiently: take the next un-crossed number, cross out all
+its multiples, repeat.
+
+## Greatest common divisor
+
+The **gcd** of two numbers is the largest number dividing both. **Euclid's
+algorithm** computes it astonishingly fast by repeated remainders:
+
+`gcd(a, b) = gcd(b, a mod b)`, stopping when `b = 0`.
+
+For example `gcd(48, 18) = gcd(18, 12) = gcd(12, 6) = gcd(6, 0) = 6`. It is one of the
+oldest algorithms still in everyday use.
+
+## Modular arithmetic
+
+**Modular arithmetic** wraps numbers around a fixed modulus `m`, keeping only the
+remainder. On a 12-hour clock, `17 mod 12 = 5`. Numbers with the same remainder are
+**congruent mod m**. Addition and multiplication still work — they just cycle:
+
+`(a + b) mod m`   and   `(a · b) mod m`
+
+This wraparound is exactly how hash tables map keys into a fixed number of buckets and
+how cyclic buffers reuse indices.
+
+## Why it matters for CS
+
+Public-key cryptography (the lock behind secure connections) relies on the fact that
+multiplying two large primes is easy but factoring the result is brutally hard.
+Hashing uses modular arithmetic to spread keys across buckets, and checksums use it to
+catch transmission errors. Number theory turns "boring" integers into the bedrock of
+digital security.
+
+## Further reading
+
+[Khan Academy: Modular arithmetic](https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/what-is-modular-arithmetic)
+introduces these ideas with a focus on cryptography, for free.
+
+## Takeaways
+
+- Primes are the building blocks of the integers; the sieve finds them by crossing out
+  multiples.
+- Euclid's algorithm computes the gcd quickly with repeated remainders.
+- Modular arithmetic wraps numbers around a modulus and underpins hashing and
+  cryptography.

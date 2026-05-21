@@ -28,7 +28,7 @@ gradient descent, a gridworld RL agent, a single-qubit simulator, and more).
 
 ## Practice problems
 
-LeetCode-style problems with an in-browser judge. **Python** runs via Pyodide and
+Practice problems with an in-browser judge. **Python** runs via Pyodide and
 **JavaScript** runs natively, both client-side. Each problem ships reference
 solutions in Python, JavaScript, C++, Java, and pseudocode.
 

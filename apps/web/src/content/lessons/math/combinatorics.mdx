@@ -1,0 +1,69 @@
+---
+title: Sets & Combinatorics
+track: math
+order: 5
+summary: Counting arrangements and selections with factorials, permutations, and combinations.
+difficulty: medium
+---
+
+import CombinatoricsExplorer from '@/components/viz/CombinatoricsExplorer.tsx';
+
+**Combinatorics** is the art of counting *without* listing everything out. It
+answers questions like "how many passwords are possible?" or "how many ways can I
+pick a team?" — the same questions that bound how large a search space an algorithm
+must face.
+
+Toggle between permutations and combinations below and reveal the outcomes one at a
+time. Watch how ordering changes the count.
+
+<CombinatoricsExplorer client:visible />
+
+## Sets and counting
+
+A **set** is an unordered collection of distinct elements, written `{A, B, C}`. Its
+**cardinality** is just how many elements it has. Two basic rules drive most
+counting:
+
+- **Sum rule:** if you can do A in `m` ways *or* B in `n` ways, that's `m + n` ways.
+- **Product rule:** if a choice has `m` options *then* `n` options, that's `m · n`
+  ways. A 4-digit PIN is `10 · 10 · 10 · 10 = 10⁴`.
+
+## Factorials and permutations
+
+A **factorial** `n!` = `n · (n−1) · … · 1` counts how many ways to order `n` items:
+`3! = 6`. A **permutation** `P(n, k)` counts ordered arrangements of `k` chosen from
+`n`:
+
+`P(n, k) = n! / (n − k)!`
+
+Order matters here — `AB` and `BA` are different.
+
+## Combinations
+
+A **combination** `C(n, k)` counts *unordered* selections — `{A, B}` is the same as
+`{B, A}`:
+
+`C(n, k) = n! / (k! · (n − k)!)`
+
+These are the **binomial coefficients** that fill Pascal's triangle, where each
+number is the sum of the two above it. There are always `k!` times more permutations
+than combinations, because each unordered group can be ordered `k!` ways.
+
+## Why it matters for CS
+
+Counting tells you the size of a problem. A brute-force search over all orderings is
+`O(n!)`; over all subsets is `O(2ⁿ)`. Knowing these counts is how you recognize when
+an exhaustive approach is hopeless and a smarter algorithm is required. Hashing,
+combinatorial generation, and probability all build directly on these formulas.
+
+## Further reading
+
+[Khan Academy: Counting, permutations, and combinations](https://www.khanacademy.org/math/statistics-probability/counting-permutations-and-combinations)
+is a free, step-by-step course.
+
+## Takeaways
+
+- The sum and product rules turn most counting problems into arithmetic.
+- Permutations count *ordered* arrangements; combinations count *unordered*
+  selections — differing by a factor of `k!`.
+- `n!` and `2ⁿ` growth explain why brute-force search blows up so fast.

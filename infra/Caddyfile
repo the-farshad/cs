@@ -1,0 +1,25 @@
+# Caddyfile — reverse proxy + automatic HTTPS for the cs.thefarshad.com API.
+#
+# Caddy automatically provisions and renews a TLS certificate (Let's Encrypt)
+# for the hostname below, then proxies traffic to the internal `api` service.
+# The static frontend (cs.thefarshad.com) is served separately by GitHub Pages
+# and is NOT handled here.
+#
+# Optional: set an email for ACME notifications by uncommenting the global block.
+# {
+#     email you@example.com
+# }
+
+api.cs.thefarshad.com {
+	# Forward all requests to the `api` service on the internal docker network.
+	# Caddy resolves `api` via docker DNS; the port matches PORT=8080.
+	reverse_proxy api:8080
+
+	# Sensible defaults: gzip/zstd responses and structured access logs.
+	encode zstd gzip
+
+	log {
+		output stdout
+		format console
+	}
+}

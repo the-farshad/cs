@@ -1,0 +1,62 @@
+---
+title: Two Pointers & Sliding Window
+track: algorithms
+order: 5
+summary: Two coordinated indices walk an array to solve in one pass what a brute force would solve in two nested loops.
+difficulty: easy
+---
+
+import SlidingWindowVisualizer from '@/components/viz/SlidingWindowVisualizer.tsx';
+
+A surprising number of array and string problems that look like they need
+**nested loops** — and therefore O(n²) time — collapse to a single pass once you
+move two indices in a coordinated way. **Two pointers** and the **sliding
+window** are the same idea wearing two hats.
+
+Try both modes below. *Sliding window* keeps a fixed-size block moving across the
+array, tracking its sum; *two pointers* walks one index in from each end of a
+sorted array to hunt for a pair.
+
+<SlidingWindowVisualizer client:visible />
+
+## The sliding window
+
+When you want the best contiguous block of a given size (or the longest block
+satisfying a condition), don't recompute the block from scratch each time. Slide
+it: as the window moves right by one, **add** the entering element and
+**subtract** the leaving one. Each element is added once and removed once, so the
+whole scan is **O(n)** instead of O(n·k).
+
+The same trick handles *variable* windows: grow the right edge to include more,
+and shrink the left edge whenever the window violates a constraint (too large a
+sum, a repeated character, and so on). The window never moves backward, which is
+what keeps it linear.
+
+## Two pointers from both ends
+
+On a **sorted** array, a pair-sum search needs no nested loop. Put one pointer at
+the start and one at the end and look at their sum:
+
+- Too **small**? The only way to grow it is to move the **left** pointer right.
+- Too **big**? Move the **right** pointer left.
+- Equal to the target? Done.
+
+Each move discards a whole row of the brute-force comparison matrix, so the
+search is **O(n)** after sorting. The same converging-pointers shape solves
+container-with-most-water, reversing in place, merging sorted lists, and
+partitioning.
+
+## When it applies
+
+The pattern needs **monotonic structure**: sortedness, or a window quantity that
+changes predictably as the edges move. If moving a pointer could ever require
+undoing an earlier decision, two pointers won't be correct — reach for a
+different tool.
+
+## Takeaways
+
+- Two coordinated indices turn many O(n²) scans into a single O(n) pass.
+- A sliding window updates incrementally — add the entrant, drop the leaver — and
+  never moves backward.
+- Converging pointers exploit sorted order; each step eliminates a whole class of
+  candidates.

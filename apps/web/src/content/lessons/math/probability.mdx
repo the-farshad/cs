@@ -1,0 +1,72 @@
+---
+title: Probability
+track: math
+order: 6
+summary: Events, independence, expected value, and how randomness settles down over many trials.
+difficulty: medium
+---
+
+import LawOfLargeNumbers from '@/components/viz/LawOfLargeNumbers.tsx';
+
+**Probability** measures how likely something is, on a scale from 0 (impossible) to
+1 (certain). It is the math behind randomized algorithms, machine learning,
+load estimates, and any system that has to reason about uncertainty.
+
+Press play to sample a coin or die over and over. Each bar is the *observed*
+fraction; watch them drift toward the dashed true-probability line.
+
+<LawOfLargeNumbers client:visible />
+
+## Events and probability
+
+An **event** is an outcome or set of outcomes. For a fair die, `P(roll a 4) = 1/6`.
+A few rules cover most cases:
+
+- **Complement:** `P(not A) = 1 − P(A)`.
+- **Addition (mutually exclusive):** `P(A or B) = P(A) + P(B)`.
+- **Multiplication (independent):** `P(A and B) = P(A) · P(B)`.
+
+## Independence
+
+Two events are **independent** when one happening tells you nothing about the other —
+two separate coin flips, for example. That's why the chance of two heads is
+`1/2 · 1/2 = 1/4`. When events *aren't* independent, you need **conditional
+probability** `P(A | B)`: the probability of A *given* that B occurred.
+
+## Expected value
+
+The **expected value** is the long-run average outcome — each value weighted by its
+probability:
+
+`E[X] = Σ (value · probability)`
+
+For a fair die, `E = (1+2+3+4+5+6)/6 = 3.5`. Expected value is how you compare random
+strategies: the average cost of a hash lookup, or the expected number of comparisons
+in randomized quicksort.
+
+## Distributions and the law of large numbers
+
+A **distribution** lists every outcome with its probability. The **law of large
+numbers** says that as you take more samples, the empirical frequencies converge to
+the true distribution — exactly what the visualizer shows. A handful of rolls can
+look lopsided; thousands almost never do.
+
+## Why it matters for CS
+
+Randomized algorithms (quicksort pivots, hashing, Monte Carlo methods) trade
+worst-case guarantees for excellent *average* behavior. Probability is also the
+foundation of machine learning, where models output likelihoods rather than
+certainties.
+
+## Further reading
+
+[Khan Academy: Probability](https://www.khanacademy.org/math/statistics-probability/probability-library)
+is a free, thorough introduction.
+
+## Takeaways
+
+- Probabilities run from 0 to 1; complement, addition, and multiplication rules cover
+  most calculations.
+- Independent events multiply; expected value is the probability-weighted average
+  outcome.
+- The law of large numbers explains why randomized algorithms are reliable at scale.

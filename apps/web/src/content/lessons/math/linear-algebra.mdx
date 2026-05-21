@@ -1,0 +1,70 @@
+---
+title: Linear Algebra
+track: math
+order: 7
+summary: Vectors and 2x2 matrices as transformations of space, with the determinant as area.
+difficulty: medium
+---
+
+import MatrixTransform from '@/components/viz/MatrixTransform.tsx';
+
+**Linear algebra** is the math of **vectors** and **matrices** — and it is the
+engine behind computer graphics, machine learning, physics simulations, and data
+analysis. The key insight is that a matrix is not just a grid of numbers; it is a
+*transformation* of space.
+
+Drag the four matrix entries below. The blue and green arrows are the basis vectors,
+and the shaded region is the unit square after the transform. Its area is the
+**determinant**.
+
+<MatrixTransform client:visible />
+
+## Vectors
+
+A **vector** is a quantity with direction and magnitude, written as a column of
+numbers like `[3, 2]`. You can **add** vectors component-wise and **scale** them by a
+number. In code, a vector is just an array — a point, a velocity, a color, or a row
+of features.
+
+## Matrices as transformations
+
+A 2x2 matrix `[[a, b], [c, d]]` transforms every point in the plane. The trick: it
+sends the basis vector `î = [1, 0]` to the first column `[a, c]`, and `ĵ = [0, 1]` to
+the second column `[b, d]`. Every other point follows along, because
+
+`M · [x, y] = x · (first column) + y · (second column)`
+
+Different entries produce familiar effects:
+
+- **Scaling:** `[[2, 0], [0, 2]]` doubles everything.
+- **Rotation:** `[[cos θ, −sin θ], [sin θ, cos θ]]` spins the plane.
+- **Shear:** `[[1, 1], [0, 1]]` slides the top sideways.
+
+## The determinant
+
+The **determinant** `ad − bc` measures how much the transformation scales **area**.
+
+- `det = 1`: area preserved (a pure rotation).
+- `det = 0`: the square collapses to a line — the matrix is **not invertible** and
+  information is lost.
+- `det < 0`: the plane is **flipped** over (orientation reversed).
+
+## Why it matters for CS
+
+Graphics pipelines multiply matrices to move and rotate objects. Neural networks are
+chains of matrix multiplications. Search engines and recommender systems represent
+data as vectors and compare them with dot products. Once you see matrices as
+transformations, all of this clicks into place.
+
+## Further reading
+
+[Khan Academy: Linear algebra](https://www.khanacademy.org/math/linear-algebra)
+covers vectors, matrices, and transformations for free.
+
+## Takeaways
+
+- Vectors are directed quantities you can add and scale; a matrix transforms whole
+  vectors at once.
+- A 2x2 matrix is defined by where it sends the basis vectors `î` and `ĵ`.
+- The determinant is the area scale factor; `det = 0` means the matrix is not
+  invertible.

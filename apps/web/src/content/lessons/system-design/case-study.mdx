@@ -2,13 +2,13 @@
 title: 'Case Study: URL Shortener'
 track: system-design
 order: 4
-summary: Put the pieces together — design a TinyURL-style service from requirements to scale.
+summary: Put the pieces together — design a URL shortener from requirements to scale.
 difficulty: medium
 ---
 
 Design interviews and real projects both start the same way: clarify
 **requirements**, sketch the **API and data**, then make it **scale and stay up**.
-Let's design a URL shortener (like TinyURL).
+Let's design a URL shortener — a service that turns a long URL into a short code.
 
 ## 1. Requirements
 
@@ -51,7 +51,7 @@ stays `O(1)`/`O(log n)`.
 ## The pattern
 
 Clarify → API → data → bottleneck → apply caching/replication/sharding. The same
-recipe designs a pastebin, a news feed, or a rate limiter.
+recipe designs a paste service, a news feed, or a rate limiter.
 
 ## Takeaways
 

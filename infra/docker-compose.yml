@@ -1,0 +1,138 @@
+# cs.thefarshad.com — backend infrastructure
+#
+# Brings up the API stack on a generic Linux VPS:
+#   postgres  → database (internal only, never exposed to the host)
+#   api       → Node/Express service on :8080 (internal only, reached via caddy)
+#   caddy     → public reverse proxy + automatic HTTPS for api.cs.thefarshad.com
+#   judge0    → (later phase) sandbox for compiled-language code execution
+#
+# Secrets/config come from an `.env` file in THIS directory — copy `.env.example`
+# to `.env` and fill it in. Never commit `.env`. See `deploy.md` for the runbook.
+#
+# Usage:
+#   docker compose -f infra/docker-compose.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    # Loaded from infra/.env — POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB.
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # NOT exposed to the host: no `ports:` mapping. Only services on the
+    # internal docker network (i.e. `api`) can reach Postgres on 5432.
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../apps/api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # DATABASE_URL points at the `postgres` service over the internal network.
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      # CORS / allowed browser origin (the static frontend on GitHub Pages).
+      APP_ORIGIN: ${APP_ORIGIN}
+      PORT: 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # NOT published directly to the host — only caddy talks to it on :8080
+    # over the internal network. `expose` documents the port without binding it.
+    expose:
+      - "8080"
+    networks:
+      - backend
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    # The only public-facing service. Caddy obtains/renews TLS certificates
+    # automatically (Let's Encrypt) for api.cs.thefarshad.com.
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data    # certificates + ACME account (must persist)
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - backend
+
+  # ---------------------------------------------------------------------------
+  # judge0 — added in a LATER PHASE (Phase 3) for compiled-language code
+  # execution (C/C++/Java/Go/Rust/...). It's the heavy tenant (needs its own
+  # db + redis + workers and significant RAM), so it is intentionally left
+  # commented out until the host is sized for it. When enabled it stays on the
+  # internal `backend` network and is reached only by the `api` service — never
+  # published to the host. Sketch only; finalize versions/config at Phase 3.
+  # ---------------------------------------------------------------------------
+  # judge0:
+  #   image: judge0/judge0:1.13.1
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env            # JUDGE0_* settings (db creds, redis url, limits)
+  #   depends_on:
+  #     - judge0-db
+  #     - judge0-redis
+  #   privileged: true     # required for the sandbox (cgroups/isolate)
+  #   expose:
+  #     - "2358"
+  #   networks:
+  #     - backend
+  #
+  # judge0-workers:
+  #   image: judge0/judge0:1.13.1
+  #   command: ["./scripts/workers"]
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - judge0-db
+  #     - judge0-redis
+  #   privileged: true
+  #   networks:
+  #     - backend
+  #
+  # judge0-db:
+  #   image: postgres:16
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env            # JUDGE0_DB_* (kept separate from the app database)
+  #   volumes:
+  #     - judge0_pgdata:/var/lib/postgresql/data
+  #   networks:
+  #     - backend
+  #
+  # judge0-redis:
+  #   image: redis:7
+  #   restart: unless-stopped
+  #   networks:
+  #     - backend
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+  # judge0_pgdata:   # uncomment together with the judge0 services above
+
+networks:
+  backend:
+    driver: bridge

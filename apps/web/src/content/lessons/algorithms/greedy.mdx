@@ -1,0 +1,57 @@
+---
+title: Greedy Algorithms
+track: algorithms
+order: 7
+summary: Make the locally best choice at each step and never look back — fast and simple, but only correct when the problem allows it.
+difficulty: medium
+---
+
+import GreedyScheduleVisualizer from '@/components/viz/GreedyScheduleVisualizer.tsx';
+
+A **greedy algorithm** builds a solution one step at a time, each time taking the
+choice that looks best **right now**, and never reconsidering. When it works, it
+is wonderfully simple and fast. The hard part is not the code — it is proving the
+short-sighted choice is also the globally optimal one.
+
+Below is the classic **activity selection** problem: given a set of intervals
+(say, meetings competing for one room), pick the **most** that don't overlap. The
+greedy rule is to always take the interval that **finishes earliest**.
+
+<GreedyScheduleVisualizer client:visible />
+
+## Why "earliest finish" is optimal here
+
+Sorting by finish time and grabbing each compatible interval is provably optimal.
+The argument is an **exchange argument**: whatever the best possible schedule is,
+its first meeting can be swapped for the earliest-finishing meeting without
+causing any conflict and without reducing the count — that swap leaves at least as
+much room for everything after it. Repeat the reasoning and the greedy schedule
+matches the optimum.
+
+That last clause matters: a greedy rule is only correct if you can show such an
+argument. The **greedy-choice property** (a locally optimal pick is part of some
+global optimum) and **optimal substructure** together are what license the
+approach.
+
+## When greedy fails
+
+Greedy is seductive because it is so natural — and it is wrong just as often.
+Making change with coins of 1, 3, and 4: greedily paying 6 as 4 + 1 + 1 uses
+three coins, but 3 + 3 uses two. The largest-coin-first rule is optimal for some
+coin systems and not others. Likewise the 0/1 knapsack cannot be solved greedily
+by value-per-weight; it needs **dynamic programming**.
+
+## Greedy vs DP
+
+Both exploit optimal substructure. The difference: DP **explores** all the
+sub-choices and keeps the best; greedy **commits** to one and moves on. When a
+greedy rule is valid it is dramatically cheaper — usually just a sort plus a
+linear pass, **O(n log n)**.
+
+## Takeaways
+
+- Greedy makes an irrevocable locally optimal choice at each step.
+- It is correct only with the greedy-choice property plus optimal substructure —
+  prove it, often with an exchange argument.
+- When valid it is much faster than DP; when not, it quietly returns wrong
+  answers.

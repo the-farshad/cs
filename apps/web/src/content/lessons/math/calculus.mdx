@@ -1,0 +1,68 @@
+---
+title: Calculus
+track: math
+order: 8
+summary: Derivatives as the instantaneous slope of a curve — the math behind optimization.
+difficulty: hard
+---
+
+import TangentExplorer from '@/components/viz/TangentExplorer.tsx';
+
+**Calculus** is the math of *change*. Its central idea, the **derivative**, measures
+how fast a quantity is changing at an instant — the slope of a curve at a single
+point. This is exactly what optimization algorithms use to climb toward better
+solutions.
+
+Slide the point along the curve below. The gold dashed line is the tangent, and its
+slope is the derivative `f'(x)` at that point.
+
+<TangentExplorer client:visible />
+
+## Slope, from average to instantaneous
+
+The slope of a straight line is `rise / run`. For a curve, the slope changes
+everywhere, so we look at it *locally*. Pick two nearby points and compute the
+average slope between them:
+
+`(f(x + h) − f(x)) / h`
+
+As the gap `h` shrinks toward zero, that secant line rotates until it just grazes the
+curve — the **tangent**. Its slope is the **derivative**, written `f'(x)`.
+
+## The derivative
+
+`f'(x)` is itself a function: it tells you the slope at every `x`. A few patterns
+recur constantly:
+
+- `f(x) = x²` → `f'(x) = 2x`
+- `f(x) = xⁿ` → `f'(x) = n · xⁿ⁻¹`  (the power rule)
+- `f(x) = sin x` → `f'(x) = cos x`
+- `f(x) = eˣ` → `f'(x) = eˣ`  (its own derivative)
+
+Where the curve climbs steeply, `f'(x)` is large; at a peak or valley the tangent is
+flat, so `f'(x) = 0`. Those flat spots are how you *find* maxima and minima.
+
+## Integrals, briefly
+
+The **integral** is the derivative run in reverse: it accumulates a quantity, and
+geometrically it is the **area under a curve**. Together, differentiation and
+integration are inverse operations — the Fundamental Theorem of Calculus.
+
+## Why it matters for CS
+
+**Gradient descent**, the workhorse of machine learning, follows the derivative
+downhill to minimize error — adjusting parameters in the direction that decreases the
+loss fastest. Derivatives also drive physics engines, animation easing, and any
+system that optimizes a numeric objective.
+
+## Further reading
+
+[Khan Academy: Differential calculus](https://www.khanacademy.org/math/differential-calculus)
+is a free course that builds derivatives from the ground up.
+
+## Takeaways
+
+- A derivative is the instantaneous slope — the limit of average slopes as the gap
+  shrinks to zero.
+- `f'(x) = 0` marks peaks and valleys, which is how optimization finds extremes.
+- Gradient descent in machine learning is just following the derivative downhill.
