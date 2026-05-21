@@ -24,6 +24,8 @@ export const ICONS: Record<string, string> = {
   check: '<polyline points="20 6 9 17 4 12"/>',
   'arrow-right': '<line x1="4" y1="12" x2="20" y2="12"/><polyline points="13 5 20 12 13 19"/>',
   'arrow-left': '<line x1="20" y1="12" x2="4" y2="12"/><polyline points="11 5 4 12 11 19"/>',
+  'arrow-up': '<line x1="12" y1="20" x2="12" y2="4"/><polyline points="5 11 12 4 19 11"/>',
+  'arrow-down': '<line x1="12" y1="4" x2="12" y2="20"/><polyline points="5 13 12 20 19 13"/>',
   code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
 
   // Pathfinding tools

@@ -5,6 +5,7 @@ import { bfs, dfs, dijkstra, astar } from '../src/components/viz/pathfinding';
 import { heapInsert, heapExtractMin } from '../src/components/viz/heap';
 import { PROBLEMS } from '../src/lib/problems';
 import { runJavaScript } from '../src/lib/runners';
+import { valueIteration, type Cell } from '../src/components/viz/gridworld';
 
 let pass = 0;
 let fail = 0;
@@ -97,6 +98,17 @@ for (const avl of [false, true]) {
     h = fr[fr.length - 1].array;
   }
   ok(eq(order, [...ins].sort((a, b) => a - b)), 'heap extract-min yields ascending order');
+}
+
+// --- gridworld value iteration ---
+{
+  const cells: Cell[] = ['empty', 'empty', 'empty', 'goal', 'empty', 'wall', 'empty', 'pit', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty', 'empty'];
+  const frames = valueIteration({ rows: 4, cols: 4, cells, gamma: 0.9, step: -0.04, goal: 1, pit: -1 });
+  const last = frames[frames.length - 1].values;
+  ok(last[3] === 1 && last[7] === -1, 'gridworld terminals stay fixed (+1 / -1)');
+  ok(last[2] > last[12], 'gridworld value decreases with distance from the goal');
+  ok(last.every((v) => Number.isFinite(v)), 'gridworld values are all finite');
+  ok(frames.length > 1 && frames.length <= 51, 'gridworld value iteration converges');
 }
 
 // --- problem judge: every JS reference solution must pass its own tests ---

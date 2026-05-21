@@ -1,0 +1,50 @@
+---
+title: Supervised Learning
+track: machine-learning
+order: 2
+summary: Learn a mapping from labeled examples — features, training, and the overfitting trap.
+difficulty: easy
+---
+
+**Supervised learning** is the most common kind of machine learning: you have
+**labeled examples** (inputs paired with correct outputs) and learn a function that
+maps new inputs to outputs. "Supervised" because the correct answers supervise the
+training.
+
+## The setup
+
+- **Features** (`X`) — the inputs (pixels, words, measurements).
+- **Labels** (`y`) — the answers: a **class** (spam / not spam) for
+  **classification**, or a **number** (house price) for **regression**.
+- A **model** has parameters; **training** tunes them to fit the examples, usually
+  by minimizing a **loss** with gradient descent (see the Gradient Descent lesson).
+
+## A few models
+
+- **k-Nearest Neighbors** — to label a new point, look at the `k` closest training
+  points and take the majority. No training, but slow lookups.
+- **Linear / logistic regression** — fit a weighted sum of features; convex and
+  interpretable.
+- **Decision trees / forests** — split on features in a flow-chart; handle
+  non-linear data well.
+- **Neural networks** — stacked layers that learn their own features; powerful but
+  data-hungry.
+
+## The central problem: generalization
+
+The goal isn't to memorize the training data — it's to do well on **new** data.
+
+- **Overfitting:** the model nails the training set but fails on new inputs (it
+  learned noise). Signs: great train accuracy, poor test accuracy.
+- **Underfitting:** the model is too simple to capture the pattern (poor on both).
+
+You guard against this by splitting data into **train / validation / test** sets,
+and by **regularization** (penalizing complexity). You only trust the score on data
+the model never saw during training.
+
+## Takeaways
+
+- Supervised learning maps features → labels from labeled examples
+  (classification or regression).
+- Training minimizes a loss; many model families trade interpretability for power.
+- The real goal is generalization — split your data and watch for overfitting.

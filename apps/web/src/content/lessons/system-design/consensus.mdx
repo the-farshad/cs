@@ -1,0 +1,49 @@
+---
+title: Consensus & Coordination
+track: system-design
+order: 3
+summary: How a cluster agrees on one truth despite failures — replicated logs, leaders, and quorums.
+difficulty: hard
+---
+
+Replicated systems need every copy to agree on **what happened and in what order**,
+even when machines crash or messages are delayed. That agreement problem is
+**consensus**, and it underpins databases, queues, and schedulers.
+
+## The replicated log
+
+The core trick: instead of replicating *state*, replicate an **append-only log** of
+operations. If every machine applies the **same operations in the same order**,
+they reach the same state. Consensus is really about agreeing on the **order** of
+the log.
+
+## Leaders and elections
+
+Most practical systems elect a single **leader** that orders writes; followers
+replicate its log. If the leader fails, the cluster runs a **leader election** to
+choose a new one. A single leader makes ordering easy — the challenge is detecting
+failure and switching safely without two leaders ("split brain").
+
+## Quorums
+
+A write is considered committed once a **majority** (a quorum) of nodes
+acknowledge it. With `2f + 1` nodes you can tolerate `f` failures, because any two
+majorities overlap — so a committed entry is never lost. This majority rule is why
+clusters are usually odd-sized (3, 5).
+
+**Raft** and **Paxos** are the well-known algorithms that make this safe; Raft is
+designed to be the more understandable one (leader election + log replication +
+safety rules).
+
+## Where you meet it
+
+- Strongly-consistent databases and key-value stores.
+- Coordination services (etcd, ZooKeeper) used for config and locks.
+- Anything needing exactly-one leader or a globally agreed order.
+
+## Takeaways
+
+- Replicate an ordered **log** of operations, not raw state — consensus is about order.
+- A single elected **leader** orders writes; elections handle leader failure.
+- A **majority quorum** commits writes and tolerates `f` of `2f+1` failures
+  (Raft/Paxos).

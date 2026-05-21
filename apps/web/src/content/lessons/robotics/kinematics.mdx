@@ -1,0 +1,53 @@
+---
+title: Kinematics
+track: robotics
+order: 1
+summary: Turn joint angles into a position in space — forward kinematics with a two-link arm.
+difficulty: medium
+---
+
+import RoboticArm from '@/components/viz/RoboticArm.tsx';
+
+**Kinematics** is the geometry of motion: where the parts of a robot are, given how
+its joints are set, without worrying about forces. It's the bridge between "motor
+angles" and "position in the world."
+
+Drag the two joint angles and watch the arm's tip (end-effector) move. The dashed
+circle is everything it can reach.
+
+<RoboticArm client:visible />
+
+## Forward kinematics
+
+**Forward kinematics (FK)** computes the end-effector position *from* the joint
+angles — a direct calculation. For this two-link arm it's just trigonometry
+(see the Math track):
+
+```
+x = L₁·cos θ₁ + L₂·cos(θ₁ + θ₂)
+y = L₁·sin θ₁ + L₂·sin(θ₁ + θ₂)
+```
+
+Each joint adds a rotation; you chain them along the links. Real robots stack many
+such transforms (often as matrices) down the kinematic chain.
+
+## Inverse kinematics
+
+The harder, more useful direction: **inverse kinematics (IK)** asks *"what joint
+angles put the tip at this target?"* Unlike FK, IK can have **no solution** (target
+out of reach), **one**, or **many** (the elbow can often go "up" or "down" to the
+same point). It's solved with geometry or iterative numerical methods, and it's how
+you tell an arm "go pick up that cup."
+
+## Degrees of freedom
+
+Each independent joint is a **degree of freedom (DOF)**. More DOF means more ways to
+reach a pose (useful for avoiding obstacles) but a harder IK problem. A human arm
+has 7 DOF; this toy has 2.
+
+## Takeaways
+
+- Forward kinematics: joint angles → end-effector position (direct, via trig).
+- Inverse kinematics: target position → joint angles (may have 0, 1, or many
+  solutions).
+- Degrees of freedom set both flexibility and the difficulty of control.

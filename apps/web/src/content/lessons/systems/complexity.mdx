@@ -1,0 +1,53 @@
+---
+title: Big-O & Complexity
+track: systems
+order: 1
+summary: How to describe an algorithm's running time as the input grows — and why the growth class is what matters.
+difficulty: easy
+---
+
+import BigOChart from '@/components/viz/BigOChart.tsx';
+
+**Big-O notation** describes how an algorithm's cost grows as the input size `n`
+grows, ignoring constant factors and lower-order terms. It answers the question
+that actually matters at scale: *when the data gets 10× or 1000× bigger, what
+happens to the running time?*
+
+Toggle the curves and drag `n`. The y-axis is a **log scale**, so each growth
+class separates into its own band.
+
+<BigOChart client:visible />
+
+## The common classes
+
+From best to worst:
+
+- **O(1)** — constant: same cost regardless of `n` (hash lookup, array index).
+- **O(log n)** — logarithmic: halving each step (binary search, balanced trees).
+- **O(n)** — linear: one pass (scanning a list).
+- **O(n log n)** — the speed limit for comparison sorting (merge/quick sort).
+- **O(n²)** — quadratic: nested loops (bubble sort, all-pairs).
+- **O(2ⁿ)**, **O(n!)** — exponential / factorial: brute force over subsets or
+  permutations; impossible beyond small `n`.
+
+Look at the table at `n = 40`: O(n²) is in the thousands while O(2ⁿ) is in the
+*trillions*. That gap is the whole reason we study algorithms.
+
+## Why we drop constants
+
+`O(2n + 100)` is just `O(n)`. Constants and hardware speed shift the curve up or
+down, but the **shape** — how it scales — is set by the dominant term. A faster
+computer can't rescue an O(2ⁿ) algorithm; a better algorithm can.
+
+## Best, average, worst
+
+Big-O usually means the **worst case**. Some algorithms differ by case:
+quicksort is `O(n log n)` on average but `O(n²)` in the worst case; hash lookups
+are `O(1)` average but `O(n)` if everything collides. Knowing which case you care
+about matters.
+
+## Takeaways
+
+- Big-O describes growth as `n → ∞`, ignoring constants and lower terms.
+- The growth class (log, linear, quadratic, exponential) dominates real cost at scale.
+- A better algorithm beats a faster machine once `n` is large.

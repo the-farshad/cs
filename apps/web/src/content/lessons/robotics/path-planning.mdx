@@ -1,0 +1,44 @@
+---
+title: Path Planning
+track: robotics
+order: 3
+summary: Find a collision-free route from A to B — grids, configuration space, and sampling methods like RRT.
+difficulty: medium
+---
+
+A robot needs to get somewhere **without hitting anything**. **Path planning** finds
+a collision-free route from start to goal. The search algorithms are the same ones
+from the Algorithms track — the art is in how you model the space.
+
+> The grid search behind this lives in the [Graph Traversal & Pathfinding](/learn/algorithms/pathfinding)
+> lesson — BFS, Dijkstra, and A\* on a grid. Open it to watch them run.
+
+## Configuration space
+
+The key idea: plan in **configuration space (C-space)** — the space of the robot's
+*possible states*, not the physical world. For a mobile robot that's `(x, y)`; for
+an arm it's the joint angles `(θ₁, θ₂, …)`. Obstacles get "inflated" by the robot's
+size so the robot can be treated as a single **point** moving through C-space. Now
+planning is just finding a path for a dot.
+
+## Grid-based planning
+
+Lay a grid over C-space and run **A\*** with a distance heuristic (the pathfinding
+lesson). Simple and optimal on the grid — but the number of cells **explodes** as
+dimensions grow (a 6-joint arm has a 6-D space), so grids don't scale to
+high-DOF robots.
+
+## Sampling-based planning (RRT)
+
+For high dimensions, **sample** instead of enumerate. A **Rapidly-exploring Random
+Tree (RRT)** grows a tree from the start by repeatedly: pick a random point, steer
+the nearest tree node toward it, and add the new node if the motion is
+collision-free. It quickly fills the space and finds *a* path (not necessarily the
+shortest); **RRT\*** refines toward optimal. This is how arms and self-driving
+cars plan in practice.
+
+## Takeaways
+
+- Plan in configuration space, with obstacles inflated so the robot is a point.
+- Grid + A\* is optimal but blows up in high dimensions.
+- Sampling methods (RRT/RRT\*) scale to many degrees of freedom by exploring randomly.

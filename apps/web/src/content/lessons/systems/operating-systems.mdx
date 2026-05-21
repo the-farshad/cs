@@ -1,0 +1,51 @@
+---
+title: Operating Systems
+track: systems
+order: 2
+summary: How the OS shares one machine among many programs — processes, threads, scheduling, and memory.
+difficulty: medium
+---
+
+An **operating system** is the layer between your programs and the hardware. It
+creates the illusion that each program has the CPU and memory to itself, while
+actually juggling dozens at once and keeping them isolated and safe.
+
+## Processes and threads
+
+- A **process** is a running program with its own private memory space. Processes
+  are isolated: one crashing doesn't corrupt another.
+- A **thread** is a unit of execution *inside* a process. Threads in the same
+  process **share memory**, which makes communication fast but introduces **race
+  conditions** when they touch the same data without coordination.
+
+## Scheduling
+
+There is usually one CPU core per few-dozen ready threads, so the OS **scheduler**
+rapidly switches between them — a **context switch** — to give the appearance of
+parallelism (concurrency). Policies trade off goals: round-robin for fairness,
+priority scheduling for responsiveness. Each switch has a cost (saving/restoring
+state), so switching too often wastes time.
+
+## Concurrency and its hazards
+
+When threads share data, you need **synchronization**:
+
+- A **race condition** is when the result depends on timing.
+- A **mutex/lock** lets only one thread into a **critical section** at a time.
+- A **deadlock** is when threads wait on each other forever (each holds a lock the
+  other needs). Avoid it by ordering locks or limiting how long they're held.
+
+## Virtual memory
+
+Each process sees a clean, contiguous **virtual address space**; the OS maps those
+addresses to physical RAM through **pages**, swapping idle pages to disk when
+memory is tight. This isolates processes and lets the system run programs larger
+than physical RAM — at the cost of a slow **page fault** when accessing something
+that's been swapped out.
+
+## Takeaways
+
+- Processes are isolated (separate memory); threads share memory within a process.
+- The scheduler context-switches to share the CPU; switches aren't free.
+- Shared memory needs locks; beware races and deadlocks.
+- Virtual memory gives each process its own address space, paged to/from disk.

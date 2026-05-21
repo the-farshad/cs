@@ -1,0 +1,52 @@
+---
+title: PID Control
+track: robotics
+order: 2
+summary: The feedback loop that keeps drones level and motors on target — proportional, integral, derivative.
+difficulty: medium
+---
+
+import PIDVisualizer from '@/components/viz/PIDVisualizer.tsx';
+
+Knowing *where* you want to be (kinematics) isn't enough — motors drift, gravity
+pulls, sensors lag. **Control** is the feedback loop that drives the real state
+toward the target despite all that. The **PID controller** is its workhorse, used
+in everything from thermostats to drones.
+
+The dashed line is the **setpoint** (target = 1); the curve is the system's
+response. Tune the three gains and watch how it gets there.
+
+<PIDVisualizer client:visible />
+
+## The three terms
+
+The controller measures the **error** (target − current) and sets its output from
+three pieces:
+
+- **P — proportional** (`Kp·error`): push in proportion to how far off you are.
+  Bigger `Kp` reacts faster, but too big causes **overshoot** and oscillation.
+- **I — integral** (`Ki·∫error`): accumulate past error to erase a stubborn
+  **steady-state offset** (e.g. gravity). Too much makes it sluggish and wind up.
+- **D — derivative** (`Kd·d error/dt`): react to how fast the error is changing —
+  a brake that **damps** overshoot and settles things down.
+
+`output = Kp·e + Ki·∫e + Kd·(de/dt)`
+
+## Tuning
+
+Try it: crank **Kp** alone → it overshoots and rings. Add **Kd** → the
+oscillation calms. If it settles below the line, add **Ki** → the steady-state
+error closes. Good tuning balances **fast** response against **stable**, low-
+overshoot settling.
+
+## Where it runs
+
+PID (and its cousins) stabilizes drone attitude, holds motor speed, regulates
+temperature, and keeps a self-driving car in its lane — anywhere a measured value
+must track a target in real time.
+
+## Takeaways
+
+- Control closes the loop: measure error, act, repeat.
+- P reacts to current error, I to accumulated error, D to its rate of change.
+- Tuning trades speed against overshoot and stability.

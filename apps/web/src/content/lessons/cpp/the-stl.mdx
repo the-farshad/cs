@@ -1,0 +1,63 @@
+---
+title: The STL
+track: cpp
+order: 2
+summary: C++'s Standard Template Library — ready-made containers and algorithms with known complexity.
+difficulty: medium
+---
+
+The **Standard Template Library (STL)** is why C++ is so productive for data
+structures and algorithms: battle-tested **containers** and **algorithms** that
+work on any type via templates, each with documented complexity. Reach for these
+before writing your own.
+
+## Containers
+
+```cpp
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <set>
+
+std::vector<int> v = {3, 1, 2};   // dynamic array — O(1) index, O(1) amortized push_back
+std::map<string,int> m;           // sorted (red-black tree) — O(log n) ops
+std::unordered_map<string,int> h; // hash table — O(1) average ops
+std::set<int> s;                  // sorted unique keys — O(log n)
+```
+
+Pick by access pattern: `vector` for sequences, `unordered_map`/`unordered_set`
+for fast membership, `map`/`set` when you need keys kept **in order**.
+
+## Iterators
+
+Containers expose **iterators** — generalized pointers (`begin()`, `end()`) — that
+let one algorithm work across every container. A range is the half-open
+`[begin, end)`.
+
+## Algorithms
+
+```cpp
+#include <algorithm>
+
+std::sort(v.begin(), v.end());                 // O(n log n)
+bool found = std::binary_search(v.begin(), v.end(), 2);
+auto it = std::find(v.begin(), v.end(), 3);
+int total = std::accumulate(v.begin(), v.end(), 0);
+```
+
+`<algorithm>` and `<numeric>` give you sort, search, min/max, partition, unique,
+and dozens more — all decoupled from the container via iterators.
+
+## Why it matters
+
+These are the same structures from the Data Structures track, implemented and
+optimized for you. Knowing the **complexity** of each operation (the table above)
+is what lets you choose the right one — a `map` lookup is `O(log n)`, an
+`unordered_map` lookup is `O(1)` average.
+
+## Takeaways
+
+- The STL gives you containers (`vector`, `map`, `unordered_map`, `set`) with known
+  complexity.
+- Iterators are the glue: one algorithm works on any container via `[begin, end)`.
+- `<algorithm>` provides sort/search/transform — prefer it over hand-rolling.

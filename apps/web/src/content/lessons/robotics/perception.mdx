@@ -1,0 +1,48 @@
+---
+title: Perception & SLAM
+track: robotics
+order: 4
+summary: Sensors are noisy — how robots estimate where they are and build a map at the same time.
+difficulty: hard
+---
+
+A robot only knows the world through **sensors**, and every sensor is **noisy** and
+incomplete. **Perception** is turning those imperfect readings into a usable
+estimate of the world and the robot's place in it.
+
+## Sensors
+
+- **Proprioceptive** — about the robot itself: wheel encoders, IMUs (acceleration
+  and rotation).
+- **Exteroceptive** — about the world: cameras, LiDAR (laser range), ultrasonic,
+  GPS.
+
+Each has failure modes: encoders **drift**, GPS is coarse and blocked indoors,
+cameras struggle in the dark. No single sensor is enough.
+
+## Sensor fusion and state estimation
+
+The fix is **fusion**: combine many noisy sources into one better estimate. The
+classic tool is the **Kalman filter**, which keeps a running estimate *plus its
+uncertainty* and, each step:
+
+1. **Predicts** the next state from the motion model (uncertainty grows), then
+2. **Corrects** using the latest measurement (uncertainty shrinks),
+
+weighting prediction vs measurement by how much it trusts each. The result tracks
+the true state far better than any one sensor.
+
+## SLAM
+
+The chicken-and-egg problem: to know **where you are** you need a **map**, but to
+build a map you need to know where you are. **SLAM** (Simultaneous Localization And
+Mapping) does both at once — estimating the robot's path *and* the map together,
+closing **loops** when it recognizes a previously seen place to correct accumulated
+drift. It's what lets a vacuum robot map your home or a drone navigate indoors.
+
+## Takeaways
+
+- Sensors are noisy and partial; no single one suffices.
+- State estimation (e.g. Kalman filter) fuses prediction with measurement, tracking
+  uncertainty.
+- SLAM localizes and maps simultaneously, using loop closure to fight drift.

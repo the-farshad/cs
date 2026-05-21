@@ -1,0 +1,52 @@
+---
+title: Optimization
+track: ml-rl
+order: 3
+summary: Finding the best solution under constraints — convexity, gradients, and why it underlies ML.
+difficulty: medium
+---
+
+**Optimization** is finding the input that minimizes (or maximizes) an objective
+function — the math behind training models, planning routes, and allocating
+resources. "Learning" in machine learning is almost always "minimize a loss."
+
+> The hands-on gradient-descent visualizer lives in the
+> [Gradient Descent](/learn/machine-learning/gradient-descent) lesson — drag the
+> learning rate and watch it converge or diverge.
+
+## Convex vs non-convex
+
+- A **convex** function is bowl-shaped: any local minimum is the **global**
+  minimum, and gradient descent is guaranteed to find it. Linear/logistic
+  regression and SVMs are convex — a big reason they're reliable.
+- A **non-convex** function has many hills and valleys. Gradient descent finds a
+  *local* minimum that depends on where you start. Neural networks are deeply
+  non-convex, yet descent works well enough in practice — a happy empirical fact.
+
+## Gradients
+
+The **gradient** is the vector of partial derivatives — it points in the direction
+of steepest increase. To minimize, step **against** it. **Stochastic gradient
+descent (SGD)** estimates the gradient from a small random batch each step, trading
+exactness for speed; it's what trains essentially every large model.
+
+## Constraints
+
+Real problems have **constraints** ("stay within budget", "weights sum to 1").
+**Lagrange multipliers** fold equality constraints into the objective so you can
+optimize the combined thing; **linear** and **convex programming** solve large
+constrained problems efficiently. Constrained optimization is how you plan under
+limits.
+
+## Where it shows up
+
+- **ML training:** minimize loss over parameters (SGD/Adam).
+- **Operations:** scheduling, routing, resource allocation (linear programming).
+- **Control & RL:** choosing actions that maximize expected reward.
+
+## Takeaways
+
+- Optimization minimizes an objective; ML training is optimization of a loss.
+- Convex problems have one global optimum; non-convex ones (neural nets) have many.
+- The gradient gives the descent direction; constraints are handled with Lagrange
+  multipliers and convex/linear programming.

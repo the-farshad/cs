@@ -1,0 +1,60 @@
+---
+title: 'Case Study: URL Shortener'
+track: system-design
+order: 4
+summary: Put the pieces together — design a TinyURL-style service from requirements to scale.
+difficulty: medium
+---
+
+Design interviews and real projects both start the same way: clarify
+**requirements**, sketch the **API and data**, then make it **scale and stay up**.
+Let's design a URL shortener (like TinyURL).
+
+## 1. Requirements
+
+- **Functional:** create a short code for a long URL; redirect a short code to its
+  long URL.
+- **Non-functional:** very **read-heavy** (redirects ≫ creations), low latency,
+  high availability, codes never collide.
+- **Scope estimate:** say 100M new links/month, ~100:1 read:write. That's modest
+  writes but huge reads — a caching problem more than a storage one.
+
+## 2. API
+
+```
+POST /shorten   { "url": "https://…" }  ->  { "code": "aZ3xQ" }
+GET  /{code}                            ->  301 redirect to the long URL
+```
+
+## 3. Data model
+
+A single mapping: `code -> long_url` (plus created_at, owner). A key-value store or
+an indexed SQL table both work; the access pattern is a primary-key lookup, so it
+stays `O(1)`/`O(log n)`.
+
+## 4. Generating the code
+
+- **Counter + base62:** keep a global counter, encode it in base62 (`0-9a-zA-Z`) →
+  short, collision-free, but the counter must be coordinated across servers (hand
+  out ranges to each).
+- **Random + check:** generate a random 7-char code, retry on the rare collision.
+  Simple and stateless; collisions are vanishingly unlikely with 62⁷ codes.
+
+## 5. Make it scale
+
+- **Cache** hot codes (a small fraction of links get most traffic) in Redis →
+  most redirects never touch the database.
+- **Replicate** the store for read throughput and failover.
+- Put it behind a **load balancer** and a **CDN**; redirects are cacheable.
+- **Shard** by code if storage outgrows one machine.
+
+## The pattern
+
+Clarify → API → data → bottleneck → apply caching/replication/sharding. The same
+recipe designs a pastebin, a news feed, or a rate limiter.
+
+## Takeaways
+
+- Start from requirements and read/write ratios — they decide the design.
+- A short code is just an encoded counter or a checked random string.
+- Read-heavy systems live or die on caching and replication.

@@ -1,0 +1,58 @@
+---
+title: Reinforcement Learning
+track: ml-rl
+order: 1
+summary: An agent learns by trial and reward — MDPs, value, policy, and value iteration on a gridworld.
+difficulty: hard
+---
+
+import GridworldRL from '@/components/viz/GridworldRL.tsx';
+
+**Reinforcement learning (RL)** is learning by interaction: an **agent** takes
+**actions** in an **environment**, receives **rewards**, and learns a **policy** —
+a rule for what to do in each state — that maximizes long-term reward. No labeled
+examples, just consequences.
+
+Below is a classic **gridworld**. Reaching the goal pays **+1**, the pit **−1**,
+and each step costs a little. Press **Iterate** and watch value flow outward from
+the goal; the arrows show the best action in each cell.
+
+<GridworldRL client:visible />
+
+## The MDP
+
+RL problems are framed as a **Markov Decision Process**: states `S`, actions `A`,
+a transition rule (where actions lead), and a reward `R`. "Markov" means the future
+depends only on the **current** state, not the whole history. The **discount
+factor** γ (here 0.9) makes near rewards worth more than distant ones and keeps the
+math finite.
+
+## Value and policy
+
+- The **value** `V(s)` is the expected total (discounted) reward from state `s` if
+  you act well thereafter.
+- The **policy** π(s) is which action to take in each state.
+
+They're linked by the **Bellman equation**: a state's value is the immediate
+reward plus the discounted value of the best next state:
+
+```
+V(s) = R(s) + γ · maxₐ V(next(s, a))
+```
+
+## Value iteration
+
+The visualizer runs **value iteration**: start all values at 0, then repeatedly
+apply the Bellman update everywhere. Values **propagate** one ring per sweep out
+from the goal until they stop changing (convergence). Reading off the best action
+at each state gives the **optimal policy** — the arrows.
+
+When the transition rules are *unknown*, you instead **learn** from experience
+(e.g. **Q-learning**), but the target it converges to is this same Bellman
+solution.
+
+## Takeaways
+
+- RL learns a policy from rewards, framed as an MDP (states, actions, rewards, γ).
+- The Bellman equation ties a state's value to the best next state's value.
+- Value iteration propagates values to optimal; the greedy policy follows them.

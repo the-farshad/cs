@@ -1,0 +1,53 @@
+---
+title: Networking
+track: systems
+order: 3
+summary: How data crosses the internet — layers, packets, addresses, and the protocols behind every request.
+difficulty: medium
+---
+
+When you load a page, your data is broken into **packets**, routed across many
+machines, and reassembled at the other end. Networking is organized in **layers**,
+each handling one concern and building on the one below.
+
+## The layered model (TCP/IP)
+
+- **Link** — moving bits between directly connected devices (Ethernet, Wi-Fi).
+- **Internet (IP)** — addressing and routing packets between networks. Every
+  device has an **IP address**; routers forward packets hop by hop toward it.
+- **Transport (TCP/UDP)** — delivering data between programs (identified by
+  **ports**). **TCP** guarantees ordered, reliable delivery (with handshakes,
+  acknowledgements, and retransmits); **UDP** is fire-and-forget — faster but
+  lossy, good for video/games.
+- **Application (HTTP, DNS, …)** — what the data *means*: web requests, email, etc.
+
+Each layer wraps the one above in its own header — like nested envelopes.
+
+## Names and addresses
+
+Humans use names; the network uses numbers. **DNS** (the Domain Name System) is
+the internet's phone book: it translates `cs.thefarshad.com` into an IP address
+before your browser can connect.
+
+## Latency vs bandwidth
+
+Two different things people conflate:
+
+- **Latency** — the *delay* for one packet to make the trip (think distance and
+  hops). Bounded by the speed of light; you can't cache your way around physics.
+- **Bandwidth** — how *much* data per second the pipe carries.
+
+A transfer can have huge bandwidth yet feel slow if latency is high, which is why
+chatty protocols (many round trips) hurt and CDNs put content physically closer.
+
+## A request, end to end
+
+Typing a URL: **DNS** resolves the name → **TCP** opens a connection (handshake) →
+**TLS** secures it → **HTTP** sends the request → the server responds → packets are
+routed back and reassembled.
+
+## Takeaways
+
+- Networking is layered: link → IP → transport → application, each adding a header.
+- TCP is reliable and ordered; UDP is fast but best-effort. DNS maps names to IPs.
+- Latency (delay) and bandwidth (throughput) are independent — both shape speed.

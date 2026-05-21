@@ -1,0 +1,50 @@
+---
+title: Scaling Fundamentals
+track: system-design
+order: 1
+summary: Handle more load with scaling, load balancing, caching, and CDNs — the building blocks of big systems.
+difficulty: medium
+---
+
+System design is about meeting **scale, reliability, and latency** goals as traffic
+grows. You rarely invent new algorithms; you arrange known components to handle
+more load without falling over.
+
+## Vertical vs horizontal scaling
+
+- **Vertical** (scale up): a bigger machine. Simple, but there's a ceiling and a
+  single point of failure.
+- **Horizontal** (scale out): many machines behind a **load balancer**. Nearly
+  unlimited, but requires your servers to be **stateless** so any one can handle
+  any request — keep session/user state in a shared store, not in process memory.
+
+## Load balancing
+
+A **load balancer** spreads requests across a pool of servers (round-robin, least
+-connections, etc.), removes unhealthy ones via **health checks**, and gives you a
+single entry point. It's also where you add TLS termination and rate limiting.
+
+## Caching
+
+The fastest work is work you don't repeat. A **cache** stores recent/expensive
+results in fast memory (e.g. Redis):
+
+- **Cache hit** → serve instantly; **miss** → compute and store.
+- Set a **TTL** (expiry) and an **eviction** policy (LRU) since memory is finite.
+- The hard part is **invalidation** — keeping the cache from serving stale data.
+
+Caches sit at many layers: browser, CDN, application, and database query cache.
+
+## CDNs
+
+A **Content Delivery Network** caches static assets (images, JS, CSS — like this
+very site) on servers physically near users. That cuts **latency** (shorter
+distance) and offloads your origin. It's why a global audience still loads pages
+quickly.
+
+## Takeaways
+
+- Scale out (horizontal) with stateless servers behind a load balancer to grow
+  past one machine.
+- Cache aggressively to avoid repeated work — the challenge is invalidation.
+- CDNs push content close to users, cutting latency and origin load.

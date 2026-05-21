@@ -1,0 +1,51 @@
+---
+title: Database Internals
+track: systems
+order: 4
+summary: How databases store data on disk, find rows fast with indexes, and keep data correct with transactions.
+difficulty: medium
+---
+
+A database has to do two hard things well: **find data fast** even with billions
+of rows, and **stay correct** even with many writers and sudden crashes. Indexes
+solve the first; transactions solve the second.
+
+## Indexes: finding rows fast
+
+Without an index, finding a row means scanning the whole table — `O(n)`. An
+**index** is a separate, sorted structure that points into the table so lookups
+become `O(log n)`.
+
+Most relational databases use a **B-tree** (a balanced, high-fan-out tree kept on
+disk). Its shallow height means a lookup touches only a few disk pages. The
+trade-off: every index speeds up reads but **slows down writes** (each insert must
+update the index too) and uses space.
+
+Write-heavy systems often use an **LSM-tree** instead: buffer writes in memory,
+flush them as sorted files, and merge in the background — great for ingest, at the
+cost of more work on reads.
+
+## Transactions and ACID
+
+A **transaction** groups operations so they happen all-or-nothing. The guarantees
+are **ACID**:
+
+- **Atomicity** — all steps commit, or none do (no half-finished transfers).
+- **Consistency** — the database moves from one valid state to another.
+- **Isolation** — concurrent transactions don't see each other's partial work.
+- **Durability** — once committed, it survives a crash (via a **write-ahead log**
+  flushed before acknowledging).
+
+## Isolation levels
+
+Full isolation is expensive, so databases offer **levels** trading correctness for
+speed — from *read committed* (may see different data if you re-read) up to
+*serializable* (as if transactions ran one at a time). Picking the right level is
+a real engineering decision.
+
+## Takeaways
+
+- Indexes (usually B-trees) turn `O(n)` scans into `O(log n)` lookups — but cost
+  write speed and space.
+- Transactions give ACID guarantees; the write-ahead log provides durability.
+- Isolation levels trade strictness for concurrency/performance.
