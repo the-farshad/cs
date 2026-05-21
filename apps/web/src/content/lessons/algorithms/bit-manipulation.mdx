@@ -6,4 +6,40 @@ summary: Use bitwise operators to solve problems with extreme efficiency and com
 difficulty: medium
 ---
 
-Content coming soon.
+import BitManipulationVisualizer from '@/components/viz/BitManipulationVisualizer.tsx';
+
+Computers don't see numbers or text; they see strings of **bits** (0s and 1s).
+Bit manipulation is the art of using bitwise operators (`AND`, `OR`, `XOR`,
+`NOT`, and shifts) to perform calculations and store data with extreme
+efficiency.
+
+<BitManipulationVisualizer client:visible />
+
+## The Core Operators
+
+- **AND (`&`):** Result is 1 only if both bits are 1. Used for **masking** (extracting specific bits).
+- **OR (`|`):** Result is 1 if either bit is 1. Used for **setting** bits.
+- **XOR (`^`):** Result is 1 if the bits are different. Useful for toggling and has the property `x ^ x = 0`.
+- **NOT (`~`):** Flips every bit (0 becomes 1, 1 becomes 0).
+- **Shifts (`<<`, `>>`):** Moves bits left or right. `x << 1` is equivalent to $x \times 2$; `x >> 1` is $x / 2$.
+
+## Why use Bit Manipulation?
+
+1.  **Speed:** Bitwise operations are executed directly by the CPU in a single
+    clock cycle. They are the fastest operations possible.
+2.  **Memory:** You can store 8 boolean flags in a single byte. This is crucial
+    in embedded systems, game engines, and high-performance databases.
+3.  **Bitmasks:** You can represent a "set" of items as a single integer. If the
+    $i$-th bit is 1, the $i$-th item is in the set.
+
+## Common Tricks
+
+- **Check if even/odd:** `(x & 1) == 0` is true if `x` is even.
+- **Power of two:** `(x & (x - 1)) == 0` is true if `x` is a power of 2.
+- **Clear the lowest set bit:** `x = x & (x - 1)`.
+
+## Takeaways
+
+- Bits are the most granular way to view and manipulate data.
+- Bitwise operators allow for constant-time, zero-allocation "set" logic.
+- While it can be harder to read, it's a vital tool for performance-critical code.

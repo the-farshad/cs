@@ -6,4 +6,45 @@ summary: Connect all nodes with the minimum total edge weight using Kruskal's or
 difficulty: medium
 ---
 
-Content coming soon.
+import MSTVisualizer from '@/components/viz/MSTVisualizer.tsx';
+
+Suppose you are laying down fiber optic cables to connect a set of cities. You
+want every city to be connected to every other city, but you want to use the
+**minimum total length** of cable to save costs. This is the **Minimum Spanning
+Tree (MST)** problem.
+
+<MSTVisualizer client:visible />
+
+## What is a Spanning Tree?
+
+A spanning tree of a graph is a subset of edges that:
+1.  **Connects all vertices.**
+2.  **Contains no cycles** (it's a tree).
+3.  For a graph with $V$ vertices, it has exactly $V-1$ edges.
+
+The **Minimum** Spanning Tree is the one where the sum of edge weights is as
+small as possible.
+
+## Two Classic Algorithms
+
+### 1. Kruskal's Algorithm (Edge-based)
+- Sort all edges by weight from smallest to largest.
+- Pick the smallest edge. If it doesn't create a cycle with the edges we already
+  have, add it to the MST.
+- Repeat until you have $V-1$ edges.
+- **Efficiency:** Uses **Union-Find** to check for cycles in nearly $O(1)$ time.
+
+### 2. Prim's Algorithm (Vertex-based)
+- Start with a single node in your tree.
+- Look at all edges that connect a node *in* the tree to a node *outside* the tree.
+- Pick the cheapest one and add that new node to the tree.
+- Repeat until all nodes are in the tree.
+- **Efficiency:** Uses a **Priority Queue** to quickly find the cheapest edge.
+
+## Takeaways
+
+- An MST connects all nodes without cycles using the minimum total weight.
+- **Kruskal's** is great for sparse graphs; **Prim's** can be faster for dense
+  graphs.
+- It is a "greedy" problem—making the locally best choice at each step leads to
+  the global optimum.

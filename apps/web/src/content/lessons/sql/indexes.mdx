@@ -6,4 +6,51 @@ summary: How to make queries fast — indexes, execution plans, and avoiding the
 difficulty: medium
 ---
 
-Content coming soon.
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+In a database with millions of rows, finding a single record using a `WHERE`
+clause is like looking for a name in an unsorted pile of paper. You'd have to
+check every single page. This is called a **Full Table Scan**, and it is very
+slow ($O(n)$). An **Index** is like the index at the back of a book — it tells
+the database exactly where to look.
+
+<SqlPlayground client:visible />
+
+## How Indexes Work (B-Trees)
+
+Most database indexes use a data structure called a **B-Tree**. It's a balanced
+tree that keeps keys sorted and allows for **logarithmic search** ($O(\log n)$).
+Instead of checking a million rows, the database only needs to traverse a few
+nodes of the tree (usually 3 or 4 levels deep).
+
+```sql
+-- Create an index on the 'salary' column
+CREATE INDEX idx_salary ON employees(salary);
+
+-- Now this query is fast:
+SELECT name FROM employees WHERE salary > 120000;
+```
+
+## The Cost of an Index
+
+If indexes make things fast, why not index every column?
+1.  **Storage:** Every index takes up disk space.
+2.  **Write Performance:** Every time you `INSERT`, `UPDATE`, or `DELETE`, the
+    database must also update the B-Tree. This makes writes slower.
+
+## Execution Plans
+
+You can see how the database plans to run your query using the `EXPLAIN` keyword.
+It tells you if the database is using an index or scanning the entire table.
+
+```sql
+EXPLAIN QUERY PLAN
+SELECT * FROM employees WHERE id = 5;
+-- Output: SEARCH TABLE employees USING INTEGER PRIMARY KEY (rowid=?)
+```
+
+## Takeaways
+
+- Indexes turn $O(n)$ table scans into $O(\log n)$ tree traversals.
+- Most indexes use B-Trees to keep data sorted and searchable.
+- Indexes speed up reads but slow down writes and use extra space.

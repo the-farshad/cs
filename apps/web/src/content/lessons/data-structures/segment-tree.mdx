@@ -6,4 +6,45 @@ summary: Range queries and updates in O(log n) — the Swiss army knife for inte
 difficulty: hard
 ---
 
-Content coming soon.
+import SegmentTreeVisualizer from '@/components/viz/SegmentTreeVisualizer.tsx';
+
+A **Segment Tree** is a powerful data structure used for performing **range
+queries** (like finding the sum or minimum in a sub-array) and **point updates**
+(changing a value in the array) in $O(\log n)$ time.
+
+<SegmentTreeVisualizer client:visible />
+
+## The Structure
+
+The tree is built over an underlying array of $n$ elements:
+- Each **leaf** node represents a single element from the array.
+- Each **internal node** represents a range $[L, R]$ and stores a precomputed
+  value for that range (e.g., the sum, min, or max of all elements in $[L, R]$).
+- A node's value is derived from its two children (e.g., `sum = left.sum + right.sum`).
+
+## Operations
+
+### 1. Range Query: $O(\log n)$
+To find the sum of range $[3, 7]$, you start at the root and descend. If a node's
+range is completely inside $[3, 7]$, you take its value and stop. If it's
+partially inside, you visit its children. Because of the tree's height, you never
+need to visit more than $4 \log n$ nodes.
+
+### 2. Point Update: $O(\log n)$
+When a value $a[i]$ changes, only the nodes on the path from the root to the leaf
+$i$ need to be updated. For a tree with $n$ elements, this path has length
+$\approx \log_2 n$.
+
+## Why use a Segment Tree?
+
+- **Versus Prefix Sums:** A prefix sum array can do range sum queries in $O(1)$,
+  but updating a single value takes $O(n)$. Segment trees handle *both* in
+  $O(\log n)$.
+- **Range Updates:** With a technique called **Lazy Propagation**, you can even
+  update an entire range of elements in $O(\log n)$ time.
+
+## Takeaways
+
+- Segment trees store precomputed range data in a binary tree structure.
+- They support range queries and point updates in $O(\log n)$ time.
+- They are ideal for problems where the data changes frequently.

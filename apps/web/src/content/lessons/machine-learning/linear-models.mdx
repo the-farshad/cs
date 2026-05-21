@@ -6,4 +6,43 @@ summary: The foundation of supervised learning — fitting lines and curves to m
 difficulty: easy
 ---
 
-Content coming soon.
+import GradientDescentVisualizer from '@/components/viz/GradientDescentVisualizer.tsx';
+
+Supervised learning starts with finding the relationship between features (input)
+and labels (output). The simplest and most fundamental way to do this is
+**Regression**.
+
+## Linear Regression: Predicting a Number
+
+In linear regression, we try to fit a straight line to our data. If we're
+predicting house prices ($y$) based on square footage ($x$), we're looking for
+the weights $w$ and $b$ in the equation:
+
+$$y = wx + b$$
+
+We measure how wrong our line is using a **Loss Function** (usually Mean Squared
+Error). To find the best $w$ and $b$, we use **Gradient Descent**.
+
+<GradientDescentVisualizer client:visible />
+
+## Gradient Descent: The "Mountain" Analogy
+
+Imagine you're at the top of a foggy mountain and want to find the lowest point.
+You can't see the whole landscape, so you look at the ground and take a small
+step in the direction where the slope is steepest downwards.
+- **Gradient:** The direction of the steepest uphill.
+- **Learning Rate:** How big of a step you take.
+- **Convergence:** When you reach the bottom (the minimum loss).
+
+## Logistic Regression: Predicting a Category
+
+Despite the name, logistic regression is actually used for **classification**
+(e.g., Is this email spam? Yes or No). Instead of a straight line, it fits an
+**S-shaped curve** (the sigmoid function) that maps any input to a value between
+0 and 1, representing a probability.
+
+## Takeaways
+
+- **Linear regression** predicts continuous values by fitting a line.
+- **Logistic regression** predicts probabilities for classification.
+- **Gradient Descent** is the core optimization algorithm that "trains" these models by minimizing loss.

@@ -6,4 +6,41 @@ summary: The act of observing that collapses a superposition into a definite sta
 difficulty: medium
 ---
 
-Content coming soon.
+import QubitVisualizer from '@/components/viz/QubitVisualizer.tsx';
+
+In the quantum world, a system doesn't have a single definite state until you
+look at it. This act of "looking" is called **Measurement**, and it is one of
+the most counterintuitive parts of quantum mechanics.
+
+<QubitVisualizer client:visible />
+
+## The Collapse
+
+Before measurement, a qubit is in a **superposition** of $|0\rangle$ and
+$|1\rangle$. It's not "somewhere in between" or "both at once" — it is in a
+state where it has a certain **probability amplitude** for both.
+
+When you measure the qubit:
+1.  The superposition **collapses** instantly.
+2.  The result is a definite classical bit: either **0** or **1**.
+3.  The information about the original superposition is **lost forever**.
+
+## Born's Rule
+
+How do we know the probability of getting a 0 or a 1? If a qubit is in state
+$|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$, the probability of
+measuring 0 is $|\alpha|^2$, and the probability of measuring 1 is $|\beta|^2$.
+Because the qubit must land *somewhere*, $|\alpha|^2 + |\beta|^2$ always equals 1.
+
+## Measurement is Destructive
+
+Measurement isn't like taking a photo of a car; it's more like trying to measure
+the position of a soap bubble by touching it. The act of measurement changes the
+system. Once a qubit collapses to $|0\rangle$, it stays $|0\rangle$ unless you
+apply more gates to it.
+
+## Takeaways
+
+- Measurement forces a quantum superposition into a classical 0 or 1.
+- The outcome is inherently probabilistic, determined by the amplitudes.
+- Measurement is irreversible and "collapses" the quantum state.

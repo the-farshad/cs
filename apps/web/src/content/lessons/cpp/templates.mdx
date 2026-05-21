@@ -6,4 +6,69 @@ summary: Write code once for any type — the power behind the STL and modern C+
 difficulty: medium
 ---
 
-Content coming soon.
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+
+How do you write a `max(a, b)` function that works for `int`, `float`, and
+`string` without writing three different versions? In C++, you use
+**Templates**. This is the foundation of **Generic Programming**.
+
+## What is a Template?
+
+A template is a blueprint for a function or a class. The compiler uses this
+blueprint to generate the actual code only when you use the function with a
+specific type. This is called **instantiation**.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `// A generic function template
+template <typename T>
+T myMax(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    // Compiler generates int version:
+    int i = myMax(10, 20); 
+    
+    // Compiler generates double version:
+    double d = myMax(3.14, 2.71); 
+}`
+  },
+  {
+    language: 'cpp',
+    code: `// A generic class template
+template <typename T>
+class Box {
+    T value;
+public:
+    Box(T v) : value(v) {}
+    T get() { return value; }
+};
+
+Box<int> intBox(42);
+Box<string> strBox("Hello");`
+  }
+]} client:visible />
+
+## Why use Templates?
+
+1.  **Code Reuse:** Write logic once and use it for any type that supports the
+    required operations (like the `>` operator in our `max` example).
+2.  **Performance:** Because templates are expanded at **compile-time**, there is
+    zero runtime overhead. The code generated is as fast as if you had written it
+    by hand for that specific type.
+3.  **Type Safety:** The compiler checks that the type you provide actually
+    supports the operations used in the template.
+
+## The STL connection
+
+The C++ **Standard Template Library (STL)** is built entirely on templates.
+`std::vector<T>`, `std::map<K, V>`, and algorithms like `std::sort` are all
+templates that can be used with any data type.
+
+## Takeaways
+
+- Templates allow for type-independent, generic code.
+- They are resolved at compile-time, ensuring maximum performance.
+- They power the entire C++ standard library (STL).

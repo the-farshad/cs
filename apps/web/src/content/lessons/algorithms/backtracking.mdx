@@ -6,4 +6,43 @@ summary: Explore every possibility and "prune" the search tree when a path is in
 difficulty: medium
 ---
 
-Content coming soon.
+import NQueensVisualizer from '@/components/viz/NQueensVisualizer.tsx';
+
+**Backtracking** is a refined brute-force technique. It's used when you need to
+find a solution (or all solutions) to a problem by trying out different options.
+The key is that as soon as you realize a partial solution cannot possibly be
+completed, you **"backtrack"** to the previous step and try a different path.
+
+<NQueensVisualizer client:visible />
+
+## The "Explore and Retreat" Strategy
+
+Backtracking can be thought of as a **Depth-First Search (DFS)** on a tree of
+possibilities. At each node, you:
+1.  **Choose:** Pick one of the available options.
+2.  **Constraint:** Check if this choice violates any rules.
+3.  **Recurse:** If valid, move to the next step.
+4.  **Backtrack:** If you hit a dead end, undo the choice and try the next
+    option.
+
+## The N-Queens Problem
+
+How do you place $N$ queens on an $N \times N$ chessboard such that no two queens
+attack each other?
+- A naive brute force would check billions of combinations.
+- Backtracking only places a queen if it's not attacked by the ones already on
+  the board. If we can't place a queen in row 3, we don't even bother trying
+  anything in rows 4 through 8—we immediately go back to row 2 and move that
+  queen. This is called **pruning**.
+
+## Common Backtracking Problems
+
+- **Combinatorial:** Generating all subsets or permutations of a set.
+- **Constraint Satisfaction:** Sudoku solvers, Map coloring.
+- **Pathfinding:** Finding a path through a maze.
+
+## Takeaways
+
+- Backtracking explores a "state-space tree" of possibilities.
+- Pruning invalid branches is what makes it faster than pure brute force.
+- It's the standard way to solve puzzles and combinatorial optimization problems.

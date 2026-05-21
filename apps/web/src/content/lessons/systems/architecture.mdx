@@ -2,8 +2,48 @@
 title: Computer Architecture
 track: systems
 order: 0
-summary: The memory hierarchy, CPU caches, and why data locality is the secret to high-performance code.
+summary: The memory hierarchy, CPU caches, and why data locality is the select to high-performance code.
 difficulty: medium
 ---
 
-Content coming soon.
+To write truly fast code, you must understand that not all memory is created
+equal. While we often think of "RAM" as a single pool of storage, the physical
+reality is a complex **hierarchy** designed to hide the massive speed gap between
+the CPU and your main memory.
+
+## The Memory Hierarchy
+
+The CPU is incredibly fast, but fetching data from main RAM is relatively slow
+(it takes hundreds of clock cycles). To compensate, CPUs use small, lightning-fast
+on-chip memories called **caches**.
+
+| Level | Size | Latency (approx) | Location |
+| :--- | :--- | :--- | :--- |
+| **Registers** | < 1 KB | 1 cycle | Inside CPU core |
+| **L1 Cache** | 64 KB | 4 cycles | Inside CPU core |
+| **L2 Cache** | 256 KB | 12 cycles | Shared per core |
+| **L3 Cache** | 16 MB | 40 cycles | Shared across all cores |
+| **Main RAM** | 16 GB | 200+ cycles | Separate sticks |
+| **SSD/Disk** | 1 TB | Millions of cycles | PCIe / SATA |
+
+## Data Locality
+
+When the CPU needs a piece of data, it first checks L1, then L2, then L3. If it's
+not in any cache (a **cache miss**), it has to wait hundreds of cycles for RAM.
+
+To minimize misses, the CPU doesn't just fetch one byte; it fetches a **Cache Line**
+(usually 64 bytes). It assumes that if you need `a[i]`, you'll probably need `a[i+1]`
+soon. This is why **arrays** (contiguous memory) are much faster than **linked
+lists** (scattered memory) — they exhibit high **spatial locality**.
+
+## The Performance Secret
+
+In modern computing, **memory latency** is often the biggest bottleneck. High-performance
+code is often "cache-aware": it organizes data to stay in L1/L2 as much as possible,
+avoiding the "long walk" to main RAM.
+
+## Takeaways
+
+- CPUs are much faster than RAM; caches (L1, L2, L3) bridge the gap.
+- Cache misses are the "silent killer" of performance.
+- Contiguous data structures like arrays maximize cache hits through spatial locality.

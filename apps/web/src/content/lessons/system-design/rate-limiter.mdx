@@ -6,4 +6,43 @@ summary: Protect your services from abuse — design a scalable rate limiter usi
 difficulty: medium
 ---
 
-Content coming soon.
+A **Rate Limiter** is a defense mechanism for your API. It ensures that no single
+user or service can overwhelm your system by making too many requests in a short
+period. It prevents DDoS attacks, accidental loops, and ensures fair usage of
+resources.
+
+## 1. Token Bucket Algorithm
+
+This is the most popular algorithm for rate limiting.
+- Imagine a bucket that holds **tokens**.
+- Tokens are added to the bucket at a fixed rate (e.g., 10 tokens per second).
+- Each request "costs" one token.
+- If the bucket is empty, the request is rejected (Rate Limited).
+- **Benefit:** It allows for "bursts" of traffic — if a user hasn't made a
+  request in a while, they can use all tokens in the bucket at once.
+
+## 2. Leaky Bucket Algorithm
+
+- Imagine a bucket with a small hole at the bottom.
+- Requests enter the bucket at the top (at any speed).
+- They "leak" out of the hole and are processed at a constant rate.
+- If the bucket is full, new requests overflow and are rejected.
+- **Benefit:** It forces a perfectly smooth, constant output rate, regardless of
+  how bursty the input is.
+
+## System Design Considerations
+
+- **Where to put it?** Usually in an **API Gateway** or a dedicated service
+  layer, so the heavy requests never reach your expensive application servers.
+- **Distributed Limiting:** If you have 10 servers, you can't just limit 100
+  requests/sec on each one (that would allow 1000 total). You use a centralized
+  store like **Redis** to keep a global counter that all servers check.
+- **Client Feedback:** When rate limiting, return a `429 Too Many Requests`
+  status code, and ideally a `Retry-After` header telling the client when to try
+  again.
+
+## Takeaways
+
+- Rate limiters protect system availability and ensure fair resource usage.
+- **Token Bucket** allows for bursts; **Leaky Bucket** ensures a smooth rate.
+- In distributed systems, use a shared cache (Redis) for global rate tracking.

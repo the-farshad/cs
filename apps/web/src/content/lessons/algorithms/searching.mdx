@@ -6,4 +6,43 @@ summary: The most basic way to find data — from scanning everything to the eff
 difficulty: easy
 ---
 
-Content coming soon.
+import BinarySearchVisualizer from '@/components/viz/BinarySearchVisualizer.tsx';
+
+How do you find a value in a list? The approach depends entirely on how the
+data is organized.
+
+## Linear Search: $O(n)$
+
+If the data is unsorted, you have no choice but to start at the beginning and
+check every single element until you find what you're looking for (or run out of
+elements).
+- **Worst Case:** The target is at the very end or not there at all ($n$ checks).
+- **Best Case:** The target is the first element (1 check).
+- **Average Case:** You'll check about half the elements ($n/2$).
+
+Linear search is simple and works on any collection, but it's too slow for large
+datasets.
+
+## Binary Search: $O(\log n)$
+
+If the data is **sorted**, you can be much smarter. By checking the middle
+element, you can instantly eliminate **half** of the remaining search space.
+
+<BinarySearchVisualizer client:visible />
+
+Binary search is the classic example of **Divide and Conquer**. Instead of
+reducing the problem size by 1 each step (like linear search), you reduce it by
+a factor of 2.
+
+| Elements ($n$) | Linear Search ($n$) | Binary Search ($\log_2 n$) |
+| :--- | :--- | :--- |
+| 1,000 | 1,000 | $\approx 10$ |
+| 1,000,000 | 1,000,000 | $\approx 20$ |
+| 1,000,000,000 | 1,000,000,000 | $\approx 30$ |
+
+## Takeaways
+
+- **Linear search** is for unsorted data; it's slow but reliable.
+- **Binary search** requires sorted data but is incredibly fast.
+- Most real-world systems spend extra time sorting data up front just to enable
+  logarithmic searches later.

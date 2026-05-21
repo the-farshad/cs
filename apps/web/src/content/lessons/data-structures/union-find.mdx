@@ -6,4 +6,46 @@ summary: Keep track of connected components and merge sets in near-constant time
 difficulty: medium
 ---
 
-Content coming soon.
+import UnionFindVisualizer from '@/components/viz/UnionFindVisualizer.tsx';
+
+**Union-Find** (also called a Disjoint Set Union or DSU) is a data structure that
+tracks a set of elements partitioned into several non-overlapping (disjoint)
+subsets. It provides two extremely fast operations:
+- **Find:** Determine which set a particular element belongs to.
+- **Union:** Merge two sets into a single set.
+
+<UnionFindVisualizer client:visible />
+
+## The "Forest" Representation
+
+The most efficient way to implement Union-Find is using a **forest**. Each set is
+a tree where every node points to its parent, and the **root** of the tree is the
+representative of the entire set.
+- `find(x)` follows the parent pointers from $x$ up to the root.
+- `union(x, y)` finds the roots of both $x$ and $y$ and makes one root the
+  parent of the other.
+
+## Optimizations
+
+Without optimizations, a tree can become a long chain, making `find` take $O(n)$
+time. Two tricks make it nearly constant time:
+
+1.  **Union by Rank/Size:** Always hang the shorter tree under the taller one.
+    This keeps the maximum height of any tree at $O(\log n)$.
+2.  **Path Compression:** Every time you call `find(x)`, make every node along
+    the path point **directly to the root**. This flattens the tree
+    dramatically over time.
+
+## Complexity
+
+With both optimizations, the amortized time per operation is **$O(\alpha(n))$**,
+where $\alpha$ is the inverse Ackermann function. For any value of $n$ that can
+exist in our universe, $\alpha(n)$ is less than 5. It is essentially
+**constant time**.
+
+## Takeaways
+
+- Union-Find manages partitions of a set into disjoint groups.
+- Path compression and union-by-rank make it nearly $O(1)$ per operation.
+- Essential for algorithms like Kruskal's (Minimum Spanning Tree) and finding
+  cycles in a graph.

@@ -6,4 +6,46 @@ summary: Adjacency lists vs adjacency matrices — how to model connections and 
 difficulty: medium
 ---
 
-Content coming soon.
+import GraphRepresentationVisualizer from '@/components/viz/GraphRepresentationVisualizer.tsx';
+
+A **graph** is a set of **vertices** (nodes) connected by **edges**. To run
+algorithms like BFS or Dijkstra, we first need a way to store these connections
+in computer memory. There are two primary ways to do this, each with different
+trade-offs.
+
+<GraphRepresentationVisualizer client:visible />
+
+## 1. Adjacency Matrix
+
+An **adjacency matrix** is a 2D array of size $V \times V$. If there is an edge
+between node $i$ and node $j$, we store a `1` (or the weight) at `matrix[i][j]`.
+
+- **Pros:** Checking if an edge exists (`hasEdge(u, v)`) is a lightning-fast
+  **$O(1)$** lookup.
+- **Cons:** It always uses **$O(V^2)$** space, even if the graph has very few
+  edges (a "sparse" graph). Iterating over all neighbors of a node takes $O(V)$
+  time.
+
+## 2. Adjacency List
+
+An **adjacency list** is an array of lists. Each index `i` stores a list of all
+nodes connected to node `i`.
+
+- **Pros:** Highly **space-efficient**—it only uses $O(V + E)$ memory. Iterating
+  over the neighbors of a node is fast ($O(\text{degree})$). This is the standard
+  choice for most graph algorithms.
+- **Cons:** Checking if a specific edge $(u, v)$ exists takes $O(\text{degree})$
+  time because you have to scan the list.
+
+## Which one to use?
+
+- Use a **matrix** for **dense** graphs (where $E \approx V^2$) or when you
+  need constant-time edge lookups.
+- Use a **list** for **sparse** graphs (the vast majority of real-world graphs,
+  like social networks or maps) and for traversals like BFS and DFS.
+
+## Takeaways
+
+- Adjacency matrices are fast for lookups but use $O(V^2)$ space.
+- Adjacency lists are space-efficient and the default for most algorithms.
+- Choice of representation depends on graph density and required operations.

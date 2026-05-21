@@ -6,4 +6,43 @@ summary: The most common structure — how an array grows when it runs out of sp
 difficulty: easy
 ---
 
-Content coming soon.
+import DynamicArrayVisualizer from '@/components/viz/DynamicArrayVisualizer.tsx';
+
+A standard **array** has a fixed size. If you need to store more elements than you
+initially allocated, you're stuck. A **dynamic array** (like `std::vector` in C++,
+`ArrayList` in Java, or `list` in Python/JS) solves this by automatically resizing
+itself.
+
+<DynamicArrayVisualizer client:visible />
+
+## How it works
+
+A dynamic array keeps a pointer to a fixed-size buffer and tracks two numbers:
+- **Size:** how many elements are currently in the array.
+- **Capacity:** the total space available in the underlying buffer.
+
+When you **push** an element and `size < capacity`, it's a simple `O(1)` write.
+But when `size == capacity`, the array is full. To make room, it:
+1. Allocates a **new, larger buffer** (usually double the current capacity).
+2. **Copies** all existing elements into the new buffer.
+3. Frees the old buffer.
+
+## Amortized O(1)
+
+That copy step is `O(n)`, which sounds slow. However, it happens very rarely. If
+you double the capacity every time, you only pay the "grow tax" every $n, 2n, 4n$
+operations. When you spread that cost across all $n$ pushes, the **average cost**
+(amortized cost) of each push is still `O(1)`.
+
+## Trade-offs
+
+- **Random Access:** `O(1)` — just like a fixed array, you can jump to any index instantly.
+- **Push Back:** `O(1)` amortized.
+- **Insert/Delete (Middle):** `O(n)` — you have to shift all subsequent elements to maintain continuity.
+- **Space:** `O(n)` — there is often some unused capacity at the end of the buffer.
+
+## Takeaways
+
+- Dynamic arrays manage a fixed buffer that grows when full.
+- Doubling capacity ensures `O(1)` amortized time for insertions.
+- They provide fast random access but slow middle-insertions.

@@ -6,4 +6,47 @@ summary: How text is represented, and the common patterns used to manipulate str
 difficulty: easy
 ---
 
-Content coming soon.
+import StringVisualizer from '@/components/viz/StringVisualizer.tsx';
+
+A **string** is essentially an array of characters. However, because we use
+strings so often, many languages treat them specially, often making them
+**immutable**. Understanding the performance implications of how strings are
+stored and modified is key to writing efficient code.
+
+<StringVisualizer client:visible />
+
+## Immutability and the Concat Trap
+
+In many high-level languages (like Python, Java, and JavaScript), strings are
+immutable. Once created, they cannot be changed in place.
+
+When you do `s += "!"`, the language doesn't just append a character. It:
+1. Allocates a **new buffer** large enough for the result.
+2. **Copies** the entire old string into it.
+3. Appends the new character.
+
+If you build a string of length $n$ by adding one character at a time in a loop,
+you perform $1 + 2 + 3 + ... + n$ copies, which is **$O(n^2)$** total work. To
+avoid this, always use a mutable buffer (like `StringBuilder` or an array of
+characters) and join at the very end.
+
+## Internal Representation
+
+- **Contiguous Memory:** Like arrays, characters in a string are stored next to
+  each other. This makes **indexing** `s[i]` an $O(1)$ operation.
+- **Encoding:** A character isn't always one byte. ASCII uses 1 byte, but UTF-8
+  (the web standard) uses 1 to 4 bytes per character. This means "length" can
+  refer to bytes or to visible characters.
+
+## Common Operations
+
+- **Search (substring):** Finding "cat" in a long text. The naive approach is
+  $O(n \cdot m)$, but algorithms like KMP or Boyer-Moore can do it in $O(n)$.
+- **Reverse:** Usually done in $O(n)$ by swapping characters from both ends
+  toward the middle.
+
+## Takeaways
+
+- Strings are character arrays, but often immutable in modern languages.
+- Repeated concatenation on immutable strings leads to $O(n^2)$ performance.
+- Indexing is $O(1)$, but substring operations require more careful algorithms.

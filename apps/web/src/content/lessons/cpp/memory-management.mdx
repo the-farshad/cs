@@ -6,4 +6,68 @@ summary: Resource Acquisition Is Initialization — tie memory and resources to 
 difficulty: medium
 ---
 
-Content coming soon.
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+
+In C++, you have direct control over memory. While this gives you power, it also
+gives you the responsibility to free every byte you allocate. **RAII** is the
+"secret sauce" that makes modern C++ safe and exception-proof.
+
+## The Problem: Manual Management
+
+In old-style C++, you would allocate memory with `new` and free it with `delete`.
+If you forgot the `delete`, or if an exception was thrown before you reached it,
+you had a **memory leak**.
+
+## The Solution: RAII
+
+**RAII (Resource Acquisition Is Initialization)** is a pattern where a resource
+(memory, a file, a database lock) is tied to the **lifetime of an object**.
+- **Constructor:** Acquires the resource.
+- **Destructor:** Releases the resource.
+
+Because the C++ compiler guarantees that a local object's destructor is called
+when it goes out of scope, the resource is *always* freed, even if an error
+occurs.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `// Modern C++ (Smart Pointers)
+#include <memory>
+
+void example() {
+    // std::unique_ptr uses RAII to automatically delete
+    // the object when 'ptr' goes out of scope.
+    auto ptr = std::make_unique<MyClass>();
+    
+    // No "delete" required!
+} // ptr is destroyed here, calling 'delete'`
+  },
+  {
+    language: 'cpp',
+    code: `// Old C++ (Manual - Dangerous)
+void example() {
+    MyClass* ptr = new MyClass();
+    
+    if (some_error) {
+        return; // LEAK! delete never called
+    }
+    
+    delete ptr;
+}`
+  }
+]} client:visible />
+
+## Smart Pointers
+
+Modern C++ provides smart pointers in the `<memory>` header that implement RAII:
+- **`std::unique_ptr`:** Owns a resource exclusively. It cannot be copied, only
+  moved.
+- **`std::shared_ptr`:** Uses **reference counting**. The resource is deleted
+  only when the last pointer to it is destroyed.
+
+## Takeaways
+
+- RAII ties resource lifetime to object scope.
+- It prevents memory leaks and makes code exception-safe.
+- Always prefer smart pointers (`unique_ptr`, `shared_ptr`) over raw `new` and `delete`.

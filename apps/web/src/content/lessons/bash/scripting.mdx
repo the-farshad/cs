@@ -6,4 +6,63 @@ summary: Automate your workflow by combining commands into reusable scripts with
 difficulty: medium
 ---
 
-Content coming soon.
+import BashTerminal from '@/components/viz/BashTerminal.tsx';
+
+So far, we've typed commands one by one. **Shell scripting** allows you to save
+a sequence of commands into a file, add logic (like `if` statements and loops),
+and run them as a single program.
+
+<BashTerminal client:visible />
+
+## A Simple Script
+
+A shell script is just a text file. It usually starts with a **shebang** (`#!`)
+telling the system which shell to use.
+
+```bash
+#!/bin/bash
+# This is a comment
+
+NAME="Learner"
+echo "Hello, $NAME!"
+echo "Today is $(date)"
+```
+
+## Variables and Logic
+
+- **Variables:** No spaces around the `=`. Access them with `$`.
+- **Arguments:** `$1`, `$2`, etc., refer to the first, second arguments passed
+  to the script. `$#` is the count of arguments.
+- **Conditionals:**
+  ```bash
+  if [ $USER == "root" ]; then
+    echo "Welcome, admin."
+  else
+    echo "Standard user."
+  fi
+  ```
+
+## Loops
+
+Automating a task over many files is where scripting shines:
+
+```bash
+# Rename all .txt files to .bak
+for file in *.txt; do
+  mv "$file" "${file%.txt}.bak"
+done
+```
+
+## Why Script?
+
+1.  **Automation:** Never type a complex 5-command pipe more than once.
+2.  **Reproducibility:** Document exactly how a build or deployment is
+    performed.
+3.  **Power:** Combine small, specialized tools (grep, sed, awk) into a custom
+    solution for your specific data.
+
+## Takeaways
+
+- Scripts are executable files containing a sequence of shell commands.
+- They support standard programming constructs like variables, loops, and logic.
+- They are the "glue" that holds together complex server-side workflows.

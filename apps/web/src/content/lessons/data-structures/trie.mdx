@@ -6,4 +6,45 @@ summary: A specialized tree for strings that makes prefix search fast — and ho
 difficulty: medium
 ---
 
-Content coming soon.
+import TrieVisualizer from '@/components/viz/TrieVisualizer.tsx';
+
+A **Trie** (pronounced "try") is a tree structure used for storing strings.
+Unlike a hash table, where keys are stored as whole units, a Trie stores keys
+character by character along paths from the root. This structure makes it
+incredibly efficient for tasks involving **prefixes**.
+
+<TrieVisualizer client:visible />
+
+## How it works
+
+- Each **node** represents a single character.
+- Each **edge** represents moving to the next character in a word.
+- The **root** is an empty node representing the start of all strings.
+- A boolean flag (`isEndOfWord`) marks nodes that complete a valid word.
+
+To insert "CAR", you follow/create nodes 'C' $\to$ 'A' $\to$ 'R' and mark the 'R'
+node as an end. If you then insert "CAT", you reuse the 'C' and 'A' nodes and
+branch off to a new 'T' node.
+
+## Why use a Trie?
+
+- **Prefix Search:** You can find all words starting with "CA" in $O(L)$ time
+  (where $L$ is the length of the prefix), regardless of how many millions of
+  words are in the dictionary. This powers **autocomplete** and spell checkers.
+- **Ordered Iteration:** Words can be retrieved in alphabetical order by
+  performing a depth-first traversal of the trie.
+- **Space Efficiency:** Common prefixes are stored only once, saving memory when
+  storing many similar words (like "ant", "anteater", "antelope").
+
+## Complexity
+
+- **Insert/Search:** $O(L)$, where $L$ is the length of the word. It does not
+  depend on the number of words $N$ in the trie.
+- **Space:** $O(\text{total characters} \times \text{alphabet size})$. Nodes can
+  have many null pointers, so memory usage can be high for sparse tries.
+
+## Takeaways
+
+- Tries store strings character-by-character along tree paths.
+- They are the "gold standard" for prefix-based lookups and autocomplete.
+- Search time depends only on word length, not the dictionary size.

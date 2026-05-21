@@ -6,4 +6,43 @@ summary: Beyond the basics — how algorithms like Shor's and Grover's use quant
 difficulty: hard
 ---
 
-Content coming soon.
+Why build a quantum computer at all? Because for certain specific problems,
+quantum algorithms can provide a massive speedup that no classical computer
+could ever match. This is known as **Quantum Advantage**.
+
+## How Quantum Algorithms Work
+
+Quantum algorithms don't just "try all paths at once." Instead, they use
+**Interference** to steer the probabilities.
+- They create a superposition of all possible answers.
+- They apply gates that cause the **wrong** answers to cancel each other out
+  (destructive interference).
+- They cause the **right** answer's probability to grow (constructive
+  interference).
+- When you measure at the end, you are highly likely to get the correct answer.
+
+## The Big Two
+
+### 1. Shor's Algorithm (Factoring)
+Shor's algorithm can factor large numbers in **polynomial time**. Since almost
+all modern encryption (like RSA) relies on the fact that factoring is "hard"
+(exponential time), a large-scale quantum computer could break most digital
+security.
+
+### 2. Grover's Algorithm (Searching)
+Grover's algorithm can search an unsorted list of $N$ items in **$O(\sqrt{N})$**
+time. A classical computer takes $O(N)$. While not as dramatic as Shor's, it's a
+proven speedup for any "needle in a haystack" problem.
+
+## The Future: Quantum Simulation
+Perhaps the most useful application will be simulating nature itself. Classical
+computers struggle to simulate molecules and chemical reactions because they are
+inherently quantum. Quantum computers can do this naturally, potentially
+revolutionizing medicine and material science.
+
+## Takeaways
+
+- Quantum algorithms use interference to make the right answer the most probable.
+- **Shor's Algorithm** threatens modern encryption; **Grover's** speeds up searching.
+- The true power of quantum computing lies in problems that are exponentially
+  hard for classical machines.

@@ -6,4 +6,43 @@ summary: Order tasks with dependencies so that every task comes before its requi
 difficulty: medium
 ---
 
-Content coming soon.
+import TopologicalSortVisualizer from '@/components/viz/TopologicalSortVisualizer.tsx';
+
+Imagine you're getting dressed. You must put on your socks before your shoes,
+and your shirt before your tie. A **Topological Sort** takes a set of tasks with
+dependencies and produces a linear order where every "before" task actually
+comes before its "after" task.
+
+<TopologicalSortVisualizer client:visible />
+
+## DAGs Only
+
+Topological sort only works on a **Directed Acyclic Graph (DAG)**.
+- **Directed:** Dependencies have a specific direction ($A \to B$).
+- **Acyclic:** There are no cycles. If $A$ depends on $B$ and $B$ depends on $A$,
+  no valid order exists—you're stuck in a circular dependency.
+
+## Kahn's Algorithm
+
+A common way to compute a topological sort is **Kahn's Algorithm**, which
+simulates the process of finishing tasks:
+1.  **Identify "ready" nodes:** Find all nodes with an **in-degree of 0** (no
+    incoming arrows/dependencies).
+2.  **Process:** Pick a ready node, add it to the final order, and "remove" it
+    from the graph.
+3.  **Update:** Removing the node might free up its neighbors. If a neighbor now
+    has an in-degree of 0, it is now "ready."
+4.  **Repeat** until all nodes are processed.
+
+## Real-World Uses
+
+- **Build Systems:** Determining the order to compile files (e.g., `make`, `npm`).
+- **Data Pipelines:** Running database migrations or processing jobs in the
+  right order.
+- **Package Managers:** Resolving which libraries to install first.
+
+## Takeaways
+
+- Topological sort linearizes a graph while respecting edge directions.
+- It is only possible in graphs without cycles (DAGs).
+- Kahn's algorithm uses in-degrees to find and process "ready" tasks.
