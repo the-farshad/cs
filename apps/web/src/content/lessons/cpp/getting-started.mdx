@@ -1,0 +1,71 @@
+---
+title: Getting Started with C++
+track: cpp
+order: 1
+summary: Compile your first program, and meet the value semantics, references, and pointers that define C++.
+difficulty: intro
+---
+
+C++ is a compiled, statically typed language that gives you control over memory
+and performance while still offering high-level abstractions. It is the standard
+choice for systems programming, game engines, high-frequency trading, and
+competitive programming — anywhere speed and predictability matter.
+
+## Hello, world
+
+```cpp
+#include <iostream>
+
+int main() {
+    std::cout << "Hello, world!\n";
+    return 0;
+}
+```
+
+Compile and run it with a modern compiler:
+
+```bash
+g++ -std=c++20 -O2 hello.cpp -o hello
+./hello
+```
+
+The `-std=c++20` flag selects the language standard and `-O2` turns on
+optimizations.
+
+## Values, references, and pointers
+
+This is the idea that trips up newcomers, and it is the heart of C++:
+
+- A **value** is a copy. `int b = a;` gives `b` its own independent copy of `a`.
+- A **reference** (`int& r = a;`) is another name for an existing object.
+  Changing `r` changes `a`.
+- A **pointer** (`int* p = &a;`) stores the *address* of an object. You follow it
+  with `*p` and it can be reseated or null.
+
+```cpp
+int a = 10;
+int& r = a;     // r is an alias for a
+int* p = &a;    // p holds the address of a
+r = 20;         // a is now 20
+*p = 30;        // a is now 30
+```
+
+Understanding when data is copied versus shared is what makes C++ fast — and
+what makes dangling references and leaks possible if you are careless. Later
+lessons cover **RAII** (tying resource lifetime to scope), smart pointers,
+templates, and the **STL** containers and algorithms.
+
+## Why C++ for this site
+
+Many data-structure and algorithm problems are written in C++ because it maps
+closely to what the machine does, so the cost model in those lessons is concrete.
+Running C++ against test cases in the browser arrives with the problem judge in a
+later phase; for now these lessons focus on the language and its mental model.
+
+## Takeaways
+
+- C++ is compiled and statically typed, trading some convenience for speed and
+  control.
+- Value semantics by default; references alias, pointers hold addresses.
+- Knowing what gets copied versus shared is the foundation everything else builds
+  on.

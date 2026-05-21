@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemeSwitcher from '../components/ui/ThemeSwitcher.tsx';
+import Icon from '@/components/ui/Icon.astro';
 
 interface Props {
   title?: string;
@@ -33,12 +34,11 @@ const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)documen
     <header class="sticky top-0 z-40 border-b border-edge bg-bg/80 backdrop-blur">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <a href="/" class="flex items-center gap-2 font-display text-2xl">
-          <span class="text-accent">&lt;/&gt;</span>
+          <Icon name="code" size={22} class="text-accent" />
           <span class="text-fg">cs.thefarshad</span>
         </a>
         <nav class="flex items-center gap-4 text-sm text-muted">
           <a href="/#tracks" class="hidden hover:text-fg sm:inline">Tracks</a>
-          <a href="https://thefarshad.com" class="hidden hover:text-fg sm:inline">thefarshad.com</a>
           <ThemeSwitcher client:load />
         </nav>
       </div>

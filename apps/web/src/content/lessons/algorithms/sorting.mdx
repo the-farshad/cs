@@ -1,0 +1,53 @@
+---
+title: Sorting
+track: algorithms
+order: 1
+summary: How comparison sorts rearrange data, and why some are O(n log n) and others O(n²).
+difficulty: intro
+---
+
+import SortVisualizer from '@/components/viz/SortVisualizer.tsx';
+
+**Sorting** puts a collection into order. It is the workhorse behind search,
+deduplication, grouping, and countless other tasks — and it is the perfect first
+look at how an algorithm's *strategy* shows up as *running time*.
+
+Press play and watch each algorithm work. Colors mark what the algorithm is
+doing on every step: a **compare**, a **write/swap**, the current **pivot**, and
+the cells already in their **sorted** position.
+
+<SortVisualizer client:visible />
+
+## Comparison sorts
+
+Most general-purpose sorts are **comparison sorts**: they only ask "is `a`
+before `b`?" and rearrange based on the answer. Two operations dominate the cost
+— **comparisons** and **moves** (swaps or writes). Counting them is how we reason
+about speed.
+
+## Two families
+
+- **Simple, O(n²):** bubble, insertion, and selection sort. They are easy to
+  understand and great on tiny or nearly-sorted inputs (insertion sort is
+  genuinely fast when the data is almost ordered), but the work grows with the
+  *square* of the input size.
+- **Divide-and-conquer, O(n log n):** merge sort and quicksort. They split the
+  problem, solve the pieces, and combine — turning quadratic work into
+  near-linear. This is why doubling the input roughly doubles the time, not
+  quadruples it.
+
+## Stability
+
+A sort is **stable** if equal elements keep their original relative order. That
+matters when you sort by one key after another (sort by name, then by date, and
+the names stay ordered within each date). Merge and insertion sort are stable;
+quicksort and selection sort, as usually written, are not.
+
+## Takeaways
+
+- Cost is dominated by comparisons and moves — watch the counters change with
+  the array size.
+- O(n log n) beats O(n²) badly as inputs grow; the gap is the whole reason
+  divide-and-conquer matters.
+- "Best sort" depends on context: input size, how sorted it already is, memory,
+  and whether you need stability.

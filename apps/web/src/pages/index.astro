@@ -1,18 +1,8 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import SortVisualizer from '../components/viz/SortVisualizer.tsx';
-
-const tracks = [
-  { title: 'Data Structures', desc: 'Arrays, lists, trees, heaps, graphs — every structure, animated.', icon: '🌳' },
-  { title: 'Algorithms', desc: 'Sorting, searching, recursion, DP, and graph algorithms.', icon: '⚡' },
-  { title: 'CS Systems', desc: 'Big-O, operating systems, networking, database internals.', icon: '🧠' },
-  { title: 'System Design', desc: 'Scaling, caching, consistency, consensus, case studies.', icon: '🏛️' },
-  { title: 'SQL', desc: 'Queries, joins, indexes — with an in-browser playground.', icon: '🗄️' },
-  { title: 'Git', desc: 'The commit DAG and workflows, explored interactively.', icon: '🌿' },
-  { title: 'Bash', desc: 'The shell, pipes, and scripting in a safe sandbox.', icon: '❯' },
-  { title: 'Robotics', desc: 'Kinematics, PID control, and path planning.', icon: '🤖' },
-  { title: 'ML / RL / Math', desc: 'Probability, optimization, and reinforcement learning.', icon: '∑' },
-];
+import Layout from '@/layouts/Layout.astro';
+import SortVisualizer from '@/components/viz/SortVisualizer.tsx';
+import Icon from '@/components/ui/Icon.astro';
+import { TRACKS } from '@/lib/tracks';
 ---
 
 <Layout>
@@ -30,7 +20,7 @@ const tracks = [
   <section class="mx-auto max-w-6xl px-4">
     <div class="mb-3 flex items-baseline justify-between">
       <h2 class="font-display text-2xl text-fg">Try it: sorting</h2>
-      <span class="text-sm text-muted">a taste of the visualizers</span>
+      <a href="/learn/algorithms/sorting" class="text-sm text-muted hover:text-fg">Open the lesson →</a>
     </div>
     <SortVisualizer client:visible />
   </section>
@@ -40,13 +30,17 @@ const tracks = [
     <p class="mt-1 text-muted">The full map. Lessons, visualizers, and problems land here track by track.</p>
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {
-        tracks.map((t) => (
-          <article class="group rounded-xl border border-edge bg-surface p-5 transition hover:border-accent">
-            <div class="text-2xl">{t.icon}</div>
-            <h3 class="mt-2 font-display text-xl text-fg transition group-hover:text-accent">{t.title}</h3>
-            <p class="mt-1 text-sm text-muted">{t.desc}</p>
-            <span class="mt-3 inline-block text-xs tracking-wide text-muted uppercase">Coming soon</span>
-          </article>
+        TRACKS.map((t) => (
+          <a
+            href={`/learn/${t.slug}`}
+            class="group rounded-xl border border-edge bg-surface p-5 transition hover:border-accent"
+          >
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg border border-edge text-accent">
+              <Icon name={t.icon} size={22} />
+            </span>
+            <h3 class="mt-3 font-display text-xl text-fg transition group-hover:text-accent">{t.title}</h3>
+            <p class="mt-1 text-sm text-muted">{t.summary}</p>
+          </a>
         ))
       }
     </div>

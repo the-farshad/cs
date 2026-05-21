@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+import Icon from '@/components/ui/Icon.astro';
+import LessonList from '@/components/ui/LessonList.tsx';
+import { TRACKS, type Track } from '@/lib/tracks';
+
+export async function getStaticPaths() {
+  return TRACKS.map((t) => ({ params: { track: t.slug }, props: { track: t } }));
+}
+
+interface Props {
+  track: Track;
+}
+
+const { track } = Astro.props;
+const lessons = (await getCollection('lessons'))
+  .filter((e) => !e.data.draft && e.data.track === track.slug)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((e) => ({
+    id: e.id,
+    href: `/learn/${e.data.track}/${e.id.split('/').pop()}`,
+    title: e.data.title,
+    summary: e.data.summary,
+    difficulty: e.data.difficulty,
+  }));
+---
+
+<Layout title={`${track.title} — cs.thefarshad.com`} description={track.summary}>
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <nav class="mb-6 flex items-center gap-2 text-sm text-muted">
+      <a href="/" class="hover:text-fg">Home</a>
+      <span>/</span>
+      <span class="text-fg">{track.title}</span>
+    </nav>
+    <header class="mb-8 flex items-center gap-4">
+      <span class="flex h-14 w-14 items-center justify-center rounded-xl border border-edge bg-surface text-accent">
+        <Icon name={track.icon} size={28} />
+      </span>
+      <div>
+        <h1 class="font-display text-4xl text-accent">{track.title}</h1>
+        <p class="mt-1 text-muted">{track.summary}</p>
+      </div>
+    </header>
+    <LessonList lessons={lessons} client:load />
+  </section>
+</Layout>

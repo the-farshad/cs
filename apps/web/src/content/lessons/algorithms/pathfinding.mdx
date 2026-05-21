@@ -1,0 +1,51 @@
+---
+title: Graph Traversal & Pathfinding
+track: algorithms
+order: 3
+summary: BFS, DFS, Dijkstra, and A* on a grid — how they explore and which find the shortest path.
+difficulty: medium
+---
+
+import PathfindingVisualizer from '@/components/viz/PathfindingVisualizer.tsx';
+
+A grid is a **graph**: each cell is a node connected to its neighbors. "Find a
+route from start to end" is the classic shortest-path problem, and the algorithm
+you choose decides both *how much* of the grid you explore and *whether* the path
+you get is actually the shortest.
+
+Draw some walls, move the start and end, then visualize. The blue cells are
+everything the algorithm **explored**; the gold cells are the **path** it
+returned.
+
+<PathfindingVisualizer client:visible />
+
+## Four strategies
+
+- **BFS (breadth-first):** explores in rings of equal distance. On an unweighted
+  grid it always returns a shortest path.
+- **DFS (depth-first):** dives down one direction as far as it can before
+  backtracking. It reaches the goal, but the path is usually *not* shortest.
+- **Dijkstra:** expands the closest unvisited node first. On this uniform grid it
+  behaves like BFS, but it generalizes to **weighted** edges (e.g. roads with
+  different costs).
+- **A\*:** Dijkstra plus a **heuristic** — an estimate of the remaining distance
+  (here, Manhattan distance). It steers exploration toward the goal, so it
+  usually expands far fewer cells while still returning a shortest path.
+
+## Heuristics and admissibility
+
+A* trusts its heuristic to prioritize. If the heuristic never *overestimates* the
+true remaining cost, it is called **admissible**, and A* is guaranteed to find a
+shortest path. Manhattan distance is admissible on a 4-direction grid because you
+can never reach the goal in fewer steps than the straight-line block count.
+
+Watch the "explored" counter: on an open grid, A\* typically touches a fraction
+of the cells BFS does — same answer, far less work.
+
+## Takeaways
+
+- Grids are graphs; traversal order is the whole game.
+- BFS, Dijkstra, and A\* return shortest paths (with the right conditions); DFS
+  does not.
+- A good heuristic turns a blind search into a guided one without sacrificing
+  optimality.

@@ -2,17 +2,21 @@ import { useMemo, useState } from 'react';
 import { SORTS, type SortKey } from './sortingAlgorithms';
 import type { SortFrame } from './types';
 import { useStepper } from './useStepper';
+import Icon from '@/components/ui/Icon';
 
 function randomArray(n: number): number[] {
   return Array.from({ length: n }, () => Math.floor(Math.random() * 96) + 4);
 }
 
-const LEGEND: { key: string; label: string; cls: string }[] = [
-  { key: 'compare', label: 'compare', cls: 'bg-amber-400' },
-  { key: 'swap', label: 'write / swap', cls: 'bg-rose-500' },
-  { key: 'pivot', label: 'pivot', cls: 'bg-violet-500' },
-  { key: 'sorted', label: 'sorted', cls: 'bg-emerald-500' },
+const LEGEND: { label: string; cls: string }[] = [
+  { label: 'compare', cls: 'bg-amber-400' },
+  { label: 'write / swap', cls: 'bg-rose-500' },
+  { label: 'pivot', cls: 'bg-violet-500' },
+  { label: 'sorted', cls: 'bg-emerald-500' },
 ];
+
+const btn =
+  'inline-flex items-center gap-1.5 rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
 
 export default function SortVisualizer() {
   const [algo, setAlgo] = useState<SortKey>('quick');
@@ -40,12 +44,8 @@ export default function SortVisualizer() {
     return 'bg-[var(--viz-bar)]';
   };
 
-  const btn =
-    'rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
-
   return (
     <div className="rounded-xl border border-edge bg-surface p-4 sm:p-6">
-      {/* Controls */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm text-muted">
           Algorithm
@@ -64,22 +64,14 @@ export default function SortVisualizer() {
 
         <label className="flex items-center gap-2 text-sm text-muted">
           Size {size}
-          <input
-            type="range"
-            min={6}
-            max={60}
-            value={size}
-            onChange={(e) => onSize(Number(e.target.value))}
-            className="accent-[var(--accent)]"
-          />
+          <input type="range" min={6} max={60} value={size} onChange={(e) => onSize(Number(e.target.value))} className="accent-[var(--accent)]" />
         </label>
 
         <button type="button" className={btn} onClick={shuffle}>
-          Shuffle
+          <Icon name="shuffle" size={16} /> Shuffle
         </button>
       </div>
 
-      {/* Bars */}
       <div className="flex h-64 items-end gap-[2px]" role="img" aria-label={`${meta.label} visualization`}>
         {frame.array.map((v, i) => (
           <div
@@ -90,45 +82,30 @@ export default function SortVisualizer() {
         ))}
       </div>
 
-      {/* Transport */}
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <button type="button" className={btn} onClick={prev} disabled={index <= 0} aria-label="Step back">
-          ‹ Step
+          <Icon name="chevron-left" size={16} /> Step
         </button>
         <button
           type="button"
-          className="rounded border border-accent bg-accent px-4 py-1 text-sm font-medium text-accent-fg transition hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded border border-accent bg-accent px-4 py-1 text-sm font-medium text-accent-fg transition hover:opacity-90"
           onClick={() => (playing ? pause() : play())}
         >
-          {playing ? '❚❚ Pause' : '▶ Play'}
+          <Icon name={playing ? 'pause' : 'play'} size={16} /> {playing ? 'Pause' : 'Play'}
         </button>
-        <button
-          type="button"
-          className={btn}
-          onClick={next}
-          disabled={index >= frames.length - 1}
-          aria-label="Step forward"
-        >
-          Step ›
+        <button type="button" className={btn} onClick={next} disabled={index >= frames.length - 1} aria-label="Step forward">
+          Step <Icon name="chevron-right" size={16} />
         </button>
         <button type="button" className={btn} onClick={reset} disabled={index === 0}>
-          Reset
+          <Icon name="rotate-ccw" size={16} /> Reset
         </button>
 
         <label className="ml-auto flex items-center gap-2 text-sm text-muted">
           Speed
-          <input
-            type="range"
-            min={1}
-            max={60}
-            value={fps}
-            onChange={(e) => setFps(Number(e.target.value))}
-            className="accent-[var(--accent)]"
-          />
+          <input type="range" min={1} max={60} value={fps} onChange={(e) => setFps(Number(e.target.value))} className="accent-[var(--accent)]" />
         </label>
       </div>
 
-      {/* Scrubber */}
       <div className="mt-3 flex items-center gap-3">
         <input
           type="range"
@@ -144,11 +121,10 @@ export default function SortVisualizer() {
         </span>
       </div>
 
-      {/* Legend + complexity */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-edge pt-4 text-xs text-muted">
         <div className="flex flex-wrap items-center gap-3">
           {LEGEND.map((l) => (
-            <span key={l.key} className="flex items-center gap-1.5">
+            <span key={l.label} className="flex items-center gap-1.5">
               <span className={`inline-block h-3 w-3 rounded-sm ${l.cls}`} />
               {l.label}
             </span>
