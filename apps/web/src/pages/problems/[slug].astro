@@ -1,0 +1,35 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ProblemRunner from '@/components/problems/ProblemRunner.tsx';
+import { PROBLEMS } from '@/lib/problems';
+
+export async function getStaticPaths() {
+  return PROBLEMS.map((problem) => ({ params: { slug: problem.slug }, props: { problem } }));
+}
+
+const { problem } = Astro.props;
+---
+
+<Layout title={`${problem.title} — Problems`} description={problem.topic}>
+  <article class="mx-auto max-w-3xl px-4 py-12">
+    <nav class="mb-6 flex items-center gap-2 text-sm text-muted">
+      <a href="/" class="hover:text-fg">Home</a>
+      <span>/</span>
+      <a href="/problems" class="hover:text-fg">Problems</a>
+      <span>/</span>
+      <span class="text-fg">{problem.title}</span>
+    </nav>
+
+    <header class="mb-6">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="rounded border border-edge px-2 py-0.5 text-xs text-muted capitalize">{problem.difficulty}</span>
+        <span class="rounded border border-edge px-2 py-0.5 text-xs text-muted">{problem.topic}</span>
+      </div>
+      <h1 class="mt-3 font-display text-4xl text-accent sm:text-5xl">{problem.title}</h1>
+    </header>
+
+    <p class="mb-6 whitespace-pre-line leading-relaxed text-fg">{problem.prompt}</p>
+
+    <ProblemRunner problem={problem} client:load />
+  </article>
+</Layout>
