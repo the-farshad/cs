@@ -6,4 +6,44 @@ summary: How teams use Git — feature branches, pull requests, and strategies l
 difficulty: easy
 ---
 
-Content coming soon.
+import GitVisualizer from '@/components/viz/GitVisualizer.tsx';
+
+Git is more than just a backup tool; it's a collaboration platform. While you can
+use Git alone on your machine, teams need a set of rules — a **workflow** — to
+ensure code stays stable and developers don't step on each other's toes.
+
+<GitVisualizer client:visible />
+
+## Feature Branches
+
+The most common workflow pattern is the **Feature Branch**. Instead of working
+on the `main` branch directly:
+1.  Create a new branch for your task: `git checkout -b new-button`.
+2.  Commit your changes there.
+3.  Merge it back to `main` only when the work is finished and tested.
+
+This keeps the `main` branch always "deployable" and clean.
+
+## Pull Requests (PRs)
+
+A Pull Request is a request to merge one branch into another (usually a feature
+branch into `main`). It provides a space for **Code Review**, where other
+developers can comment on your code, suggest changes, and catch bugs before they
+hit production.
+
+## Common Strategies
+
+### 1. Gitflow
+A strict model with dedicated branches for features, releases, and hotfixes.
+Great for large, slow-moving projects with scheduled releases.
+
+### 2. Trunk-Based Development
+Developers merge small, frequent updates directly to the "trunk" (`main`). This
+requires high automated test coverage and is common in fast-moving Continuous
+Delivery teams.
+
+## Takeaways
+
+- Workflows provide a standardized way for teams to collaborate using Git.
+- **Feature branches** isolate work and keep the main codebase stable.
+- **Pull Requests** and code reviews are essential for maintaining code quality.

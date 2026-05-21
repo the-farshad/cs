@@ -6,4 +6,45 @@ summary: Layers of artificial neurons that learn complex patterns from data — 
 difficulty: medium
 ---
 
-Content coming soon.
+If linear regression is a single line, a **Neural Network** is a massive web of
+interconnected lines. Inspired by the human brain, they are capable of learning
+highly non-linear and complex patterns, from recognizing faces to translating
+languages.
+
+## The Artificial Neuron
+
+A single neuron (or "perceptron") is a simple mathematical function. It:
+1.  Takes several **inputs**.
+2.  Multiplies each by a **weight** ($w$).
+3.  Adds them together with a **bias** ($b$).
+4.  Passes the result through an **activation function** (like ReLU or Sigmoid)
+    to introduce non-linearity.
+
+## The Architecture
+
+A network is organized into **layers**:
+- **Input Layer:** Receives the raw data (e.g., pixels of an image).
+- **Hidden Layers:** Where the "learning" happens. Each layer extracts
+  increasingly abstract features.
+- **Output Layer:** Provides the final prediction.
+
+## How they learn: Backpropagation
+
+Training a neural network involves two main steps:
+1.  **Forward Pass:** Pass data through the network to get a prediction and
+    calculate the error (loss).
+2.  **Backward Pass (Backprop):** Use calculus (the chain rule) to calculate how
+    much each weight contributed to the error. We then use **Gradient Descent**
+    to slightly adjust every weight in the network to reduce the loss.
+
+## Deep Learning
+
+A "Deep" neural network is simply one with many hidden layers. Deep learning has
+revolutionized AI because more layers allow the network to learn more complex
+hierarchies of features (e.g., edges $\to$ shapes $\to$ faces).
+
+## Takeaways
+
+- Neural networks are composed of layers of simple mathematical neurons.
+- Activation functions allow them to learn non-linear patterns.
+- **Backpropagation** is the engine that calculates how to adjust weights to improve performance.
