@@ -2,7 +2,7 @@
 title: Computer Architecture
 track: systems
 order: 0
-summary: The memory hierarchy, CPU caches, and why data locality is the select to high-performance code.
+summary: The memory hierarchy, CPU caches, and why data locality is the secret to high-performance code.
 difficulty: medium
 ---
 
@@ -26,24 +26,28 @@ on-chip memories called **caches**.
 | **Main RAM** | 16 GB | 200+ cycles | Separate sticks |
 | **SSD/Disk** | 1 TB | Millions of cycles | PCIe / SATA |
 
-## Data Locality
+## Two Types of Locality
 
-When the CPU needs a piece of data, it first checks L1, then L2, then L3. If it's
-not in any cache (a **cache miss**), it has to wait hundreds of cycles for RAM.
+The reason caches work so well is because programs are predictable.
 
-To minimize misses, the CPU doesn't just fetch one byte; it fetches a **Cache Line**
-(usually 64 bytes). It assumes that if you need `a[i]`, you'll probably need `a[i+1]`
-soon. This is why **arrays** (contiguous memory) are much faster than **linked
-lists** (scattered memory) — they exhibit high **spatial locality**.
+1. **Spatial Locality:** If you access address $X$, you'll probably access $X+1$
+   soon. Caches exploit this by fetching data in **Cache Lines** (usually 64
+   bytes). This is why **arrays** (contiguous) are much faster than **linked
+   lists** (scattered).
+2. **Temporal Locality:** If you access address $X$ now, you'll probably access
+   it again soon (e.g., in a loop). Caches keep recently used data close to the
+   CPU.
 
 ## The Performance Secret
 
 In modern computing, **memory latency** is often the biggest bottleneck. High-performance
 code is often "cache-aware": it organizes data to stay in L1/L2 as much as possible,
-avoiding the "long walk" to main RAM.
+avoiding the "long walk" to main RAM. This is why "Data-Oriented Design" is
+so popular in game engines and high-performance databases.
 
 ## Takeaways
 
 - CPUs are much faster than RAM; caches (L1, L2, L3) bridge the gap.
+- **Spatial locality** (arrays) and **temporal locality** (loops) are what make
+  caches effective.
 - Cache misses are the "silent killer" of performance.
-- Contiguous data structures like arrays maximize cache hits through spatial locality.

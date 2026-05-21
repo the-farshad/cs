@@ -1,50 +1,54 @@
 ---
-title: Neural Networks
+title: Model Evaluation
 track: machine-learning
-order: 4
-summary: Layers of artificial neurons that learn complex patterns from data — the engine of modern AI.
-difficulty: medium
+order: 5
+summary: Beyond accuracy — precision, recall, F1-score, and how to tell if your model is actually good.
+difficulty: easy
 ---
 
-If linear regression is a single line, a **Neural Network** is a massive web of
-interconnected lines. Inspired by the human brain, they are capable of learning
-highly non-linear and complex patterns, from recognizing faces to translating
-languages.
+If a model predicts that 99% of people do *not* have a rare disease, and it's
+right 99% of the time, is it a good model? **No.** If it misses the 1% who actually
+have the disease, it's useless. In machine learning, **Accuracy** is often a
+lying metric.
 
-## The Artificial Neuron
+## The Confusion Matrix
 
-A single neuron (or "perceptron") is a simple mathematical function. It:
-1.  Takes several **inputs**.
-2.  Multiplies each by a **weight** ($w$).
-3.  Adds them together with a **bias** ($b$).
-4.  Passes the result through an **activation function** (like ReLU or Sigmoid)
-    to introduce non-linearity.
+To truly evaluate a model, we look at four outcomes:
+- **True Positive (TP):** Predicted "Yes", actually "Yes". (Good)
+- **True Negative (TN):** Predicted "No", actually "No". (Good)
+- **False Positive (FP):** Predicted "Yes", actually "No". (Type I Error)
+- **False Negative (FN):** Predicted "No", actually "Yes". (Type II Error - The "Miss")
 
-## The Architecture
+## Better Metrics
 
-A network is organized into **layers**:
-- **Input Layer:** Receives the raw data (e.g., pixels of an image).
-- **Hidden Layers:** Where the "learning" happens. Each layer extracts
-  increasingly abstract features.
-- **Output Layer:** Provides the final prediction.
+### 1. Precision (Quality)
+"Of all the times the model said 'Yes', how many were actually 'Yes'?"
 
-## How they learn: Backpropagation
+$$\text{Precision} = \frac{TP}{TP + FP}$$
 
-Training a neural network involves two main steps:
-1.  **Forward Pass:** Pass data through the network to get a prediction and
-    calculate the error (loss).
-2.  **Backward Pass (Backprop):** Use calculus (the chain rule) to calculate how
-    much each weight contributed to the error. We then use **Gradient Descent**
-    to slightly adjust every weight in the network to reduce the loss.
+*High precision means few "False Alarms".*
 
-## Deep Learning
+### 2. Recall (Completeness)
+"Of all the 'Yes' cases in the data, how many did the model find?"
 
-A "Deep" neural network is simply one with many hidden layers. Deep learning has
-revolutionized AI because more layers allow the network to learn more complex
-hierarchies of features (e.g., edges $\to$ shapes $\to$ faces).
+$$\text{Recall} = \frac{TP}{TP + FN}$$
+
+*High recall means the model doesn't "Miss" many cases.*
+
+### 3. F1-Score (The Balance)
+The harmonic mean of precision and recall. It's the best single number to use if
+you have an imbalanced dataset.
+
+## Generalization: Train vs Test
+
+A model that memorizes its training data but fails on new data is **Overfitting**.
+To detect this, we always split our data:
+- **Training Set:** Used to adjust the weights.
+- **Test Set:** A "hidden" set used only at the very end to see how the model
+  performs on data it has never seen before.
 
 ## Takeaways
 
-- Neural networks are composed of layers of simple mathematical neurons.
-- Activation functions allow them to learn non-linear patterns.
-- **Backpropagation** is the engine that calculates how to adjust weights to improve performance.
+- Accuracy is misleading for imbalanced data.
+- **Precision** measures "false alarms"; **Recall** measures "misses".
+- **Overfitting** is when a model memorizes data rather than learning patterns.

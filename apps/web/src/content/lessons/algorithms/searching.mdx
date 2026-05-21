@@ -40,6 +40,15 @@ a factor of 2.
 | 1,000,000 | 1,000,000 | $\approx 20$ |
 | 1,000,000,000 | 1,000,000,000 | $\approx 30$ |
 
+## Common Pitfalls
+
+- **Off-by-one:** Decide whether `hi` is the last valid index (`lo <= hi`) or one
+  past the end (`lo < hi`), and stay consistent.
+- **Midpoint overflow:** In fixed-width integer languages, `(lo + hi)` can
+  overflow — prefer `lo + (hi - lo) / 2`.
+- **Unsorted input:** Binary search *requires* sorted input. On unsorted data, the
+  invariant is false and the result is meaningless.
+
 ## Takeaways
 
 - **Linear search** is for unsorted data; it's slow but reliable.

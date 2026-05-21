@@ -1,7 +1,7 @@
 ---
 title: Linear Algebra
 track: math
-order: 7
+order: 8
 summary: Vectors and 2x2 matrices as transformations of space, with the determinant as area.
 difficulty: medium
 ---
@@ -22,49 +22,43 @@ and the shaded region is the unit square after the transform. Its area is the
 ## Vectors
 
 A **vector** is a quantity with direction and magnitude, written as a column of
-numbers like `[3, 2]`. You can **add** vectors component-wise and **scale** them by a
-number. In code, a vector is just an array — a point, a velocity, a color, or a row
-of features.
+numbers like $\begin{bmatrix} 3 \\ 2 \end{bmatrix}$. You can **add** vectors
+component-wise and **scale** them by a number. In code, a vector is just an
+array — a point, a velocity, a color, or a row of features.
 
 ## Matrices as transformations
 
-A 2x2 matrix `[[a, b], [c, d]]` transforms every point in the plane. The trick: it
-sends the basis vector `î = [1, 0]` to the first column `[a, c]`, and `ĵ = [0, 1]` to
-the second column `[b, d]`. Every other point follows along, because
-
-`M · [x, y] = x · (first column) + y · (second column)`
+A 2x2 matrix $\begin{bmatrix} a & b \\ c & d \end{bmatrix}$ transforms every
+point in the plane. The trick: it sends the basis vector $\hat{i} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
+to the first column $\begin{bmatrix} a \\ c \end{bmatrix}$, and $\hat{j} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$
+to the second column $\begin{bmatrix} b \\ d \end{bmatrix}$. Every other point
+follows along linearly.
 
 Different entries produce familiar effects:
+- **Scaling:** $\begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}$ doubles everything.
+- **Rotation:** $\begin{bmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{bmatrix}$ spins the plane.
+- **Shear:** $\begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}$ slides the top sideways.
 
-- **Scaling:** `[[2, 0], [0, 2]]` doubles everything.
-- **Rotation:** `[[cos θ, −sin θ], [sin θ, cos θ]]` spins the plane.
-- **Shear:** `[[1, 1], [0, 1]]` slides the top sideways.
+## Dot Product and Matrix Multiplications
+
+The **dot product** of two vectors $u \cdot v$ measures how much they "point in
+the same direction." It's the sum of their products: $u_1v_1 + u_2v_2$.
+
+**Matrix multiplication** is really about **composition**. If matrix $A$ rotates
+and matrix $B$ scales, then the product $BA$ is the single transformation that
+rotates *then* scales. In code, this is how we chain graphics transforms or
+neural network layers.
 
 ## The determinant
 
-The **determinant** `ad − bc` measures how much the transformation scales **area**.
-
-- `det = 1`: area preserved (a pure rotation).
-- `det = 0`: the square collapses to a line — the matrix is **not invertible** and
-  information is lost.
-- `det < 0`: the plane is **flipped** over (orientation reversed).
-
-## Why it matters for CS
-
-Graphics pipelines multiply matrices to move and rotate objects. Neural networks are
-chains of matrix multiplications. Search engines and recommender systems represent
-data as vectors and compare them with dot products. Once you see matrices as
-transformations, all of this clicks into place.
-
-## Further reading
-
-[Khan Academy: Linear algebra](https://www.khanacademy.org/math/linear-algebra)
-covers vectors, matrices, and transformations for free.
+The **determinant** $(ad - bc)$ measures how much the transformation scales **area**.
+- $\text{det} = 1$: area preserved (e.g., a pure rotation).
+- $\text{det} = 0$: the unit square collapses to a line — the matrix is **not invertible** and information is lost.
+- $\text{det} < 0$: the plane is **flipped** over (orientation reversed).
 
 ## Takeaways
 
-- Vectors are directed quantities you can add and scale; a matrix transforms whole
-  vectors at once.
-- A 2x2 matrix is defined by where it sends the basis vectors `î` and `ĵ`.
-- The determinant is the area scale factor; `det = 0` means the matrix is not
-  invertible.
+- Vectors are directed quantities; a matrix transforms whole vectors at once.
+- A 2x2 matrix is defined by where it sends the basis vectors $\hat{i}$ and $\hat{j}$.
+- Matrix multiplication corresponds to composing linear transformations.
+- The determinant is the area scale factor; $\text{det} = 0$ means information is lost.

@@ -1,16 +1,17 @@
 ---
-title: Graph Traversal
+title: General Graph Traversal
 track: algorithms
-order: 9
+order: 8
 summary: BFS and DFS on a general graph — same idea, different frontier (a queue vs a stack).
 difficulty: medium
 ---
 
 import GraphTraversalVisualizer from '@/components/viz/GraphTraversalVisualizer.tsx';
 
-The Pathfinding lesson ran these searches on a grid; here they are on a **general
-graph** of nodes and edges, with the **frontier** data structure shown explicitly.
-That frontier is the only real difference between the two fundamental traversals.
+The [Pathfinding on a Grid](/learn/algorithms/pathfinding) lesson ran these
+searches on a grid; here they are on a **general graph** of nodes and edges,
+with the **frontier** data structure shown explicitly. That frontier is the only
+real difference between the two fundamental traversals.
 
 Pick a start node and run BFS or DFS. Watch the frontier — a **queue** for BFS, a
 **stack** for DFS — and the order nodes get visited.
