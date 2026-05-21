@@ -1,6 +1,29 @@
 import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/Icon';
 
+const SQLJS_VERSION = '1.14.1';
+
+/** Load sql.js's classic UMD build from a CDN — bundling its Emscripten loader
+ *  through Vite breaks it. It exposes window.initSqlJs; the WASM itself is our
+ *  own self-hosted /sql-wasm.wasm (same version). */
+function loadSqlJs(): Promise<void> {
+  const src = `https://cdn.jsdelivr.net/npm/sql.js@${SQLJS_VERSION}/dist/sql-wasm.js`;
+  return new Promise((resolve, reject) => {
+    if ((window as any).initSqlJs) return resolve();
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve());
+      existing.addEventListener('error', () => reject(new Error('sql.js failed to load')));
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('sql.js failed to load'));
+    document.head.appendChild(s);
+  });
+}
+
 const SEED = `
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS departments;
@@ -58,8 +81,9 @@ export default function SqlPlayground() {
     let database: any;
     (async () => {
       try {
-        const initSqlJs = (await import('sql.js')).default as any;
-        const SQL = await initSqlJs({ locateFile: (file: string) => `/${file}` });
+        await loadSqlJs();
+        const initSqlJs = (window as any).initSqlJs;
+        const SQL = await initSqlJs({ locateFile: () => '/sql-wasm.wasm' });
         database = new SQL.Database();
         database.run(SEED);
         if (active) {
@@ -67,7 +91,8 @@ export default function SqlPlayground() {
           setLoading(false);
           runOn(database, EXAMPLES[0].sql);
         }
-      } catch {
+      } catch (e) {
+        console.error('SQL engine load failed:', e);
         if (active) {
           setError('Failed to load the SQL engine.');
           setLoading(false);

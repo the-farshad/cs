@@ -3,7 +3,7 @@ import '../styles/global.css';
 import ThemeSwitcher from '../components/ui/ThemeSwitcher.tsx';
 import FontSwitcher from '../components/ui/FontSwitcher.tsx';
 import Icon from '@/components/ui/Icon.astro';
-import { VERSION, SLOGAN } from '@/lib/site';
+import { VERSION, REPO_URL } from '@/lib/site';
 
 interface Props {
   title?: string;
@@ -11,8 +11,8 @@ interface Props {
 }
 
 const {
-  title = 'CS, visualized — cs.thefarshad.com',
-  description = 'Learn computer science visually: data structures, algorithms, systems, and more, with interactive visualizers and runnable problems.',
+  title = 'cs.thefarshad.com — Computer Science',
+  description = 'Computer science topics — data structures, algorithms, mathematics, systems, and more — with visualizers and practice problems.',
 } = Astro.props;
 
 // Set the saved theme before first paint to avoid a flash.
@@ -39,7 +39,7 @@ const themeInit = `(()=>{try{var d=document.documentElement;var t=localStorage.g
     <header class="sticky top-0 z-40 border-b border-edge bg-bg/80 backdrop-blur">
       <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
         <a href="/" class="flex items-center gap-2 font-display text-2xl">
-          <Icon name="code" size={22} class="text-accent" />
+          <Icon name="code-slash" size={22} class="text-accent" />
           <span class="text-fg">cs.thefarshad</span>
         </a>
         <nav class="flex items-center gap-3 text-sm text-muted">
@@ -58,7 +58,9 @@ const themeInit = `(()=>{try{var d=document.documentElement;var t=localStorage.g
     <footer class="border-t border-edge">
       <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-muted">
         <span class="font-mono">v{VERSION}</span>
-        <span>{SLOGAN}</span>
+        <a href={REPO_URL} target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 hover:text-fg">
+          <Icon name="github" size={14} /> GitHub
+        </a>
       </div>
     </footer>
   </body>
