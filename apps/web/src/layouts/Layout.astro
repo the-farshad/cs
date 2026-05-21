@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+import ThemeSwitcher from '../components/ui/ThemeSwitcher.tsx';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'CS, visualized — cs.thefarshad.com',
+  description = 'Learn computer science visually: data structures, algorithms, systems, and more, with interactive visualizers and runnable problems.',
+} = Astro.props;
+
+// Set the saved theme before first paint to avoid a flash.
+const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();`;
+---
+
+<!doctype html>
+<html lang="en" data-theme="retro-gold">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+    <script is:inline set:html={themeInit} />
+  </head>
+  <body class="min-h-screen font-body antialiased">
+    <header class="sticky top-0 z-40 border-b border-edge bg-bg/80 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <a href="/" class="flex items-center gap-2 font-display text-2xl">
+          <span class="text-accent">&lt;/&gt;</span>
+          <span class="text-fg">cs.thefarshad</span>
+        </a>
+        <nav class="flex items-center gap-4 text-sm text-muted">
+          <a href="/#tracks" class="hidden hover:text-fg sm:inline">Tracks</a>
+          <a href="https://thefarshad.com" class="hidden hover:text-fg sm:inline">thefarshad.com</a>
+          <ThemeSwitcher client:load />
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="mt-20 border-t border-edge">
+      <div class="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
+        <p>cs.thefarshad.com — computer science, visualized.</p>
+      </div>
+    </footer>
+  </body>
+</html>
