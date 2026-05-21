@@ -1,0 +1,45 @@
+---
+title: Stacks & Queues
+track: data-structures
+order: 2
+summary: Two restricted lists — last-in-first-out and first-in-first-out — that show up everywhere.
+difficulty: easy
+---
+
+import StackQueueVisualizer from '@/components/viz/StackQueueVisualizer.tsx';
+
+**Stacks** and **queues** are lists with a discipline about *where* you add and
+remove. That single restriction is exactly what makes them useful.
+
+Toggle between the two and push/pop a few values. Notice the stack always removes
+the most recent item, while the queue removes the oldest.
+
+<StackQueueVisualizer client:visible />
+
+## Stack — LIFO
+
+A **stack** is **last-in, first-out**: you `push` onto the top and `pop` from the
+top. Think of a stack of plates. Both operations are O(1).
+
+Stacks are everywhere:
+- the **call stack** that runs your functions (see the Recursion lesson),
+- undo/redo history,
+- matching brackets and expression evaluation,
+- depth-first search.
+
+## Queue — FIFO
+
+A **queue** is **first-in, first-out**: you `enqueue` at the back and `dequeue`
+from the front, like a line at a counter. Both are O(1).
+
+Queues power:
+- scheduling and task/work buffers,
+- **breadth-first search** (the frontier is a queue),
+- streaming and producer/consumer pipelines.
+
+## Takeaways
+
+- Stack = LIFO (push/pop the top); Queue = FIFO (enqueue back, dequeue front).
+- Both give O(1) add and remove by restricting *where* you touch the data.
+- The restriction is the feature: it matches how call stacks, BFS, scheduling,
+  and undo naturally work.

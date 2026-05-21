@@ -1,0 +1,51 @@
+---
+title: Linked Lists
+track: data-structures
+order: 1
+summary: Nodes joined by pointers — O(1) insertion at the ends, but no random access.
+difficulty: easy
+---
+
+import LinkedListVisualizer from '@/components/viz/LinkedListVisualizer.tsx';
+
+A **linked list** stores each value in its own **node**, and each node holds a
+**pointer** to the next one. Unlike an array, the elements are not contiguous in
+memory — they're chained together, so the list can grow and shrink without
+shifting anything.
+
+Insert at the head or tail, search, and delete. Watch how some operations are
+instant while others have to walk the chain.
+
+<LinkedListVisualizer client:visible />
+
+## The trade with arrays
+
+| | Array | Linked list |
+|---|---|---|
+| Access by index | **O(1)** | O(n) — must walk |
+| Insert at head | O(n) — shift all | **O(1)** |
+| Insert at tail | O(1)* amortized | O(n) without a tail pointer |
+| Memory | contiguous | node + pointer overhead |
+
+Arrays win on **random access**; linked lists win on **cheap insertion/deletion
+at a known position** (you just relink pointers — no shifting).
+
+## Walking the chain
+
+There is no index arithmetic. To reach the k-th node you start at the **head**
+and follow `next` pointers k times. That's why search and "insert at tail"
+(without a stored tail pointer) are O(n) — you can see the highlight stepping
+node by node.
+
+## Variations
+
+- **Doubly linked list:** each node also points to the previous one, so you can
+  walk backward and delete a node in O(1) given a reference to it.
+- **Circular list:** the tail points back to the head.
+
+## Takeaways
+
+- A linked list trades random access for cheap, shift-free insertion and deletion.
+- Operations that need the k-th element are O(n) — you must traverse.
+- Reach for it when you insert/remove a lot at the ends or middle; reach for an
+  array when you index a lot.

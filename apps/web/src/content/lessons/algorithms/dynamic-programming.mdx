@@ -1,0 +1,58 @@
+---
+title: Dynamic Programming
+track: algorithms
+order: 5
+summary: Solve overlapping subproblems once and fill a table — turning exponential recursion into polynomial time.
+difficulty: hard
+---
+
+import DPVisualizer from '@/components/viz/DPVisualizer.tsx';
+
+**Dynamic programming (DP)** solves a problem by breaking it into subproblems,
+solving each **once**, and storing the answers in a table. It applies when a
+problem has two properties: **optimal substructure** (the best answer is built
+from best answers to subproblems) and **overlapping subproblems** (the same
+subproblems recur — exactly what made naive recursion explode).
+
+Here we compute the **Longest Common Subsequence** of two strings — the longest
+sequence of characters appearing in both, in order. Watch the table fill in, then
+the path backtrack to recover the answer.
+
+<DPVisualizer client:visible />
+
+## Reading the table
+
+`dp[i][j]` is the LCS length of the first `i` characters of A and the first `j` of
+B. The recurrence is short:
+
+- If `A[i-1] == B[j-1]`, the characters match: `dp[i][j] = dp[i-1][j-1] + 1` (take
+  the **diagonal** and extend).
+- Otherwise drop one character: `dp[i][j] = max(dp[i-1][j], dp[i][j-1])` (the best
+  of **up** and **left**).
+
+The highlighted cells show exactly which earlier answers each cell depends on.
+
+## From recursion to a table
+
+The same recurrence written recursively recomputes subproblems exponentially.
+Filling a table **bottom-up** computes each `dp[i][j]` once: with strings of
+length `m` and `n`, that's `O(m·n)` time. Then we **backtrack** from the
+bottom-right, following the choices that produced each value, to reconstruct the
+subsequence itself.
+
+## The DP recipe
+
+1. Define the subproblem (`dp[i][j]` = ...).
+2. Write the recurrence relating it to smaller subproblems.
+3. Set the base cases (here, an empty prefix gives 0).
+4. Fill in an order where dependencies come first.
+5. (Optional) backtrack to recover the actual solution.
+
+This pattern solves edit distance, knapsack, matrix-chain order, shortest paths,
+and many more.
+
+## Takeaways
+
+- DP = optimal substructure + overlapping subproblems, solved once into a table.
+- A clear recurrence plus base cases is the whole design; the table just caches it.
+- Bottom-up filling gives polynomial time; backtracking recovers the solution.

@@ -1,0 +1,45 @@
+---
+title: Hash Tables
+track: data-structures
+order: 3
+summary: Average O(1) lookup by turning a key into an array index — and how collisions are handled.
+difficulty: medium
+---
+
+import HashTableVisualizer from '@/components/viz/HashTableVisualizer.tsx';
+
+A **hash table** gives you near-instant lookup, insert, and delete by a key. The
+trick: a **hash function** turns the key into an array index, so you jump
+straight to where the value lives instead of searching.
+
+Insert some values and watch where each one lands. Insert numbers that share a
+remainder (like 3, 11, 19) to force a **collision** into the same bucket.
+
+<HashTableVisualizer client:visible />
+
+## Key to index
+
+Here the hash is simply `value % 8` — the number of buckets. A good hash function
+spreads keys **uniformly** across the buckets so they rarely pile up. Real tables
+hash strings and objects into a wide integer, then take it modulo the table size.
+
+## Collisions
+
+Two different keys can hash to the same bucket — a **collision**. The fix shown
+here is **separate chaining**: each bucket holds a small list, and colliding keys
+are appended. Lookup hashes to the bucket, then scans its (short) chain. The other
+common strategy is **open addressing**: probe to the next free slot instead of
+chaining.
+
+## Load factor and resizing
+
+The **load factor** is `items / buckets`. As it climbs, chains get longer and
+lookups slow down, so real hash tables **resize** (e.g. double the buckets and
+rehash everything) to keep it low. Kept low, operations are **O(1) on average** —
+though a bad hash or adversarial keys can degrade to O(n).
+
+## Takeaways
+
+- A hash function maps keys to buckets, giving O(1) average lookup/insert/delete.
+- Collisions are unavoidable; chaining (or open addressing) resolves them.
+- Performance hinges on a good hash and a low load factor (hence resizing).

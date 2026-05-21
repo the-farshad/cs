@@ -1,0 +1,50 @@
+---
+title: Graph Traversal
+track: algorithms
+order: 6
+summary: BFS and DFS on a general graph — same idea, different frontier (a queue vs a stack).
+difficulty: medium
+---
+
+import GraphTraversalVisualizer from '@/components/viz/GraphTraversalVisualizer.tsx';
+
+The Pathfinding lesson ran these searches on a grid; here they are on a **general
+graph** of nodes and edges, with the **frontier** data structure shown explicitly.
+That frontier is the only real difference between the two fundamental traversals.
+
+Pick a start node and run BFS or DFS. Watch the frontier — a **queue** for BFS, a
+**stack** for DFS — and the order nodes get visited.
+
+<GraphTraversalVisualizer client:visible />
+
+## Same skeleton, different container
+
+Both traversals do the same thing: take a node from the frontier, visit it, and
+add its unvisited neighbors. What changes is *which* node comes out next:
+
+- **BFS** uses a **queue** (FIFO). It visits everything one edge away, then two
+  edges away, and so on — exploring in **layers**. On an unweighted graph it finds
+  shortest paths.
+- **DFS** uses a **stack** (LIFO) — or equivalently, recursion. It plunges as deep
+  as it can down one branch before backtracking.
+
+Swap a queue for a stack and BFS literally becomes DFS.
+
+## Visiting once
+
+Each node is marked **seen** the first time it is reached, so cycles don't cause
+infinite loops and every node and edge is processed a constant number of times.
+With an adjacency list that's **O(V + E)** — linear in the size of the graph.
+
+## What they're good for
+
+- **BFS:** shortest paths (unweighted), level/distance computations, connected
+  components.
+- **DFS:** cycle detection, topological sort, finding strongly connected
+  components, maze/backtracking-style exploration.
+
+## Takeaways
+
+- BFS and DFS share one loop; the frontier (queue vs stack) decides the order.
+- BFS explores in layers (shortest paths); DFS dives deep (great for structure).
+- Marking nodes seen keeps traversal at O(V + E) and safe on cyclic graphs.
