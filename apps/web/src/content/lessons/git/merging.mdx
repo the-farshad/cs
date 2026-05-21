@@ -1,0 +1,46 @@
+---
+title: Merging & Rebasing
+track: git
+order: 2
+summary: How divergent branches come back together — merge commits, fast-forwards, and rebase.
+difficulty: medium
+---
+
+import GitVisualizer from '@/components/viz/GitVisualizer.tsx';
+
+When two branches have diverged — each with commits the other doesn't have —
+**merging** brings them back together. Build a branch, add commits to both it and
+`main`, then `merge` to see what happens.
+
+<GitVisualizer client:visible />
+
+## Merge commits
+
+When both branches have new work, `git merge` creates a **merge commit**: a commit
+with **two parents**, one from each branch. It joins the histories without
+rewriting them — every original commit stays exactly where it was. In the graph
+above, the merge node is the one with two incoming lines.
+
+## Fast-forward
+
+If the current branch has *no* new commits of its own — the other branch is simply
+ahead — there's nothing to combine. Git just slides the pointer forward to the
+other tip. This is a **fast-forward**: no merge commit, just a pointer move. (It
+happens whenever your branch is a direct ancestor of the one you're merging in.)
+
+## Merge vs rebase
+
+- **Merge** preserves history exactly and records *when* branches joined, at the
+  cost of an extra merge commit and a more tangled graph.
+- **Rebase** instead *replays* your commits on top of another branch, producing a
+  straight, linear history — but it **rewrites** commits (new ids), so the rule of
+  thumb is: don't rebase commits you've already shared with others.
+
+Both end at the same files; they differ in what the *history* looks like.
+
+## Takeaways
+
+- A merge of two diverged branches creates a commit with two parents.
+- A fast-forward is just a pointer move when one branch is strictly ahead.
+- Merge keeps history as-is; rebase rewrites it into a linear sequence — avoid
+  rebasing shared commits.

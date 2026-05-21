@@ -1,0 +1,45 @@
+---
+title: The Commit Graph
+track: git
+order: 1
+summary: Commits form a DAG, branches are just movable pointers, and HEAD says where you are.
+difficulty: easy
+---
+
+import GitVisualizer from '@/components/viz/GitVisualizer.tsx';
+
+Git is, at heart, a **graph of commits**. Each commit is a snapshot of your
+project plus a pointer to its **parent** — the commit that came before it. Follow
+the parents back and you have the full history. Because commits only ever point
+*backward*, the structure is a **directed acyclic graph (DAG)**.
+
+Run some commands and watch the graph grow. `commit` adds a node; `new branch`
+starts a parallel line of work; `merge` ties two lines back together.
+
+<GitVisualizer client:visible />
+
+## Branches are pointers
+
+A **branch** is not a copy of your files — it's just a lightweight, movable
+**pointer to a commit**. When you `git commit`, Git creates the new commit and
+slides the current branch pointer forward to it. That's why branching is cheap:
+making one is just writing down a commit id.
+
+## HEAD: where you are
+
+**HEAD** points to the branch you currently have checked out (here, `HEAD → main`).
+Commits attach to wherever HEAD is. `git checkout <branch>` just moves HEAD to a
+different pointer — your next commit then extends *that* line.
+
+## Why a DAG
+
+Every commit records its parent(s), so history is a graph, not a straight line.
+Branches let two lines of work proceed independently from a shared ancestor; a
+merge (next lesson) joins them with a commit that has **two** parents. Nothing
+ever points forward, so there are no cycles — it's always a DAG.
+
+## Takeaways
+
+- A commit is a snapshot plus a link to its parent; the history is a DAG.
+- A branch is just a movable pointer to a commit — cheap to create.
+- HEAD marks your current branch; commits extend wherever HEAD points.
