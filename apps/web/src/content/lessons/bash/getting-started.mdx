@@ -1,0 +1,44 @@
+---
+title: The Shell & Filesystem
+track: bash
+order: 1
+summary: Navigate directories and work with files using pwd, ls, cd, cat, mkdir, and touch.
+difficulty: easy
+---
+
+import BashTerminal from '@/components/viz/BashTerminal.tsx';
+
+The **shell** is a text interface to your computer: you type a command, it runs,
+and it prints the result. **Bash** is the most common one. Everything starts with
+moving around the **filesystem** — a tree of directories (folders) and files.
+
+This is a real (simulated) shell running in your browser. Type commands, or click
+an example. Start with `ls` and `cat readme.txt`.
+
+<BashTerminal client:visible />
+
+## Where am I, and what's here
+
+- **`pwd`** — *print working directory*: where you currently are.
+- **`ls`** — *list* the contents of a directory. `ls -l` shows one per line;
+  `ls data` lists another directory.
+- **`cd <dir>`** — *change directory*. Special targets: `..` (up one level), `~`
+  (home), `/` (root). Try `cd data`, then `pwd`, then `cd ..`.
+
+Paths are either **absolute** (start at `/`, e.g. `/home/learner`) or **relative**
+to where you are (e.g. `data/fruits.txt`).
+
+## Reading and making files
+
+- **`cat <file>`** — print a file's contents. Try `cat data/fruits.txt`.
+- **`mkdir <name>`** — make a new directory.
+- **`touch <name>`** — create an empty file (or update its timestamp).
+- **`mv` / `cp` / `rm`** — move, copy, remove. (`rm -r` removes a directory.)
+
+Everything you create lives until you press **reset**.
+
+## Takeaways
+
+- The shell is a read-eval-print loop: type a command, see its output.
+- The filesystem is a tree; `pwd`, `ls`, and `cd` are how you move through it.
+- Paths are absolute (from `/`) or relative (from your current directory).

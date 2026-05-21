@@ -1,0 +1,54 @@
+---
+title: Pipes & Filters
+track: bash
+order: 2
+summary: Combine small commands with pipes and redirection — the core idea that makes the shell powerful.
+difficulty: medium
+---
+
+import BashTerminal from '@/components/viz/BashTerminal.tsx';
+
+The real power of the shell is **composition**: each command does one small thing,
+and you wire them together. A **pipe** (`|`) sends the output of one command
+straight into the next as its input.
+
+Run `cat data/fruits.txt | sort | uniq` below and watch three tiny tools combine
+into "the distinct fruits, in order."
+
+<BashTerminal client:visible />
+
+## The Unix philosophy
+
+Programs that "do one thing well" and read/write plain text can be chained
+endlessly. Useful **filters** read input and transform it:
+
+- **`grep <pattern>`** — keep only lines that match. `grep apple data/fruits.txt`.
+- **`sort`** — sort lines; **`uniq`** — collapse *adjacent* duplicates (so usually
+  `sort | uniq`).
+- **`wc`** — count: `wc -l` for lines, `-w` words, `-c` characters.
+- **`head` / `tail`** — first / last lines (`head -n 3`).
+
+Each works on a file argument *or* on piped input, so they drop into a pipeline
+anywhere.
+
+## Redirection
+
+A pipe feeds another command; **redirection** sends output to a **file**:
+
+- **`>`** writes (overwrites): `echo hello > greeting.txt`.
+- **`>>`** appends: `echo again >> greeting.txt`.
+
+Then `cat greeting.txt` to see the result. Combine freely:
+`cat data/fruits.txt | sort | uniq > unique.txt`.
+
+## Building a pipeline
+
+Read a pipeline left to right as a flow of text: source → filter → filter →
+destination. `cat numbers.txt | sort | head -n 3` means "take the numbers, sort
+them, keep the first three." Small, composable tools beat one big program.
+
+## Takeaways
+
+- `|` pipes one command's output into the next; chains do a lot with a little.
+- Filters (`grep`, `sort`, `uniq`, `wc`, `head`, `tail`) work on files or stdin.
+- `>` and `>>` redirect output into files (overwrite vs append).
