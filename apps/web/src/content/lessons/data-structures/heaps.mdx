@@ -1,0 +1,55 @@
+---
+title: Heaps & Priority Queues
+track: data-structures
+order: 2
+summary: A complete binary tree packed into an array that always serves the smallest item first.
+difficulty: medium
+---
+
+import HeapVisualizer from '@/components/viz/HeapVisualizer.tsx';
+
+A **binary heap** is a complete binary tree with one rule: every parent is
+smaller than its children (a **min-heap**). That rule doesn't fully sort the
+data, but it does something useful very cheaply — the minimum is always at the
+root. Heaps are how **priority queues** are built.
+
+Insert values and extract the minimum. The tree view and the array view are the
+same heap: node `i`'s children live at indices `2i+1` and `2i+2`.
+
+<HeapVisualizer client:visible />
+
+## Stored in an array, no pointers
+
+Because a heap is always a *complete* tree (filled left-to-right), it packs
+perfectly into an array. For the node at index `i`:
+
+- left child: `2i + 1`
+- right child: `2i + 2`
+- parent: `(i - 1) / 2`
+
+No node objects, no pointers — just arithmetic on indices.
+
+## The two operations
+
+- **Insert:** put the new value at the end of the array, then **sift up** —
+  repeatedly swap it with its parent while it is smaller. At most `O(log n)` swaps
+  (the tree's height).
+- **Extract-min:** the answer is the root. Move the last element to the root and
+  **sift down** — repeatedly swap it with its smaller child until the heap rule
+  holds again. Also `O(log n)`.
+
+Peeking at the minimum is `O(1)`.
+
+## Where heaps show up
+
+- **Priority queues** — always handle the most urgent item next.
+- **Dijkstra and A\*** — pick the closest frontier node efficiently.
+- **Heapsort** — build a heap, then extract repeatedly for an `O(n log n)` sort.
+- **Top-k / streaming medians** — keep a small heap of the best candidates.
+
+## Takeaways
+
+- A heap keeps the min (or max) instantly available, with `O(log n)` insert and
+  extract.
+- Being a complete tree lets it live in a flat array addressed by index math.
+- It's the natural implementation of a priority queue.

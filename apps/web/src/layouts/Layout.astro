@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css';
 import ThemeSwitcher from '../components/ui/ThemeSwitcher.tsx';
+import FontSwitcher from '../components/ui/FontSwitcher.tsx';
 import Icon from '@/components/ui/Icon.astro';
+import { VERSION, SLOGAN } from '@/lib/site';
 
 interface Props {
   title?: string;
@@ -14,7 +16,7 @@ const {
 } = Astro.props;
 
 // Set the saved theme before first paint to avoid a flash.
-const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();`;
+const themeInit = `(()=>{try{var d=document.documentElement;var t=localStorage.getItem('cs-theme');if(t)d.dataset.theme=t;var f=localStorage.getItem('cs-font');if(f)d.dataset.font=f;}catch(e){}})();`;
 ---
 
 <!doctype html>
@@ -28,7 +30,7 @@ const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)documen
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Roboto:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Roboto:wght@400;500;700&family=Ubuntu:wght@400;500;700&family=VT323&display=swap"
       rel="stylesheet"
     />
     <script is:inline set:html={themeInit} />
@@ -40,9 +42,10 @@ const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)documen
           <Icon name="code" size={22} class="text-accent" />
           <span class="text-fg">cs.thefarshad</span>
         </a>
-        <nav class="flex items-center gap-4 text-sm text-muted">
+        <nav class="flex items-center gap-3 text-sm text-muted">
           <a href="/#tracks" class="hidden hover:text-fg sm:inline">Tracks</a>
           <ThemeSwitcher client:load />
+          <FontSwitcher client:load />
         </nav>
       </div>
     </header>
@@ -52,8 +55,9 @@ const themeInit = `(()=>{try{var t=localStorage.getItem('cs-theme');if(t)documen
     </main>
 
     <footer class="mt-20 border-t border-edge">
-      <div class="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
-        <p>cs.thefarshad.com — computer science, visualized.</p>
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-8 text-sm text-muted">
+        <span class="font-mono">v{VERSION}</span>
+        <span>{SLOGAN}</span>
       </div>
     </footer>
   </body>

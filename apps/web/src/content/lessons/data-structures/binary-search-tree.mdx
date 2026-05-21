@@ -1,0 +1,48 @@
+---
+title: Binary Search Trees
+track: data-structures
+order: 1
+summary: A tree that keeps values ordered for fast search, insert, and delete — and why balancing matters.
+difficulty: medium
+---
+
+import BSTVisualizer from '@/components/viz/BSTVisualizer.tsx';
+
+A **binary search tree (BST)** stores values so that, for every node, everything
+in its **left** subtree is smaller and everything in its **right** subtree is
+larger. That single rule turns search into a series of left/right decisions —
+just like binary search, but on a linked structure you can also insert into and
+delete from cheaply.
+
+Insert a few values and watch the path each one takes. Switch to **AVL** to see
+the tree rebalance itself with rotations, and use **Find** to trace a search.
+
+<BSTVisualizer client:visible />
+
+## Search, insert, delete
+
+To **find** a value, start at the root and go left or right by comparing — at
+most one node per level. **Insert** follows the same path and hangs the new value
+off the spot where the search "fell off" the tree. Both cost **O(h)**, where `h`
+is the height of the tree.
+
+## The catch: height
+
+`O(h)` is only fast if the tree is **short**. Insert values in sorted order into a
+plain BST and it degenerates into a linked list — height `n`, and search becomes
+`O(n)`. Try inserting `10, 20, 30, 40, 50` in BST mode to see it lean over.
+
+## Self-balancing: AVL
+
+An **AVL tree** fixes this by keeping every node's two subtrees within height 1 of
+each other. After each insert it checks the balance on the way back up and, if a
+node tips over, performs a **rotation** — a local rearrangement that restores
+balance without breaking the ordering. That guarantees `h = O(log n)`, so search,
+insert, and delete are all `O(log n)`. Insert the same sorted sequence in AVL mode
+and watch it rotate to stay short.
+
+## Takeaways
+
+- A BST keeps data ordered so search is a walk down the tree: `O(h)`.
+- Height is everything — an unbalanced BST can degrade to `O(n)`.
+- Self-balancing trees (AVL, red-black) use rotations to keep `h = O(log n)`.

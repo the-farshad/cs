@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Map semantic tokens to Tailwind utilities (bg-bg, text-fg, border-edge, …).
-   `inline` keeps them as var() refs so they follow [data-theme] at runtime. */
+   `inline` keeps them as var() refs so they follow [data-theme] / [data-font] at runtime. */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -15,14 +15,7 @@
   --font-mono: var(--font-mono);
 }
 
-/* Type — Ubuntu (display), Roboto (body), JetBrains Mono (code). Shared by all themes. */
-:root {
-  --font-display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
-}
-
-/* Default theme: Retro Gold (the *.thefarshad.com family identity) */
+/* Default theme: Retro Gold — keeps the VT323 family identity. */
 :root,
 [data-theme="retro-gold"] {
   --bg: #15120a;
@@ -33,6 +26,9 @@
   --accent-fg: #1a1505;
   --border: #3a3015;
   --viz-bar: #6b5a23;
+  --font-display: "VT323", ui-monospace, monospace;
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 [data-theme="dark-dev"] {
@@ -44,6 +40,9 @@
   --accent-fg: #02130a;
   --border: #30363d;
   --viz-bar: #335b86;
+  --font-display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 [data-theme="clean-edu"] {
@@ -55,6 +54,27 @@
   --accent-fg: #ffffff;
   --border: #d0d7de;
   --viz-bar: #94a3b8;
+  --font-display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Optional font override (set via the font selector, after themes so it wins). */
+[data-font="ubuntu"] {
+  --font-display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", ui-sans-serif, system-ui, sans-serif;
+}
+[data-font="roboto"] {
+  --font-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", ui-sans-serif, system-ui, sans-serif;
+}
+[data-font="retro"] {
+  --font-display: "VT323", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+}
+[data-font="mono"] {
+  --font-display: "JetBrains Mono", ui-monospace, monospace;
+  --font-body: "JetBrains Mono", ui-monospace, monospace;
 }
 
 html { color-scheme: dark; scroll-behavior: smooth; }
@@ -66,7 +86,7 @@ body {
   font-family: var(--font-body);
 }
 
-/* Lesson prose (MDX content). Kept token-driven so it follows the theme. */
+/* Lesson prose (MDX content). Token-driven so it follows the theme. */
 .prose-cs { line-height: 1.7; }
 .prose-cs > * + * { margin-top: 1.1em; }
 .prose-cs h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.7rem; color: var(--fg); margin-top: 1.9em; }

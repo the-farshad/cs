@@ -1,0 +1,47 @@
+---
+title: Recursion
+track: algorithms
+order: 4
+summary: How a function that calls itself unfolds into a call tree — and why naive recursion can explode.
+difficulty: easy
+---
+
+import RecursionVisualizer from '@/components/viz/RecursionVisualizer.tsx';
+
+**Recursion** is when a function solves a problem by calling itself on smaller
+inputs, until it hits a **base case** simple enough to answer directly. The
+classic example is the Fibonacci numbers: `fib(n) = fib(n-1) + fib(n-2)`, with
+`fib(0) = 0` and `fib(1) = 1`.
+
+Step through the call tree below. Each node is a call; the highlighted node is the
+one currently running, and the call **stack** is the path from the root down to
+it.
+
+<RecursionVisualizer client:visible />
+
+## The call tree and the stack
+
+Every recursive call spawns its children before it can return — exactly a
+depth-first walk of the tree. At any moment the **call stack** holds the chain of
+calls still waiting for an answer. When a call reaches a base case it returns, its
+parent resumes, and the stack shrinks.
+
+## Why naive Fibonacci explodes
+
+Look at the **total calls** counter as you raise `n`. Naive `fib` recomputes the
+same subproblems over and over — `fib(3)` appears again and again across the tree.
+The number of calls grows *exponentially*, roughly doubling each time `n` goes up.
+
+## Memoization
+
+Tick **Memoize**. Now the first time a value is computed it is cached, and later
+calls for the same `n` return instantly (the dimmed nodes) instead of expanding
+again. The exponential tree collapses to a linear number of real calls — the same
+idea that powers **dynamic programming**.
+
+## Takeaways
+
+- Recursion = base case + a smaller self-call; it unfolds into a call tree.
+- The call stack is the root-to-current path; deep recursion means a deep stack.
+- Overlapping subproblems make naive recursion exponential — memoization (and DP)
+  brings it back down.

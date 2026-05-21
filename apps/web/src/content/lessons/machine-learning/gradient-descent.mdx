@@ -1,0 +1,48 @@
+---
+title: Gradient Descent
+track: machine-learning
+order: 1
+summary: The optimization workhorse of machine learning — follow the slope downhill to minimize a loss.
+difficulty: easy
+---
+
+import GradientDescentVisualizer from '@/components/viz/GradientDescentVisualizer.tsx';
+
+Training a model means **minimizing a loss** — a number that measures how wrong
+the model is. **Gradient descent** does this with one simple idea: from wherever
+you are, take a step in the direction that decreases the loss fastest, and repeat.
+
+The curve below is a loss landscape. The ball starts at your chosen `x` and rolls
+downhill. Each step is `x ← x − (learning rate) × gradient`.
+
+<GradientDescentVisualizer client:visible />
+
+## The gradient is the slope
+
+The **gradient** `f'(x)` is the slope of the loss at the current point. It points
+*uphill*, so we step in the **opposite** direction to go down. Where the curve is
+steep, the gradient is large and the step is big; near the bottom it flattens and
+the steps shrink, easing to a stop.
+
+## Learning rate: the key knob
+
+The **learning rate** scales each step. It is the single most important
+hyperparameter:
+
+- **Too small** — the ball crawls and may need many steps to arrive.
+- **Too large** — it overshoots the valley and can bounce out or **diverge**.
+  Slide the learning rate up past ~0.12 and watch it blow up.
+
+## Local minima and flat spots
+
+This landscape has **two** valleys. Where the ball lands depends on where it
+starts — gradient descent finds a *local* minimum, not necessarily the global
+best. And start exactly at `x = 0`: the gradient is zero, so the ball never moves,
+even though it's balanced on a hill. Real networks face the high-dimensional
+version of these flat spots and valleys constantly.
+
+## Takeaways
+
+- Gradient descent steps downhill against the gradient to minimize a loss.
+- The learning rate trades speed for stability — too big diverges, too small crawls.
+- It converges to a *local* minimum; the starting point and landscape shape decide which.
