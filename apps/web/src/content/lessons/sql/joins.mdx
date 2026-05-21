@@ -1,0 +1,60 @@
+---
+title: Joins
+track: sql
+order: 2
+summary: Combine rows from multiple tables on a shared key — the heart of relational databases.
+difficulty: medium
+---
+
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+Relational data is split across **tables** to avoid repetition: employees live in
+one table, departments in another, linked by a **key** (`employees.dept_id` points
+at `departments.id`). A **JOIN** stitches them back together when you query.
+
+Run the join examples below and edit them — the two tables are `employees` and
+`departments`.
+
+<SqlPlayground client:visible />
+
+## INNER JOIN
+
+The default join keeps only rows that **match on both sides**:
+
+```sql
+SELECT e.name, d.name AS dept
+FROM employees e
+JOIN departments d ON e.dept_id = d.id;
+```
+
+The **ON** clause says how rows pair up. Table **aliases** (`e`, `d`) keep things
+short and disambiguate columns with the same name.
+
+## LEFT JOIN
+
+A **LEFT JOIN** keeps every row from the left table even when there's no match on
+the right — the missing columns come back as `NULL`. It answers questions like
+"every department, including the empty ones":
+
+```sql
+SELECT d.name AS dept, COUNT(e.id) AS headcount
+FROM departments d
+LEFT JOIN employees e ON e.dept_id = d.id
+GROUP BY d.name;
+```
+
+`INNER` would silently drop a department with no employees; `LEFT` keeps it with a
+count of 0.
+
+## Joins + aggregation
+
+Joins compose with everything else. Join first to bring columns together, then
+`GROUP BY` and aggregate — for example, average salary **per department name**
+instead of per `dept_id`.
+
+## Takeaways
+
+- Tables are linked by keys; a JOIN recombines them on an `ON` condition.
+- `INNER JOIN` keeps matches only; `LEFT JOIN` keeps all left rows, filling gaps
+  with `NULL`.
+- Joins combine naturally with `WHERE`, `GROUP BY`, and aggregates.

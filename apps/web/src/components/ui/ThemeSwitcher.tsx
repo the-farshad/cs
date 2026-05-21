@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import Icon from '@/components/ui/Icon';
 
 const THEMES = [
-  { id: 'retro-gold', label: 'Gold' },
-  { id: 'dark-dev', label: 'Dark' },
-  { id: 'clean-edu', label: 'Light' },
+  { id: 'retro-gold', label: 'Gold', icon: 'palette' },
+  { id: 'dark-dev', label: 'Dark', icon: 'moon' },
+  { id: 'clean-edu', label: 'Light', icon: 'sun' },
 ] as const;
 
 type ThemeId = (typeof THEMES)[number]['id'];
@@ -13,8 +14,7 @@ export default function ThemeSwitcher() {
   const [theme, setTheme] = useState<ThemeId | null>(null);
 
   useEffect(() => {
-    const current = (document.documentElement.dataset.theme as ThemeId) || 'retro-gold';
-    setTheme(current);
+    setTheme((document.documentElement.dataset.theme as ThemeId) || 'retro-gold');
   }, []);
 
   const choose = (id: ThemeId) => {
@@ -35,11 +35,13 @@ export default function ThemeSwitcher() {
           type="button"
           onClick={() => choose(t.id)}
           aria-pressed={theme === t.id}
-          className={`rounded px-2 py-1 text-xs transition ${
+          aria-label={t.label}
+          title={t.label}
+          className={`flex items-center justify-center rounded p-1.5 transition ${
             theme === t.id ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'
           }`}
         >
-          {t.label}
+          <Icon name={t.icon} size={16} />
         </button>
       ))}
     </div>

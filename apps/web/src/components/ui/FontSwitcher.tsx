@@ -30,17 +30,18 @@ export default function FontSwitcher() {
   };
 
   return (
-    <select
-      value={font}
-      onChange={(e) => choose(e.target.value as FontId)}
-      aria-label="Font"
-      className="rounded-md border border-edge bg-bg px-2 py-1 text-xs text-fg"
-    >
+    <div className="inline-flex rounded-md border border-edge p-0.5" role="group" aria-label="Font">
       {FONTS.map((f) => (
-        <option key={f.id} value={f.id}>
+        <button
+          key={f.id}
+          type="button"
+          onClick={() => choose(f.id)}
+          aria-pressed={font === f.id}
+          className={`rounded px-1.5 py-1 text-xs transition ${font === f.id ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'}`}
+        >
           {f.label}
-        </option>
+        </button>
       ))}
-    </select>
+    </div>
   );
 }

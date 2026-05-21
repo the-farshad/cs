@@ -1,0 +1,55 @@
+---
+title: Querying Data
+track: sql
+order: 1
+summary: SELECT, WHERE, ORDER BY, and GROUP BY — ask questions of a relational database, live.
+difficulty: easy
+---
+
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+**SQL** (Structured Query Language) is how you talk to a relational database. Data
+lives in **tables** — rows and named columns — and you describe *what* you want,
+not how to fetch it. The database figures out the rest.
+
+This is a real SQLite database running entirely in your browser. Edit the query
+and run it. Changes you make with `INSERT`/`UPDATE` stick until you press **Reset
+data**.
+
+<SqlPlayground client:visible />
+
+## The shape of a query
+
+```sql
+SELECT columns
+FROM table
+WHERE condition
+ORDER BY column [ASC|DESC]
+LIMIT n;
+```
+
+- **SELECT** picks the columns (or `*` for all).
+- **FROM** names the table.
+- **WHERE** keeps only the rows matching a condition.
+- **ORDER BY** sorts the result; **LIMIT** caps how many rows come back.
+
+Try: `SELECT name, salary FROM employees WHERE salary > 100000 ORDER BY salary DESC;`
+
+## Aggregating with GROUP BY
+
+Aggregate functions collapse many rows into one value: `COUNT`, `SUM`, `AVG`,
+`MIN`, `MAX`. **GROUP BY** runs them per group rather than over the whole table:
+
+```sql
+SELECT dept_id, COUNT(*) AS headcount, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept_id;
+```
+
+Use **HAVING** to filter *groups* (after aggregation), the way `WHERE` filters rows.
+
+## Takeaways
+
+- SQL is declarative — you state the result you want, not the steps.
+- `SELECT … FROM … WHERE … ORDER BY` covers a huge share of everyday queries.
+- `GROUP BY` plus an aggregate turns rows into per-group summaries.
