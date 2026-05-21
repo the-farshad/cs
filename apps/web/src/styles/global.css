@@ -15,6 +15,13 @@
   --font-mono: var(--font-mono);
 }
 
+/* Type — Ubuntu (display), Roboto (body), JetBrains Mono (code). Shared by all themes. */
+:root {
+  --font-display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
 /* Default theme: Retro Gold (the *.thefarshad.com family identity) */
 :root,
 [data-theme="retro-gold"] {
@@ -26,9 +33,6 @@
   --accent-fg: #1a1505;
   --border: #3a3015;
   --viz-bar: #6b5a23;
-  --font-display: "VT323", ui-monospace, monospace;
-  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", monospace;
 }
 
 [data-theme="dark-dev"] {
@@ -40,9 +44,6 @@
   --accent-fg: #02130a;
   --border: #30363d;
   --viz-bar: #335b86;
-  --font-display: ui-sans-serif, system-ui, sans-serif;
-  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", monospace;
 }
 
 [data-theme="clean-edu"] {
@@ -54,9 +55,6 @@
   --accent-fg: #ffffff;
   --border: #d0d7de;
   --viz-bar: #94a3b8;
-  --font-display: ui-serif, Georgia, "Times New Roman", serif;
-  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", monospace;
 }
 
 html { color-scheme: dark; scroll-behavior: smooth; }
@@ -71,8 +69,8 @@ body {
 /* Lesson prose (MDX content). Kept token-driven so it follows the theme. */
 .prose-cs { line-height: 1.7; }
 .prose-cs > * + * { margin-top: 1.1em; }
-.prose-cs h2 { font-family: var(--font-display); font-size: 1.7rem; color: var(--fg); margin-top: 1.9em; }
-.prose-cs h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--fg); margin-top: 1.5em; }
+.prose-cs h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.7rem; color: var(--fg); margin-top: 1.9em; }
+.prose-cs h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.3rem; color: var(--fg); margin-top: 1.5em; }
 .prose-cs p, .prose-cs li { color: var(--fg); }
 .prose-cs a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 .prose-cs ul { list-style: disc; padding-left: 1.3em; }
