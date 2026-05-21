@@ -1,0 +1,46 @@
+---
+title: Exponents & Logarithms
+track: math
+order: 3
+summary: Why log n is small, exponential growth is scary, and both run through complexity analysis.
+difficulty: easy
+---
+
+import FunctionPlotter from '@/components/viz/FunctionPlotter.tsx';
+
+An **exponent** repeats multiplication: `2³ = 2·2·2 = 8`. A **logarithm** is its
+inverse — it asks *"to what power?"*: `log₂ 8 = 3`. These two ideas explain why
+binary search is fast and why brute force is hopeless.
+
+In the plotter, select **Exponential (2ˣ)** and then **Logarithm (log₂ x)** to feel
+the contrast: one rockets upward, the other crawls.
+
+<FunctionPlotter client:visible />
+
+## Logarithms grow painfully slowly
+
+`log₂ n` is *how many times you can halve `n` before reaching 1*. For a million
+items that's about 20; for a billion, about 30. That is why **binary search** and
+**balanced trees** are `O(log n)` — doubling the data adds just one step.
+
+## Exponentials grow explosively
+
+`2ⁿ` doubles every time `n` increases by one: 2, 4, 8, 16, … For `n = 60` it
+exceeds a quintillion. Algorithms that try every subset are `O(2ⁿ)` and become
+impossible well before `n = 100` — the reason naive recursion (and brute force)
+fails at scale.
+
+## Useful identities
+
+- `log(a·b) = log a + log b`  (turns multiplication into addition)
+- `logᵦ x = log x / log b`  (change of base)
+- `b^(logᵦ x) = x`  (exp and log undo each other)
+
+The base mostly doesn't matter for Big-O, since changing it only multiplies by a
+constant — that's why we just write `O(log n)`.
+
+## Takeaways
+
+- A logarithm is the inverse of an exponent: "to what power?"
+- `log n` grows extremely slowly — the signature of efficient algorithms.
+- `2ⁿ` grows explosively — the signature of brute force that doesn't scale.

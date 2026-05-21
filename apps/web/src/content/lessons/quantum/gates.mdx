@@ -1,0 +1,50 @@
+---
+title: Quantum Gates
+track: quantum
+order: 2
+summary: Gates are reversible operations that rotate a qubit's state — the instructions of a quantum circuit.
+difficulty: medium
+---
+
+import QubitVisualizer from '@/components/viz/QubitVisualizer.tsx';
+
+Where classical logic uses gates like AND and OR, quantum computing uses **quantum
+gates** that transform a qubit's amplitudes. Unlike AND/OR, every quantum gate is
+**reversible** — applying it twice (for these three) returns you to where you
+started. A **quantum circuit** is just a sequence of gates ending in a measurement.
+
+Apply gates and watch the amplitudes and probabilities change.
+
+<QubitVisualizer client:visible />
+
+## Three essential single-qubit gates
+
+- **X (NOT):** swaps the amplitudes of `|0⟩` and `|1⟩` — the quantum bit flip.
+  `X|0⟩ = |1⟩`.
+- **H (Hadamard):** creates superposition. `H|0⟩` is the even mix; press **H**
+  twice and you return to `|0⟩` — the halves **interfere** and cancel. This is
+  interference you can see.
+- **Z (phase flip):** flips the sign of the `|1⟩` amplitude. It does nothing
+  visible to `|0⟩` or `|1⟩` alone, but it changes how states interfere later —
+  apply **H, Z, H** and compare to **H, H**.
+
+## Reversible and unitary
+
+Every gate is a **unitary** operation: it preserves total probability (the
+amplitudes squared always sum to 1) and can be undone. That's a hard constraint —
+you can't simply "erase" a qubit mid-circuit — and it shapes how quantum
+algorithms are designed.
+
+## Try it
+
+1. **X** then **measure** → always 1.
+2. **H** then **measure** → 0 or 1, ~50/50.
+3. **H, Z, H** → ends in `|1⟩` (the phase flip, made visible by the surrounding
+   Hadamards). Compare with **H, H** → back to `|0⟩`.
+
+## Takeaways
+
+- Gates transform amplitudes; X flips, H superposes, Z flips phase.
+- All quantum gates are reversible and probability-preserving (unitary).
+- A circuit is gates + a final measurement; interference (e.g. H·H) is the key
+  effect.

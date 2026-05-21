@@ -1,0 +1,50 @@
+---
+title: Logic & Sets
+track: math
+order: 4
+summary: Boolean logic and truth tables — the foundation of conditions, circuits, and proofs.
+difficulty: easy
+---
+
+import TruthTable from '@/components/viz/TruthTable.tsx';
+
+**Boolean logic** deals with values that are only **true** or **false** (1 or 0).
+Every `if` statement, database filter, and digital circuit is built from a handful
+of logical operators. A **truth table** lists the output for every possible input.
+
+Pick an operator and read off its behavior.
+
+<TruthTable client:visible />
+
+## The core operators
+
+- **AND** — true only when *both* inputs are true.
+- **OR** — true when *at least one* is true.
+- **NOT** — flips the value.
+- **XOR** — true when the inputs *differ*.
+- **NAND / NOR** — the negations of AND/OR (and each alone can build *any* circuit).
+- **A → B** (implies) — only false when A is true but B is false.
+
+## De Morgan's laws
+
+Two identities you'll use constantly when simplifying conditions:
+
+- `NOT (A AND B) = (NOT A) OR (NOT B)`
+- `NOT (A OR B) = (NOT A) AND (NOT B)`
+
+They're why `!(x && y)` can be rewritten as `!x || !y` — handy for untangling
+gnarly `if` conditions.
+
+## Sets
+
+A **set** is an unordered collection of distinct items. The operations mirror
+logic: **union** (∪, "or"), **intersection** (∩, "and"), **difference**, and
+**complement** ("not"). Hash sets make membership tests `O(1)`, which is why sets
+show up everywhere from deduplication to graph visited-marks.
+
+## Takeaways
+
+- Boolean logic (AND/OR/NOT/XOR) underlies conditions and circuits; truth tables
+  define them exactly.
+- De Morgan's laws let you rewrite and simplify logical expressions.
+- Sets are logic on collections: union/intersection/difference mirror or/and/not.

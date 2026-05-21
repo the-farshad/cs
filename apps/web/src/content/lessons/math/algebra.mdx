@@ -1,0 +1,49 @@
+---
+title: Algebra & Functions
+track: math
+order: 1
+summary: Variables, equations, and functions — the language used to describe every algorithm.
+difficulty: intro
+---
+
+import FunctionPlotter from '@/components/viz/FunctionPlotter.tsx';
+
+Algebra is using **symbols** to stand for numbers so we can describe relationships
+that hold for *any* value. A **function** `f(x)` is a rule that turns an input `x`
+into an output — exactly how we describe what a piece of code computes and how its
+cost grows.
+
+Pick a function and drag the coefficients. Watch how the **shape** of the graph
+encodes the formula.
+
+<FunctionPlotter client:visible />
+
+## Variables and equations
+
+A **variable** is a placeholder. An **equation** says two expressions are equal,
+e.g. `2x + 3 = 11`; *solving* it means finding the `x` that makes it true (`x = 4`).
+The moves are simple: do the same thing to both sides until `x` is alone.
+
+## Functions and their graphs
+
+`f(x) = a·x + b` is a **line**: `a` is the slope (steepness), `b` is where it
+crosses the y-axis. `f(x) = a·x² + b·x + c` is a **parabola** — the curve behind
+projectile motion and the `O(n²)` cost of simple sorts. The graph is just every
+`(x, f(x))` pair plotted.
+
+## Why it matters for CS
+
+When we say an algorithm is `O(n²)`, we're describing a **function** of the input
+size `n`. Reading graphs and manipulating expressions is how you compare growth
+rates, solve for break-even points, and reason about performance.
+
+## Going deeper
+
+For a full ground-up course, [Khan Academy: Algebra](https://www.khanacademy.org/math/algebra)
+is free and excellent.
+
+## Takeaways
+
+- Variables let one statement describe infinitely many cases.
+- A function maps inputs to outputs; its graph is the picture of that rule.
+- Big-O notation *is* algebra — functions of the input size `n`.

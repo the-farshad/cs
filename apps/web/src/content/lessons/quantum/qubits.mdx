@@ -1,0 +1,52 @@
+---
+title: Qubits & Superposition
+track: quantum
+order: 1
+summary: A qubit isn't just 0 or 1 — it's a combination of both until you measure it.
+difficulty: medium
+---
+
+import QubitVisualizer from '@/components/viz/QubitVisualizer.tsx';
+
+A classical **bit** is either 0 or 1. A **qubit** can be in a **superposition** —
+a weighted combination of both at once, written `α|0⟩ + β|1⟩`. The numbers α and β
+are **amplitudes**; when you **measure**, you get 0 with probability `α²` and 1
+with probability `β²` (so `α² + β² = 1`), and the qubit **collapses** to whatever
+you saw.
+
+Press **H** (Hadamard) on the starting `|0⟩` to split it into an even
+superposition, then **measure** a few times — you'll get 0 or 1 about half the
+time each.
+
+<QubitVisualizer client:visible />
+
+## Reading the state
+
+- Start: `|0⟩` — 100% chance of measuring 0.
+- After **H**: `0.707|0⟩ + 0.707|1⟩` — `0.707² ≈ 0.5`, so 50/50.
+- After **measure**: the state snaps to `|0⟩` or `|1⟩`. Superposition is gone —
+  measurement is irreversible.
+
+The bars show **probabilities** (the amplitudes squared), which is all you can ever
+observe directly.
+
+## Superposition is not "both values stored"
+
+A common myth is that a qubit "holds 0 and 1 simultaneously" so you get free
+parallelism. The catch: you can't read the amplitudes — measuring gives just one
+bit and destroys the rest. Quantum speedups come from cleverly arranging
+**interference** so the *wrong* answers cancel out before you measure, not from
+reading many values at once.
+
+## Why it matters
+
+Algorithms like Shor's (factoring) and Grover's (search) use superposition plus
+interference to beat classical approaches on specific problems — with real
+consequences for cryptography and search.
+
+## Takeaways
+
+- A qubit is `α|0⟩ + β|1⟩`; measuring yields 0 or 1 with probability `α²`/`β²`.
+- Measurement collapses the state and is irreversible.
+- The power isn't "both at once" — it's interference steering probability toward
+  the right answer.

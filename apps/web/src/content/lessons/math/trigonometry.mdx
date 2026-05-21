@@ -1,0 +1,52 @@
+---
+title: Trigonometry
+track: math
+order: 2
+summary: Angles and the sine/cosine/tangent ratios — essential for graphics, robotics, and signals.
+difficulty: easy
+---
+
+import UnitCircle from '@/components/viz/UnitCircle.tsx';
+
+Trigonometry connects **angles** to **lengths**. On the **unit circle** (radius 1),
+a point at angle θ has coordinates exactly `(cos θ, sin θ)`. That single fact powers
+2D/3D rotation, robot kinematics, and the waves behind sound and signals.
+
+Drag the angle and watch the point travel around the circle. The gold segment is
+`cos θ` (horizontal), the green segment is `sin θ` (vertical).
+
+<UnitCircle client:visible />
+
+## The three ratios
+
+For an angle in a right triangle:
+
+- **sin θ** = opposite / hypotenuse
+- **cos θ** = adjacent / hypotenuse
+- **tan θ** = sin θ / cos θ = opposite / adjacent
+
+On the unit circle the hypotenuse is 1, so the point's height *is* sin θ and its
+horizontal position *is* cos θ. As θ sweeps 0 → 360°, both trace smooth **waves**.
+
+## Radians
+
+Angles are often measured in **radians** instead of degrees: a full circle is `2π`
+radians (≈ 6.28), so 180° = π. Radians make calculus and code cleaner — most
+programming `sin`/`cos` functions expect radians.
+
+## Where it shows up in CS
+
+- **Graphics & games:** rotating and positioning objects.
+- **Robotics:** a joint at angle θ puts the arm tip at `(cos θ, sin θ)` distances.
+- **Signals & audio:** every sound decomposes into sine waves (Fourier analysis).
+
+## Going deeper
+
+[Khan Academy: Trigonometry](https://www.khanacademy.org/math/trigonometry) is a
+free, thorough course.
+
+## Takeaways
+
+- The unit circle ties angle θ directly to `(cos θ, sin θ)`.
+- sin/cos/tan are ratios; on the unit circle they are coordinates and slope.
+- Rotations, robot arms, and signals all run on trigonometry.
