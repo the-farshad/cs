@@ -6,10 +6,19 @@ summary: When two qubits become linked so that measuring one instantly decides t
 difficulty: hard
 ---
 
+import BellStateBuilder from '@/components/viz/BellStateBuilder.tsx';
+
 **Entanglement** is what Einstein famously called "spooky action at a distance."
 It is a uniquely quantum phenomenon where two or more qubits become linked such
 that the state of one qubit cannot be described independently of the state of
 the others.
+
+Start from $|00\rangle$. Apply **H** to qubit 0 to put it in superposition, then
+**CNOT** (control q0, target q1) to entangle the pair — the probabilities collapse
+to 50% $|00\rangle$ and 50% $|11\rangle$. Now **measure** repeatedly: the two
+qubits *always* agree. That perfect correlation is the signature of entanglement.
+
+<BellStateBuilder client:visible />
 
 ## The Shared State
 

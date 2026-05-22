@@ -6,10 +6,18 @@ summary: Compile your first program, and meet the value semantics, references, a
 difficulty: intro
 ---
 
+import CppValueRefPointer from '@/components/viz/CppValueRefPointer.tsx';
+
 C++ is a compiled, statically typed language that gives you control over memory
 and performance while still offering high-level abstractions. It is the standard
 choice for systems programming, game engines, high-frequency trading, and
 competitive programming — anywhere speed and predictability matter.
+
+The single idea that separates C++ from most languages is how it treats *names*
+and *memory*. Step through the model below: watch which boxes change when you copy
+a value, alias it with a reference, or point at it.
+
+<CppValueRefPointer client:visible />
 
 ## Hello, world
 

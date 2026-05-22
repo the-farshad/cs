@@ -7,10 +7,18 @@ difficulty: medium
 ---
 
 import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppTemplateInstantiation from '@/components/viz/CppTemplateInstantiation.tsx';
 
 How do you write a `max(a, b)` function that works for `int`, `float`, and
 `string` without writing three different versions? In C++, you use
 **Templates**. This is the foundation of **Generic Programming**.
+
+A template is not code yet — it is a recipe the compiler follows. Each time you
+call it with a new type, the compiler *stamps out* a concrete version; call it
+again with a type it has already seen and it reuses what it built. Step through
+the call sites below to watch the instantiations appear.
+
+<CppTemplateInstantiation client:visible />
 
 ## What is a Template?
 

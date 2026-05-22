@@ -7,10 +7,19 @@ difficulty: medium
 ---
 
 import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppStackHeap from '@/components/viz/CppStackHeap.tsx';
 
 In C++, you have direct control over memory. While this gives you power, it also
 gives you the responsibility to free every byte you allocate. **RAII** is the
 "secret sauce" that makes modern C++ safe and exception-proof.
+
+Two regions hold your data. The **stack** grows and shrinks automatically as
+functions are called and return; the **heap** is the pool you manage by hand with
+`new` and `delete`. Step through the program below to see frames push and pop, a
+block get allocated and freed, and the two classic bugs — a dangling pointer and
+a leak — appear.
+
+<CppStackHeap client:visible />
 
 ## The Problem: Manual Management
 

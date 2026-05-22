@@ -6,25 +6,37 @@ summary: Systems that hop between states with fixed probabilities — and where 
 difficulty: medium
 ---
 
+import MarkovChainVisualizer from '@/components/viz/MarkovChainVisualizer.tsx';
+
 A **Markov chain** is a system that moves between **states** with fixed
 **transition probabilities**, where the next state depends *only on the current
 one* — not on how you got there. This "memoryless" property (the **Markov
 property**) makes them simple to analyze and surprisingly powerful.
 
+Below is a 3-state weather chain. Press **Multiply by P** to advance the
+distribution one step ($v_{k+1} = v_k\,P$); watch the bars settle onto the
+**stationary distribution** $\pi$ (dashed marks) no matter where you start. The
+diagram highlights a single random **walker** hopping between states — shuffle it
+for a fresh path.
+
+<MarkovChainVisualizer client:visible />
+
 ## Transition matrix
 
-The chain is captured by a **transition matrix** `P`, where `P[i][j]` is the
-probability of going from state `i` to state `j`. Each row sums to 1 (you must go
-*somewhere*). If today's distribution over states is a vector `v`, then tomorrow's
-is `v · P` — one matrix multiply advances time by one step.
+The chain is captured by a **transition matrix** $P$, where $P_{ij}$ is the
+probability of going from state $i$ to state $j$. Each row sums to 1 (you must go
+*somewhere*): $\sum_j P_{ij} = 1$. If today's distribution over states is a row
+vector $v$, then tomorrow's is $v\,P$ — one matrix multiply advances time by one
+step, and $k$ steps is $v\,P^k$.
 
 ## The stationary distribution
 
-Apply `P` over and over and many chains settle into a **stationary distribution**
-π — one that no longer changes: `π · P = π`. It tells you the long-run fraction of
-time spent in each state, regardless of where you started (for well-behaved
-chains). Finding π is an eigenvector problem, or you can just iterate `v · P` until
-it stops moving.
+Apply $P$ over and over and many chains settle into a **stationary distribution**
+$\pi$ — one that no longer changes: $\pi\,P = \pi$. It tells you the long-run
+fraction of time spent in each state, regardless of where you started (for
+well-behaved chains). Finding $\pi$ is a left-eigenvector problem (eigenvalue 1),
+or you can just iterate $v\,P$ until it stops moving — exactly what the
+visualizer does above.
 
 ## Why they matter in CS
 
@@ -45,6 +57,6 @@ spends its time. Adding *choice* and *reward* on top is what makes it RL.
 
 - A Markov chain hops between states with fixed probabilities; the future depends
   only on the present.
-- The transition matrix `P` advances a distribution by one step via `v · P`.
-- Many chains converge to a stationary distribution π with `π · P = π` — the basis
-  of PageRank and MCMC.
+- The transition matrix $P$ advances a distribution by one step via $v\,P$.
+- Many chains converge to a stationary distribution $\pi$ with $\pi\,P = \pi$ — the
+  basis of PageRank and MCMC.

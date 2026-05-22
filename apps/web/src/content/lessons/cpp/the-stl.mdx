@@ -6,10 +6,19 @@ summary: C++'s Standard Template Library — ready-made containers and algorithm
 difficulty: medium
 ---
 
+import CppStlContainers from '@/components/viz/CppStlContainers.tsx';
+
 The **Standard Template Library (STL)** is why C++ is so productive for data
 structures and algorithms: battle-tested **containers** and **algorithms** that
 work on any type via templates, each with documented complexity. Reach for these
 before writing your own.
+
+The right container depends on what each operation costs. The visualizer below
+inserts the same numbers into three containers: a `vector` (a growing array that
+doubles its capacity), an ordered `set` (kept sorted), and an `unordered_set`
+(hashed into buckets). Switch modes and step through to feel the difference.
+
+<CppStlContainers client:visible />
 
 ## Containers
 

@@ -6,11 +6,21 @@ summary: Finding the best solution under constraints — convexity, gradients, a
 difficulty: medium
 ---
 
+import ConvexityVisualizer from '@/components/viz/ConvexityVisualizer.tsx';
+
 **Optimization** is finding the input that minimizes (or maximizes) an objective
 function — the math behind training models, planning routes, and allocating
 resources. "Learning" in machine learning is almost always "minimize a loss."
 
-> The hands-on gradient-descent visualizer lives in the
+Toggle between a **convex** bowl and a **non-convex** wiggle below, then press
+**Descend**. On the bowl every starting point slides into the *same* global
+minimum. On the wiggle the four starts get trapped in *different* local minima —
+the outcome depends entirely on where you began. Drag your own start (in violet)
+and the learning rate to feel it.
+
+<ConvexityVisualizer client:visible />
+
+> The single-curve gradient-descent visualizer lives in the
 > [Gradient Descent](/learn/machine-learning/gradient-descent) lesson — drag the
 > learning rate and watch it converge or diverge.
 
@@ -25,10 +35,12 @@ resources. "Learning" in machine learning is almost always "minimize a loss."
 
 ## Gradients
 
-The **gradient** is the vector of partial derivatives — it points in the direction
-of steepest increase. To minimize, step **against** it. **Stochastic gradient
-descent (SGD)** estimates the gradient from a small random batch each step, trading
-exactness for speed; it's what trains essentially every large model.
+The **gradient** $\nabla f$ is the vector of partial derivatives — it points in the
+direction of steepest increase. To minimize, step **against** it:
+$x_{t+1} = x_t - \eta\,\nabla f(x_t)$, where $\eta$ is the learning rate (the slider
+above). **Stochastic gradient descent (SGD)** estimates $\nabla f$ from a small
+random batch each step, trading exactness for speed; it's what trains essentially
+every large model.
 
 ## Constraints
 

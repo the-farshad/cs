@@ -6,9 +6,20 @@ summary: Beyond the basics — how algorithms like Shor's and Grover's use quant
 difficulty: hard
 ---
 
+import GroverSearchVisualizer from '@/components/viz/GroverSearchVisualizer.tsx';
+
 Why build a quantum computer at all? Because for certain specific problems,
 quantum algorithms can provide a massive speedup that no classical computer
 could ever match. This is known as **Quantum Advantage**.
+
+**Grover's search** below makes the idea concrete. Pick a marked item, then step
+through the iterations. Each round runs an **oracle** (flips the sign of the
+marked item's amplitude) followed by **diffusion** (inversion about the mean),
+which amplifies the marked item while shrinking the rest. Watch its probability
+climb toward $\approx 1$ in only $\approx\sqrt{N}$ steps — a classical search
+of $N$ items would need up to $N$ checks.
+
+<GroverSearchVisualizer client:visible />
 
 ## How Quantum Algorithms Work
 
