@@ -7,7 +7,7 @@
  */
 
 /** Backend base URL. Override here if pointing at a different deployment. */
-export const API_BASE = 'https://api.cs.thefarshad.com';
+export const API_BASE = 'https://csapi.thefarshad.com';
 
 /** localStorage key holding the signed-in user's JWT. */
 const TOKEN_KEY = 'cs-token';
