@@ -6,7 +6,7 @@ summary: Amplitudes, normalization, and a geometric picture — every single-qub
 difficulty: medium
 ---
 
-import BlochSphereVisualizer from '@/components/viz/BlochSphereVisualizer.tsx';
+import BlochSphere3D from '@/components/viz/BlochSphere3D.tsx';
 
 A qubit in superposition is written $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$,
 where the **amplitudes** $\alpha$ and $\beta$ are numbers that encode how much of
@@ -17,12 +17,12 @@ $$|\alpha|^2 + |\beta|^2 = 1$$
 That constraint is what makes the probabilities add up to 1 — measuring yields
 $0$ with probability $|\alpha|^2$ and $1$ with probability $|\beta|^2$.
 
-Drag the **mixing angle** below to sweep the qubit from $|0\rangle$ at the top,
-through an even superposition at the equator, down to $|1\rangle$ at the bottom.
-Watch the amplitudes and probabilities update — and notice their squares always
-sum to exactly 1.
+Drag the sphere below to rotate it in 3D, and use the **θ** and **φ** sliders to move
+the qubit — from $|0\rangle$ at the north pole, through the even-superposition equator,
+to $|1\rangle$ at the south pole. The amplitudes and probabilities update live, and
+their squares always sum to exactly 1.
 
-<BlochSphereVisualizer client:visible />
+<BlochSphere3D client:visible />
 
 ## The Bloch sphere
 
@@ -39,8 +39,9 @@ $$|\psi\rangle = \cos\tfrac{\theta}{2}\,|0\rangle + e^{i\varphi}\sin\tfrac{\thet
 - Moving around the equator changes only the **phase** $\varphi$, which does not
   affect single measurement probabilities but matters for interference.
 
-The visualizer above shows a 2D slice (the $X$–$Z$ plane) where the amplitudes are
-real, so $\theta$ alone tells the whole story.
+The visualizer above is the full sphere: $\theta$ sets how much $|0\rangle$ versus
+$|1\rangle$, while $\varphi$ rotates the state around the equator — that is the
+**phase**, invisible to a single measurement but central to interference.
 
 ## Why the half-angle?
 

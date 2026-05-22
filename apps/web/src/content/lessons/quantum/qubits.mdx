@@ -7,6 +7,7 @@ difficulty: medium
 ---
 
 import QubitVisualizer from '@/components/viz/QubitVisualizer.tsx';
+import BlochSphere3D from '@/components/viz/BlochSphere3D.tsx';
 
 A classical **bit** is either 0 or 1. A **qubit** can be in a **superposition** —
 a weighted combination of both at once, written `α|0⟩ + β|1⟩`. The numbers α and β
@@ -19,6 +20,11 @@ superposition, then **measure** a few times — you'll get 0 or 1 about half the
 time each.
 
 <QubitVisualizer client:visible />
+
+A single qubit is also a **point on the Bloch sphere**. Drag to rotate it in 3D, and
+use the θ and φ sliders to move the state between the `|0⟩` (top) and `|1⟩` (bottom) poles.
+
+<BlochSphere3D client:visible />
 
 ## Reading the state
 
