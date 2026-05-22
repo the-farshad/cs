@@ -1,0 +1,79 @@
+---
+title: Virtualization & Containers
+track: systems
+order: 6
+summary: Virtual machines vs containers — hypervisors, the namespaces and cgroups that isolate processes on one kernel, and layered images.
+difficulty: medium
+---
+
+import VirtualizationStackVisualizer from '@/components/viz/VirtualizationStackVisualizer.tsx';
+
+Running many workloads on one machine raises a question: how do you keep them
+isolated? Two answers dominate. A **virtual machine** gives each workload a whole
+fake computer, complete with its own kernel. A **container** is far lighter — just
+an isolated *process* on the host's existing kernel. Knowing where each draws its
+boundary explains their very different cost and speed.
+
+Toggle between the two stacks below; each builds bottom-up from bare hardware.
+Watch where the VM inserts a full guest OS per app, while the container path puts
+a single shared kernel under every app. The right panel shows how images stack
+read-only layers.
+
+<VirtualizationStackVisualizer client:visible />
+
+## Virtual machines and the hypervisor
+
+A **hypervisor** sits between the hardware and one or more **guest** operating
+systems. It virtualises the CPU, memory, and devices so each guest believes it
+owns the machine. A *type-1* hypervisor runs directly on the hardware; a *type-2*
+runs as a program on a host OS.
+
+The isolation is excellent — guests have separate kernels, so a compromise or
+crash in one rarely touches another. The price is weight: every VM ships and
+boots a complete operating system, which means gigabytes of image and seconds of
+startup, even if the app inside is tiny.
+
+## Containers: one kernel, many sandboxes
+
+A container skips the guest OS entirely. All containers on a host **share the one
+host kernel**; what makes a containerised process *feel* alone is two kernel
+features:
+
+- **Namespaces** give a process its own view of the system — its own process IDs,
+  network interfaces, mount points, hostname, and users. Inside, it might see
+  itself as PID 1 on an otherwise empty machine.
+- **Cgroups** (control groups) *limit and account* for resources: how much CPU,
+  memory, and I/O the process group may consume, so one container cannot starve
+  the rest.
+
+Because there is no second kernel to boot, a container starts in milliseconds and
+adds almost no overhead. The trade-off is weaker isolation: everyone trusts the
+same kernel, so a kernel bug is a shared risk.
+
+## Images and layers
+
+A container starts from an **image** — a packaged, read-only filesystem. Crucially
+an image is built as a stack of **layers**, each recording the changes from the
+one below (a base userland, then a runtime, then your app code). Layers are
+content-addressed and **shared**: if two images build on the same base, that base
+is stored and downloaded once. When a container runs, the engine adds one thin
+**writable layer** on top, so changes at runtime do not alter the shared image.
+
+This layering is why containers are quick to ship and cache: rebuilding after a
+code change only replaces the top layers, and pulling a new image reuses every
+layer you already have.
+
+## Takeaways
+
+- A VM virtualises hardware and runs a full guest OS per workload — strong
+  isolation, heavyweight.
+- A container is an isolated process sharing the host kernel — lightweight, fast
+  to start.
+- Namespaces give a container its own view; cgroups cap its resources.
+- Images are stacks of shared read-only layers plus a per-container writable
+  layer.
+
+## References
+
+- [OSTEP — Operating Systems: Three Easy Pieces](https://pages.cs.wisc.edu/~remzi/OSTEP/)
+- [The Linux Programming Interface, Ch. on namespaces & cgroups (man7.org)](https://man7.org/linux/man-pages/man7/namespaces.7.html)

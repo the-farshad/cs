@@ -1,0 +1,82 @@
+---
+title: Monoliths & Microservices
+track: system-design
+order: 8
+summary: Split a system into services along clean boundaries — weighing independent deploys against distributed complexity.
+difficulty: medium
+---
+
+import ServiceMeshVisualizer from '@/components/viz/ServiceMeshVisualizer.tsx';
+
+As a system and its team grow, one big codebase — a **monolith** — can become hard
+to change: every deploy ships everything, and one team's work blocks another's.
+**Microservices** split it into small, independently deployable services, each
+owning one business capability. That power comes with a price: the network.
+
+Toggle the architectures below. In **microservices**, the gateway **fans out** to
+several services; mark one as failing and watch the difference between a *required*
+dependency (the whole request errors) and an *optional* one (it **degrades
+gracefully**). In the **monolith**, everything runs in one process — one place to
+deploy, one place a bug can take down.
+
+<ServiceMeshVisualizer client:visible />
+
+## Monolith first
+
+A monolith isn't a dirty word. It's **simpler**: one repo, one deploy, in-process
+calls (no network), and easy transactions across modules. For a small team or an
+unproven product, it's usually the right starting point. The pain appears at
+**scale of people and code** — slow builds, risky deploys, and teams stepping on
+each other.
+
+## Service boundaries
+
+The hardest part of microservices is **where to cut**. Good boundaries follow
+**business capabilities** (orders, payments, inventory), not technical layers.
+Each service should:
+
+- Own its **data** — no other service reads its database directly. Sharing a
+  database recouples services and defeats the purpose.
+- Be cohesive inside and **loosely coupled** outside.
+- Map to a team (Conway's law: your architecture mirrors your org chart).
+
+Cut wrong and you get a **distributed monolith** — services that must deploy
+together — which has the costs of both worlds and the benefits of neither.
+
+## Inter-service communication
+
+- **Synchronous** (REST/gRPC): simple request/response, but couples availability —
+  if a downstream is slow, the caller waits. Guard with **timeouts**, **retries**
+  (idempotent only), and **circuit breakers** that stop hammering a failing service.
+- **Asynchronous** (events/queues): the caller emits an event and moves on. More
+  resilient and decoupled, but eventually consistent and harder to trace.
+
+A failure in one service shouldn't cascade. Make non-critical dependencies
+**optional** so the core request still succeeds — exactly the graceful degradation
+shown above.
+
+## The trade-offs
+
+- **Gain:** independent deploys and scaling, fault isolation, team autonomy,
+  freedom to pick the right tech per service.
+- **Cost:** **distributed-systems complexity** — network failures, partial
+  outages, no easy cross-service transactions (you need sagas), plus the oper. burden
+  of observability, service discovery, and many pipelines.
+
+Don't adopt microservices for resume value. Adopt them when team and scale make a
+monolith the bottleneck.
+
+## Takeaways
+
+- Start with a **monolith**; split into services when people and code — not just
+  traffic — become the bottleneck.
+- Draw boundaries around **business capabilities** and let each service **own its
+  data**; avoid the distributed monolith.
+- Microservices trade simplicity for independent deploys and isolation — budget for
+  network failure, timeouts, retries, and graceful degradation.
+
+## References
+
+- [Martin Fowler: Microservices](https://martinfowler.com/articles/microservices.html)
+- [Martin Fowler: MonolithFirst](https://martinfowler.com/bliki/MonolithFirst.html)
+- [Microsoft: Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)

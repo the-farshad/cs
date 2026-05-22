@@ -1,0 +1,76 @@
+---
+title: Sequences & Series
+track: math
+order: 12
+summary: Arithmetic and geometric sequences, partial sums, and how a series converges to a limit or diverges to infinity.
+difficulty: medium
+---
+
+import PartialSumsExplorer from '@/components/viz/PartialSumsExplorer.tsx';
+
+A **sequence** is an ordered list of numbers; a **series** is what you get when you
+add them up. Deciding whether an infinite sum settles to a finite value or grows
+without bound is a core question — and it mirrors how recursive costs accumulate and
+how iterative methods either converge to an answer or blow up.
+
+Pick a series below and press *Accumulate*. Each step adds one more term to the
+running **partial sum** (the gold dot). Watch convergent series home in on the dashed
+limit while divergent ones march off the chart.
+
+<PartialSumsExplorer client:visible />
+
+## Arithmetic sequences
+
+An **arithmetic sequence** adds a fixed **common difference** $d$ each step:
+$a,\ a+d,\ a+2d,\ \dots$, so the $n$-th term is $a_n = a + (n-1)d$. Its partial sum
+has a tidy closed form:
+
+$$S_n = \frac{n}{2}\,(a_1 + a_n).$$
+
+Pairing the first and last terms — the trick Gauss famously used — is why
+$1 + 2 + \cdots + n = \frac{n(n+1)}{2}$.
+
+## Geometric sequences
+
+A **geometric sequence** *multiplies* by a fixed **ratio** $r$ each step:
+$a,\ ar,\ ar^2,\ \dots$, with $a_n = a\,r^{n-1}$. The partial sum is
+
+$$S_n = a\,\frac{1 - r^n}{1 - r}.$$
+
+When $|r| < 1$, the term $r^n$ shrinks to zero, so the *infinite* sum converges:
+
+$$\sum_{n=0}^{\infty} a\,r^n = \frac{a}{1 - r} \quad (|r| < 1).$$
+
+That is exactly why $\frac{1}{2} + \frac{1}{4} + \frac{1}{8} + \cdots = 1$ in the
+visualizer — each term covers half the remaining gap.
+
+## Convergence and divergence
+
+A series **converges** if its partial sums approach a finite **limit**, and
+**diverges** otherwise. A geometric series converges precisely when $|r| < 1$. A
+necessary first check: if the terms do not shrink to zero, the series cannot
+converge. But shrinking terms are *not* enough — the **harmonic series**
+$\sum 1/n$ diverges even though its terms vanish, because they shrink too slowly.
+Sign matters too: the alternating harmonic series $\sum (-1)^{n+1}/n$ converges to
+$\ln 2$.
+
+## Why it matters for CS
+
+Geometric series quantify the cost of doubling strategies: a dynamic array that grows
+by doubling does $1 + 2 + 4 + \cdots + n \approx 2n$ total copies, so each insertion
+is $O(1)$ amortized. Convergence underlies iterative numerical methods — gradient
+descent and Newton's method are useful only when their step sequence converges.
+Geometric decay also models exponential backoff and the resolution of recurrences.
+
+## References
+
+- [Khan Academy: Sequences, series and induction](https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:series)
+- [OpenStax: Calculus Volume 2 (sequences and series)](https://openstax.org/details/books/calculus-volume-2)
+
+## Takeaways
+
+- Arithmetic sequences add a constant $d$; geometric sequences multiply by a ratio
+  $r$, each with a closed-form partial sum.
+- A geometric series converges to $\frac{a}{1-r}$ exactly when $|r| < 1$.
+- Vanishing terms are necessary but not sufficient — the harmonic series diverges
+  even as its terms shrink to zero.

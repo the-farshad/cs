@@ -1,0 +1,80 @@
+---
+title: Concurrency
+track: systems
+order: 5
+summary: Threads vs processes, race conditions, and the locks, semaphores, and deadlock rules that keep shared data correct.
+difficulty: medium
+---
+
+import RaceConditionVisualizer from '@/components/viz/RaceConditionVisualizer.tsx';
+
+**Concurrency** is having multiple streams of execution make progress on the same
+program. It is what lets a server handle thousands of clients and a laptop stay
+responsive while compiling. The hard part is not starting work in parallel — it
+is letting those workers touch the *same data* without corrupting it.
+
+Below, two threads each run `counter++` three times. Without a lock they
+interleave and an update gets lost; switch on the mutex and one thread waits
+while the other finishes its critical section. The final count tells the story.
+
+<RaceConditionVisualizer client:visible />
+
+## Threads vs processes
+
+- A **process** has its own private memory. Two processes are isolated: one
+  crashing or scribbling on memory cannot corrupt the other. Communication
+  between them goes through the OS (pipes, sockets, shared-memory regions).
+- A **thread** runs *inside* a process and **shares** that process's memory with
+  its sibling threads. That makes communication cheap — just read a shared
+  variable — but it is exactly why threads are dangerous.
+
+## Race conditions
+
+A **race condition** is when the result depends on the *timing* of operations.
+The visualizer shows the classic one: `counter++` looks atomic but is really
+three steps — read the value, add one, write it back. If two threads read the
+same value before either writes, both compute the same result and one increment
+vanishes. The bug appears only on unlucky schedules, which is what makes races so
+maddening to reproduce.
+
+## Mutual exclusion: locks and semaphores
+
+The fix is to make the read-modify-write **atomic** with respect to other
+threads. A **mutex** (mutual-exclusion lock) lets exactly one thread into a
+**critical section** at a time; others that try to enter **block** until it is
+released. A **semaphore** generalises this to a counter of $n$ permits — a thread
+takes a permit to proceed and returns it when done, so up to $n$ threads run at
+once. A mutex is essentially a semaphore with $n = 1$.
+
+The cost is contention: while one thread holds the lock, the rest wait, so a
+coarse lock can serialise code you hoped would run in parallel. Hold locks for as
+short a span as possible.
+
+## Deadlock and the four conditions
+
+Locks introduce a new failure: **deadlock**, where threads wait on each other
+forever. The classic illustration is the **dining philosophers** — each grabs the
+fork on their left, then waits for the one on their right, and if all grab left
+at once, none can ever eat. A deadlock needs all four of these to hold at once:
+
+1. **Mutual exclusion** — a resource is held by one thread at a time.
+2. **Hold and wait** — a thread holds one resource while waiting for another.
+3. **No preemption** — resources are released only voluntarily.
+4. **Circular wait** — a cycle of threads each waiting on the next.
+
+Break any one and deadlock is impossible. The most practical fix is to defeat
+circular wait: always acquire locks in a single **global order**. The diagram at
+the bottom of the visualizer shows the wait-for cycle that order prevents.
+
+## Takeaways
+
+- Threads share memory (fast but unsafe); processes are isolated (safe but
+  costlier to coordinate).
+- A race condition makes correctness depend on timing; `counter++` is not atomic.
+- Mutexes give one-at-a-time access; semaphores allow $n$ at once.
+- Deadlock needs all four conditions — break circular wait by ordering locks.
+
+## References
+
+- [OSTEP — Operating Systems: Three Easy Pieces (Concurrency)](https://pages.cs.wisc.edu/~remzi/OSTEP/)
+- [The Little Book of Semaphores (Allen Downey)](https://greenteapress.com/wp/semaphores/)

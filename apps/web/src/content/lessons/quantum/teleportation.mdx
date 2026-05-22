@@ -1,0 +1,75 @@
+---
+title: Quantum Teleportation
+track: quantum
+order: 8
+summary: Move an unknown quantum state to a distant qubit using a shared Bell pair and two classical bits.
+difficulty: hard
+---
+
+import TeleportationVisualizer from '@/components/viz/TeleportationVisualizer.tsx';
+
+**Quantum teleportation** moves the state of one qubit to another, possibly far
+away, without ever sending the qubit itself. It is not science-fiction
+matter-transport — what travels is *information*, carried partly by entanglement
+and partly by two ordinary classical bits.
+
+Alice holds an unknown state $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$.
+She cannot just copy it (the **no-cloning theorem** forbids that) and she cannot
+measure it without destroying it. Step through the protocol below to watch
+$|\psi\rangle$ leave Alice and reappear, intact, on Bob's qubit.
+
+<TeleportationVisualizer client:visible />
+
+## The protocol
+
+The four moving parts are entanglement, a joint measurement, a classical message,
+and a correction.
+
+1. **Share a Bell pair.** Ahead of time, Alice and Bob each take one half of an
+   entangled pair $\frac{1}{\sqrt2}(|00\rangle + |11\rangle)$. This is the
+   resource teleportation consumes.
+2. **Bell measurement.** Alice applies a CNOT (her unknown qubit → her Bell half)
+   followed by a Hadamard, then measures both of her qubits. The outcome is two
+   random classical bits $m_0 m_1$.
+3. **Send two classical bits.** Alice transmits $m_0$ and $m_1$ to Bob over a
+   normal (classical) channel.
+4. **Correct.** Bob applies a gate determined by the bits: a $Z$ if the first bit
+   is $1$, then an $X$ if the second is $1$. His qubit becomes exactly
+   $|\psi\rangle$.
+
+After Alice's measurement, Bob's qubit is in one of four states — the right
+$|\psi\rangle$ up to a known $X$ and/or $Z$. The classical bits tell him which of
+the four happened, so his correction always lands on the original state.
+
+## Why it does not break physics
+
+Two worries come up immediately, and both resolve cleanly:
+
+- **No faster-than-light signaling.** Before Bob receives the classical bits, his
+  qubit looks completely random — he learns nothing. The protocol is bottlenecked
+  by the classical message, which obeys the speed of light.
+- **No cloning.** Alice's measurement *destroys* her copy of $|\psi\rangle$. At
+  the end there is exactly one copy, now on Bob's side — never two at once.
+
+## Why it matters
+
+Teleportation is a foundational primitive, not a party trick. It is the way states
+are shuttled between modules in proposed quantum networks, the backbone of
+**entanglement swapping** in quantum repeaters, and a building block for
+fault-tolerant gates. It crisply demonstrates the division of labor in quantum
+information: entanglement plus classical communication can accomplish what neither
+can alone.
+
+## Takeaways
+
+- Teleportation transfers an unknown state using a shared Bell pair and 2
+  classical bits — the qubit itself never travels.
+- Alice's Bell measurement plus Bob's $X$/$Z$ correction reconstruct
+  $|\psi\rangle$ exactly.
+- It respects no-cloning (Alice's copy is destroyed) and cannot signal faster
+  than light (the classical bits are required).
+
+## References
+
+- [Nielsen & Chuang, *Quantum Computation and Quantum Information* — §1.3.7 (quantum teleportation)](https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE)
+- [Qiskit Textbook — Quantum teleportation](https://qiskit.org/textbook/ch-algorithms/teleportation.html)

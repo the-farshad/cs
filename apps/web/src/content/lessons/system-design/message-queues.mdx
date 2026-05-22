@@ -1,0 +1,82 @@
+---
+title: Message Queues & Async Processing
+track: system-design
+order: 6
+summary: Decouple producers from consumers with queues and pub/sub, smooth bursts with buffering, and handle backpressure.
+difficulty: medium
+---
+
+import MessageQueueVisualizer from '@/components/viz/MessageQueueVisualizer.tsx';
+
+Not every request needs an answer *right now*. Sending a confirmation email,
+resizing an upload, or updating a search index can happen **after** you reply to
+the user. A **message queue** lets you hand that work off and move on — the
+foundation of **asynchronous processing**.
+
+Below, a fast **producer** drops messages into a bounded queue while a slower
+**consumer** drains them. Watch the buffer grow when production outpaces
+consumption — and overflow (dropped messages) when it stays full. Drag the
+consumer faster than the producer and the queue empties out.
+
+<MessageQueueVisualizer client:visible />
+
+## Why decouple?
+
+When a producer calls a consumer **synchronously**, the two are tightly bound: if
+the consumer is slow or down, the producer blocks or fails. A queue sits between
+them so each side runs at its **own pace** and can be scaled, deployed, or
+restarted independently. The producer only needs the queue to be up, not the
+consumer.
+
+This also smooths **spiky** traffic. A burst of 10,000 events doesn't have to be
+processed in the same second — it lands in the queue and is worked off steadily.
+
+## Queues vs pub/sub
+
+Two delivery models cover most needs:
+
+- **Queue (point-to-point):** each message is delivered to **exactly one**
+  consumer. Add more consumers (a "consumer group") and they share the load —
+  this is how you scale a backlog horizontally. Good for **work/task** dispatch.
+- **Pub/sub (publish–subscribe):** each message is **broadcast** to every
+  subscriber. One "order placed" event can fan out to billing, shipping, and
+  analytics independently. Good for **event** notification.
+
+A single broker often supports both: a topic with multiple consumer groups gives
+you pub/sub *between* groups and a work queue *within* each group.
+
+## Backpressure and buffering
+
+A queue is a **buffer**, and buffers are finite. If producers persistently outrun
+consumers, the queue grows without bound. Your options:
+
+- **Scale consumers** so throughput catches up (the usual fix).
+- **Bound the queue** and apply **backpressure** — slow or reject producers when
+  it's full, so memory stays safe (you saw drops above when the buffer overflowed).
+- **Shed load** by dropping low-priority messages or routing failures to a
+  **dead-letter queue** for later inspection.
+
+The depth of a queue is a key health signal: a steadily *growing* queue means your
+consumers can't keep up.
+
+## Delivery guarantees
+
+Networks fail, so brokers offer trade-offs: **at-most-once** (may lose messages),
+**at-least-once** (may deliver duplicates — make consumers **idempotent**), and
+**exactly-once** (hardest, often emulated with dedup keys). Most systems pick
+at-least-once plus idempotent handlers.
+
+## Takeaways
+
+- Queues enable async work and **decouple** producers from consumers so each
+  scales and fails independently.
+- **Queues** deliver each message once (work sharing); **pub/sub** broadcasts to
+  all subscribers (event fan-out).
+- Buffers are finite — handle **backpressure** by scaling consumers, bounding the
+  queue, or shedding load; a growing queue means consumers are behind.
+
+## References
+
+- [Enterprise Integration Patterns: Messaging](https://www.enterpriseintegrationpatterns.com/patterns/messaging/Messaging.html)
+- [AWS: Point-to-point vs publish/subscribe messaging](https://aws.amazon.com/what-is/message-queue/)
+- [Backpressure explained](https://medium.com/@jayphelps/backpressure-explained-the-flow-of-data-through-software-2350b3e77ce7)

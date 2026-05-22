@@ -1,0 +1,81 @@
+---
+title: Caching Strategies
+track: system-design
+order: 9
+summary: Cache-aside, read-through, write-through, write-back — plus TTL, eviction (LRU/LFU), and the hard problem of invalidation.
+difficulty: medium
+---
+
+import CacheStrategyVisualizer from '@/components/viz/CacheStrategyVisualizer.tsx';
+
+The Scaling Fundamentals lesson introduced caching as "the fastest work is work
+you don't repeat." But *how* the cache, app, and database interact has several
+distinct patterns — each with different consistency and failure trade-offs.
+
+Step through each strategy below. The toggle switches between the **read** path
+(with cache hit vs miss) and the **write** path, lighting up exactly which nodes
+get touched and when the database is involved.
+
+<CacheStrategyVisualizer client:visible />
+
+## Read strategies
+
+- **Cache-aside (lazy loading):** the **app** owns the logic. Check the cache; on a
+  miss, load from the DB and **populate the cache yourself**. Simple and resilient
+  (cache down ≠ app down), only ever caches what's actually requested. The downside:
+  a miss costs three steps, and the first read of any key is always a miss.
+- **Read-through:** the **cache** owns reads. The app always asks the cache; on a
+  miss the *cache* loads from the DB and stores it. Keeps app code clean and
+  centralizes caching, but ties you to a cache that supports it.
+
+## Write strategies
+
+- **Write-through:** every write goes to the cache **and** the DB synchronously.
+  The cache is always consistent with the DB, so reads are never stale — but writes
+  pay both latencies, and you cache data that may never be read.
+- **Write-back (write-behind):** write to the **cache only** and ack immediately;
+  flush dirty entries to the DB **later**, asynchronously (often batched). Very fast
+  writes and great for write-heavy or bursty loads — but a crash before the flush
+  **loses data**, and it's more complex.
+
+A common pairing is **cache-aside + write-through** (or its cousin,
+*write-around*, where writes skip the cache and go straight to the DB so you don't
+pollute it with rarely-read data).
+
+## Expiry and eviction
+
+Memory is finite, so entries must leave:
+
+- **TTL (time to live):** entries expire after a set time — a simple cap on
+  staleness. Short TTLs are fresher but raise the miss rate.
+- **Eviction policy** decides what to drop when the cache is full:
+  - **LRU** (least recently used) — evict what hasn't been touched longest; good
+    default, matches temporal locality.
+  - **LFU** (least frequently used) — evict the least-accessed; better when
+    popularity is stable, but slow to forget old hot keys.
+
+## Invalidation — the hard part
+
+> There are only two hard things in computer science: cache invalidation and
+> naming things.
+
+Stale data is the central risk. TTLs bound staleness automatically; for
+correctness you also **invalidate on write** — delete or update the key when the
+underlying data changes. Beware the **thundering herd**: when a hot key expires,
+many requests miss at once and stampede the DB. Mitigate with request coalescing
+(single-flight), staggered TTLs, or refreshing slightly ahead of expiry.
+
+## Takeaways
+
+- **Read:** cache-aside (app populates) is the resilient default; read-through lets
+  the cache own loading.
+- **Write:** write-through keeps the cache consistent but slower; write-back is fast
+  but risks data loss on crash.
+- Bound staleness with **TTL**, free space with **LRU/LFU**, and ensure correctness
+  by **invalidating on write** — guarding hot keys against stampedes.
+
+## References
+
+- [AWS: Caching strategies (lazy loading vs write-through)](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Strategies.html)
+- [Cache replacement policies (LRU, LFU)](https://en.wikipedia.org/wiki/Cache_replacement_policies)
+- [Cache invalidation](https://en.wikipedia.org/wiki/Cache_invalidation)

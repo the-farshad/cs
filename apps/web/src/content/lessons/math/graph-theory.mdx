@@ -1,0 +1,87 @@
+---
+title: Graph Theory
+track: math
+order: 13
+summary: Vertices and edges, degree, paths and cycles, trees, coloring, and the difference between Euler and Hamiltonian paths.
+difficulty: medium
+---
+
+import GraphPropertiesExplorer from '@/components/viz/GraphPropertiesExplorer.tsx';
+
+A **graph** is one of the most versatile objects in mathematics: a set of
+**vertices** joined by **edges**. Road maps, social networks, web links, dependency
+schedules, and molecules are all graphs. Graph theory studies their structure
+abstractly, independent of what the dots and lines happen to represent.
+
+Switch between the modes below to explore the same small graph three ways: click a
+vertex to read its **degree**, remove a vertex to test **connectivity**, or view a
+proper **3-coloring** where no edge joins two same-colored vertices.
+
+<GraphPropertiesExplorer client:visible />
+
+## Vertices, edges, and degree
+
+A graph $G = (V, E)$ is a set of vertices $V$ and a set of edges $E$, where each edge
+joins a pair of vertices. The **degree** of a vertex is how many edges touch it. A
+foundational fact, the **handshake lemma**, is that the degrees sum to twice the
+number of edges:
+
+$$\sum_{v \in V} \deg(v) = 2\,|E|.$$
+
+Since the right side is even, the number of odd-degree vertices must always be even.
+
+## Paths, cycles, and connectivity
+
+A **path** is a walk along edges that never repeats a vertex; a **cycle** is a path
+that returns to its start. A graph is **connected** when some path links every pair of
+vertices. A vertex whose removal disconnects the graph is a **cut vertex** — exactly
+what the connectivity mode lets you hunt for.
+
+## Trees
+
+A **tree** is a connected graph with no cycles. Trees are minimal in a precise sense:
+a tree on $n$ vertices has exactly $n - 1$ edges, and there is a unique path between
+any two vertices. Add any edge and you create a cycle; remove any edge and it
+disconnects. File systems, parse trees, and the spanning trees that networks use to
+avoid loops are all instances.
+
+## Coloring and bipartite graphs
+
+A **proper coloring** assigns colors so that adjacent vertices differ. The fewest
+colors needed is the **chromatic number**. A graph is **bipartite** — its vertices
+split into two groups with edges only between groups — exactly when it can be
+2-colored, which happens precisely when it has no odd-length cycle. Coloring models
+scheduling and register allocation, where "colors" are time slots or CPU registers
+that conflicting tasks must not share.
+
+## Euler vs Hamiltonian paths
+
+Two famous traversals look similar but differ sharply in difficulty:
+
+- An **Euler path** uses every *edge* exactly once. There is a clean rule: one exists
+  exactly when the graph is connected and has zero or two odd-degree vertices.
+- A **Hamiltonian path** visits every *vertex* exactly once. Despite the parallel
+  phrasing, no efficient test is known — deciding it is **NP-complete**.
+
+That gap, one problem easy and its sibling intractable, is a recurring theme in
+computer science.
+
+## Why it matters for CS
+
+Graphs model networks, dependencies, and state spaces, and algorithms such as BFS,
+DFS, shortest paths, and minimum spanning trees run directly on them. The
+abstractions here — degree, connectivity, trees, coloring — are the vocabulary every
+graph algorithm builds on.
+
+## References
+
+- [Khan Academy: Describing graphs (algorithms)](https://www.khanacademy.org/computing/computer-science/algorithms/graph-representation/a/describing-graphs)
+- [OpenStax: Contemporary Mathematics (graph theory)](https://openstax.org/details/books/contemporary-mathematics)
+
+## Takeaways
+
+- A graph is vertices plus edges; the degrees always sum to $2|E|$ (the handshake
+  lemma).
+- A tree is a connected acyclic graph with exactly $n - 1$ edges and unique paths.
+- A graph is bipartite iff it is 2-colorable iff it has no odd cycle; Euler paths are
+  easy to detect while Hamiltonian paths are NP-complete.

@@ -1,0 +1,88 @@
+---
+title: API Design
+track: system-design
+order: 7
+summary: Design clean HTTP/REST APIs — resources, verbs, status codes, pagination, idempotency, versioning — and when to reach for gRPC or GraphQL.
+difficulty: medium
+---
+
+import ApiExplorerVisualizer from '@/components/viz/ApiExplorerVisualizer.tsx';
+
+An API is a **contract**. Clients you don't control depend on it, so it should be
+predictable, hard to misuse, and stable over time. **REST over HTTP** is the
+default style: model your domain as **resources** and act on them with standard
+**verbs**.
+
+Explore the contract below. Pick a method and resource and send it — note the
+**status code** and body. Send `POST /users` twice and you create two records;
+send `PUT /users/42` twice and the state is identical the second time. That gap is
+**idempotency**.
+
+<ApiExplorerVisualizer client:visible />
+
+## Resources and verbs
+
+Name resources as **nouns**, usually plural, and let the HTTP **method** carry the
+action — don't put verbs in the path (`GET /users/42`, not `/getUser?id=42`).
+
+| Method | Use | Idempotent? |
+| --- | --- | --- |
+| `GET` | read a resource/collection | yes (also *safe*) |
+| `POST` | create a new resource | no |
+| `PUT` | replace a resource at a known URL | yes |
+| `PATCH` | partially update | not necessarily |
+| `DELETE` | remove a resource | yes |
+
+**Idempotent** means repeating the request leaves the server in the same state.
+This matters because clients **retry** on timeouts: a retried `PUT` or `DELETE` is
+safe, but a retried `POST` can double-charge. Give `POST` an **idempotency key**
+(a client-generated id the server dedupes on) when retries must be safe.
+
+## Status codes
+
+Use them precisely — they're part of the contract:
+
+- `2xx` success: `200 OK`, `201 Created`, `204 No Content`.
+- `4xx` client error: `400` (bad input), `401`/`403` (authn/authz), `404` (not
+  found), `409` (conflict), `429` (rate limited).
+- `5xx` server error: `500`, `503` (unavailable). Never return `200` with an error
+  body.
+
+## Pagination, filtering, versioning
+
+- **Pagination:** never return an unbounded list. Use **cursor-based** paging
+  (opaque `?cursor=…&limit=…`) over offset paging for large, changing datasets —
+  it's stable and `O(1)` per page.
+- **Filtering/sorting:** query params (`?status=active&sort=-created`).
+- **Versioning:** APIs evolve; avoid breaking clients. Version via the path
+  (`/v1/…`) or a header. Add fields freely (backward-compatible); removing or
+  renaming them is a breaking change that needs a new version.
+
+## REST vs gRPC vs GraphQL
+
+REST isn't the only option:
+
+- **gRPC** uses a binary protocol over HTTP/2 with typed schemas (Protocol
+  Buffers). Fast and strongly-typed — great for **internal** service-to-service
+  calls; less friendly to browsers.
+- **GraphQL** gives clients **one endpoint** and lets them request exactly the
+  fields they need, avoiding over- and under-fetching. Great for varied frontends;
+  caching and rate-limiting are harder than with REST.
+
+Rule of thumb: REST for public/web APIs, gRPC for internal high-throughput RPC,
+GraphQL when many clients need flexible, tailored reads.
+
+## Takeaways
+
+- Model **resources as nouns**; let HTTP **verbs** and **status codes** carry
+  meaning precisely.
+- **Idempotent** methods make client **retries** safe — protect `POST` with an
+  idempotency key.
+- Always paginate; version to avoid breaking clients; reach for gRPC (internal RPC)
+  or GraphQL (flexible reads) when REST doesn't fit.
+
+## References
+
+- [MDN: HTTP request methods](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods)
+- [MDN: HTTP response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
+- [Microsoft REST API guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md)

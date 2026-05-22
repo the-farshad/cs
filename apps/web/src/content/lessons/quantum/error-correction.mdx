@@ -1,0 +1,87 @@
+---
+title: Quantum Error Correction
+track: quantum
+order: 9
+summary: Decoherence threatens every qubit — the 3-qubit bit-flip code shows how redundancy and syndrome measurement fight back.
+difficulty: hard
+---
+
+import BitFlipCodeVisualizer from '@/components/viz/BitFlipCodeVisualizer.tsx';
+
+Real qubits are fragile. Stray fields, heat, and unwanted interactions cause
+**decoherence** and **noise**, randomly disturbing the delicate amplitudes. Worse,
+the obvious classical fix — "just copy the bit three times and take a majority
+vote" — is blocked by the **no-cloning theorem** and by the fact that *measuring*
+a qubit destroys its superposition. Quantum error correction has to detect and
+repair errors **without ever reading $\alpha$ or $\beta$**.
+
+The **3-qubit bit-flip code** is the simplest example. Step through it below:
+encode one logical qubit into three, let noise flip one of them, measure the
+**syndrome** to locate the flip, and apply a correction.
+
+<BitFlipCodeVisualizer client:visible />
+
+## Encoding
+
+We spread one logical qubit across three physical qubits using two CNOTs:
+
+$$\alpha|0\rangle + \beta|1\rangle \;\longrightarrow\; \alpha|000\rangle + \beta|111\rangle$$
+
+This is **not** cloning — there is still only one quantum state, now entangled
+across three qubits. The amplitudes $\alpha, \beta$ are never duplicated; only the
+*classical pattern* (all-zeros vs. all-ones) is made redundant.
+
+## Detecting the error
+
+Suppose noise flips qubit $1$, turning the state into
+$\alpha|010\rangle + \beta|101\rangle$. We must find the culprit without learning
+$\alpha$ or $\beta$. The trick is to measure **parities** rather than the qubits
+themselves:
+
+- $s_{01}$ = parity of qubits $0$ and $1$ (do they match?)
+- $s_{12}$ = parity of qubits $1$ and $2$
+
+These two bits form the **syndrome**. They reveal *whether* neighbors disagree,
+but reveal nothing about the encoded amplitudes — so the superposition survives
+the measurement. The mapping is unambiguous:
+
+| $s_{01}$ | $s_{12}$ | flipped qubit |
+| --- | --- | --- |
+| 0 | 0 | none |
+| 1 | 0 | qubit 0 |
+| 1 | 1 | qubit 1 |
+| 0 | 1 | qubit 2 |
+
+## Correcting it
+
+Once the syndrome names the offending qubit, applying an $X$ gate flips it back,
+restoring $\alpha|000\rangle + \beta|111\rangle$ and therefore the logical state.
+The correction is itself a quantum operation, so the protected superposition is
+recovered exactly — no information was lost. Try the **none** option in the
+visualizer to confirm that a clean round produces syndrome $00$ and leaves the
+state untouched.
+
+## Limits and the bigger picture
+
+This code only fixes a **single bit flip**; two simultaneous flips would fool the
+majority and produce a logical error. It also does nothing about **phase flips**
+(the $Z$-type error). The famous **9-qubit Shor code** stacks a bit-flip code and
+a phase-flip code to correct *any* single-qubit error, and modern **surface
+codes** extend the idea to large 2D lattices. The strategy is always the same:
+redundancy plus syndrome measurements that diagnose errors without disturbing the
+data — the foundation of fault-tolerant quantum computing.
+
+## Takeaways
+
+- Qubits suffer decoherence; no-cloning and measurement collapse rule out naive
+  copying, so QEC must repair errors blindly.
+- The 3-qubit code encodes $\alpha|0\rangle + \beta|1\rangle$ as
+  $\alpha|000\rangle + \beta|111\rangle$ and corrects one bit flip.
+- **Syndrome** parity measurements locate the error without revealing
+  $\alpha,\beta$; an $X$ gate then fixes it. Bigger codes handle phase and
+  multi-qubit errors.
+
+## References
+
+- [Nielsen & Chuang, *Quantum Computation and Quantum Information* — §10.1–10.2 (quantum error-correction)](https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE)
+- [Qiskit Textbook — Introduction to quantum error correction](https://qiskit.org/textbook/ch-quantum-hardware/error-correction-repetition-code.html)

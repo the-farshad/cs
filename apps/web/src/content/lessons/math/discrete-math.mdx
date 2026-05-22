@@ -1,0 +1,81 @@
+---
+title: Discrete Mathematics
+track: math
+order: 11
+summary: Proof by induction, the pigeonhole principle, and solving recurrences — the reasoning toolkit of computer science.
+difficulty: medium
+---
+
+import InductionDominoes from '@/components/viz/InductionDominoes.tsx';
+
+**Discrete mathematics** studies structures that come in distinct, separate
+pieces — integers, statements, steps of an algorithm — rather than continuous
+quantities. It supplies the proof techniques that let us claim an algorithm is
+*correct* for every input, not just the cases we tested.
+
+The visualizer below shows **induction** as a chain of dominoes. The base case pushes
+the first domino; the inductive step guarantees each domino topples the next. Turn
+either ingredient off and watch the proof break.
+
+<InductionDominoes client:visible />
+
+## Proof by induction
+
+To prove a statement $P(n)$ holds for every natural number $n$, induction needs two
+parts:
+
+1. **Base case:** show $P(1)$ is true.
+2. **Inductive step:** assume $P(k)$ (the *inductive hypothesis*) and prove
+   $P(k+1)$.
+
+Together they cover every $n$ like falling dominoes. For example, to prove
+$1 + 2 + \cdots + n = \frac{n(n+1)}{2}$: the base case $P(1)$ gives $1 = 1$, and
+assuming $P(k)$,
+
+$$1 + \cdots + k + (k+1) = \frac{k(k+1)}{2} + (k+1) = \frac{(k+1)(k+2)}{2},$$
+
+which is exactly $P(k+1)$. Induction is how we prove loops and recursive functions
+work for inputs of any size.
+
+## The pigeonhole principle
+
+If you put $n+1$ pigeons into $n$ holes, some hole holds at least two pigeons. Stated
+plainly: if $n$ items go into $m$ boxes and $n > m$, at least one box gets more than
+one item. It sounds trivial but proves surprising facts — for instance, in any group
+of 13 people, two share a birth month, and any hash table with more keys than buckets
+*must* have a collision. More generally, some box holds at least
+$\lceil n/m \rceil$ items.
+
+## Solving recurrences
+
+A **recurrence** defines a value in terms of smaller cases — exactly how recursive
+algorithms describe their own cost. Merge sort, for example, satisfies
+
+$$T(n) = 2\,T(n/2) + n.$$
+
+**Unrolling** it builds a tree: each level does $n$ total work across its subproblems,
+and there are $\log_2 n$ levels, giving $T(n) = O(n \log n)$. Other patterns:
+$T(n) = T(n-1) + 1$ unrolls to $O(n)$, while $T(n) = 2\,T(n-1) + 1$ explodes to
+$O(2^n)$. Recognizing a recurrence's shape is how you read an algorithm's running
+time straight off its structure.
+
+## Why it matters for CS
+
+Induction proves that recursive algorithms and loop invariants are correct for all
+inputs. The pigeonhole principle bounds what is possible — collisions, duplicates,
+worst cases. Solving recurrences turns a recursive definition into a concrete
+complexity like $O(n \log n)$. These three tools are how computer scientists reason
+rigorously instead of merely testing.
+
+## References
+
+- [Khan Academy: Mathematical induction](https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:series/x9e81a4f98389efdf:proof-by-mathematical-induction/v/proof-by-induction)
+- [OpenStax: Calculus Volume 2 (sequences and induction)](https://openstax.org/details/books/calculus-volume-2)
+
+## Takeaways
+
+- Induction proves $P(n)$ for all $n$ via a base case plus an inductive step — the
+  domino chain.
+- The pigeonhole principle forces a collision whenever items outnumber boxes.
+- Unrolling a recurrence into a tree reveals an algorithm's running time, like
+  $O(n \log n)$ for $T(n) = 2T(n/2) + n$.

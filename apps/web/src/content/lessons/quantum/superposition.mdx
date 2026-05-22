@@ -1,0 +1,74 @@
+---
+title: Superposition & the Bloch Sphere
+track: quantum
+order: 6
+summary: Amplitudes, normalization, and a geometric picture — every single-qubit state is a point on the Bloch sphere.
+difficulty: medium
+---
+
+import BlochSphereVisualizer from '@/components/viz/BlochSphereVisualizer.tsx';
+
+A qubit in superposition is written $|\psi\rangle = \alpha|0\rangle + \beta|1\rangle$,
+where the **amplitudes** $\alpha$ and $\beta$ are numbers that encode how much of
+each basis state is present. The one rule they must obey is **normalization**:
+
+$$|\alpha|^2 + |\beta|^2 = 1$$
+
+That constraint is what makes the probabilities add up to 1 — measuring yields
+$0$ with probability $|\alpha|^2$ and $1$ with probability $|\beta|^2$.
+
+Drag the **mixing angle** below to sweep the qubit from $|0\rangle$ at the top,
+through an even superposition at the equator, down to $|1\rangle$ at the bottom.
+Watch the amplitudes and probabilities update — and notice their squares always
+sum to exactly 1.
+
+<BlochSphereVisualizer client:visible />
+
+## The Bloch sphere
+
+Because the amplitudes are constrained, a single qubit only has two real degrees
+of freedom, and they map perfectly onto a point on the surface of a sphere — the
+**Bloch sphere**. Using a polar angle $\theta$ and an azimuthal phase $\varphi$:
+
+$$|\psi\rangle = \cos\tfrac{\theta}{2}\,|0\rangle + e^{i\varphi}\sin\tfrac{\theta}{2}\,|1\rangle$$
+
+- The **north pole** ($\theta = 0$) is $|0\rangle$; the **south pole**
+  ($\theta = \pi$) is $|1\rangle$.
+- The **equator** ($\theta = \pi/2$) holds the even superpositions, where
+  $|\alpha|^2 = |\beta|^2 = \tfrac12$.
+- Moving around the equator changes only the **phase** $\varphi$, which does not
+  affect single measurement probabilities but matters for interference.
+
+The visualizer above shows a 2D slice (the $X$–$Z$ plane) where the amplitudes are
+real, so $\theta$ alone tells the whole story.
+
+## Why the half-angle?
+
+Notice the $\theta/2$. A qubit and the *same* qubit rotated by a full $2\pi$ are
+physically indistinguishable, so a $180°$ trip from $|0\rangle$ to $|1\rangle$ on
+the sphere corresponds to only a $90°$ change in the underlying state. The
+half-angle bookkeeping keeps the geometry honest: opposite points on the sphere
+($|0\rangle$ and $|1\rangle$) are perfectly distinguishable, i.e. orthogonal.
+
+## Gates are rotations
+
+This geometric view pays off immediately: every single-qubit gate is just a
+**rotation** of the Bloch sphere. The Hadamard gate sends $|0\rangle$ (north pole)
+to a point on the equator — exactly the even superposition with
+$\alpha = \beta = \tfrac{1}{\sqrt2} \approx 0.707$. Other gates spin the vector
+about different axes. Thinking in rotations makes it obvious why applying a gate
+twice can return you to the start.
+
+## Takeaways
+
+- A qubit state $\alpha|0\rangle + \beta|1\rangle$ must satisfy
+  $|\alpha|^2 + |\beta|^2 = 1$ so probabilities sum to 1.
+- Every single-qubit state is a point on the **Bloch sphere**: poles are
+  $|0\rangle$/$|1\rangle$, the equator is even superposition.
+- The phase $\varphi$ is invisible to a single measurement but drives
+  interference; single-qubit gates are rotations of the sphere.
+
+## References
+
+- [Nielsen & Chuang, *Quantum Computation and Quantum Information* — §1.2 (qubits and the Bloch sphere)](https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE)
+- [Qiskit Textbook — Representing qubit states](https://qiskit.org/textbook/ch-states/representing-qubit-states.html)

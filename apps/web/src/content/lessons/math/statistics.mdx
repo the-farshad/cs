@@ -1,0 +1,85 @@
+---
+title: Statistics
+track: math
+order: 10
+summary: Mean, spread, distributions, sampling, and the Central Limit Theorem that makes the normal curve appear everywhere.
+difficulty: medium
+---
+
+import CentralLimitDemo from '@/components/viz/CentralLimitDemo.tsx';
+
+**Statistics** is the science of summarizing data and drawing conclusions from
+samples. Where probability reasons forward from a known model to outcomes,
+statistics works backward: from observed data to the model that likely produced it.
+It is the backbone of A/B testing, machine learning, benchmarking, and any
+data-driven decision.
+
+Pick a lumpy population below and press *Sample*. Each step averages $n$ random
+draws into one **sample mean** and drops it into the lower histogram. Watch those
+means pile up into a bell curve no matter how strange the source looks.
+
+<CentralLimitDemo client:visible />
+
+## Describing a dataset
+
+Two questions summarize almost any dataset: where is it centered, and how spread out
+is it?
+
+- **Mean** $\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$ is the arithmetic average.
+- **Median** is the middle value when sorted — robust to outliers, unlike the mean.
+- **Mode** is the most frequent value.
+
+Spread is captured by **variance** and its square root, the **standard deviation**:
+
+$$\sigma^2 = \frac{1}{n}\sum_{i=1}^{n} (x_i - \bar{x})^2, \qquad \sigma = \sqrt{\sigma^2}$$
+
+A small $\sigma$ means values hug the mean; a large $\sigma$ means they scatter
+widely. Standard deviation is in the same units as the data, which is why it is the
+go-to measure of spread.
+
+## Distributions
+
+A **distribution** describes how likely each value is. The **normal** (Gaussian)
+distribution is the familiar bell curve, fully specified by its mean $\mu$ and
+standard deviation $\sigma$. About 68% of values fall within $1\sigma$ of the mean
+and 95% within $2\sigma$ — the empirical rule. Many real distributions are *not*
+normal: response times are right-skewed, and ratings are often bimodal.
+
+## Sampling
+
+We rarely measure an entire **population**, so we take a **sample** and estimate. A
+sample mean $\bar{x}$ estimates the population mean $\mu$, but each sample gives a
+slightly different answer. The variability of an estimate across samples is its
+**standard error**.
+
+## The Central Limit Theorem
+
+Here is the remarkable part, and what the visualizer demonstrates: take the mean of
+$n$ independent draws from *almost any* distribution, repeat many times, and the
+distribution of those sample means approaches a **normal curve** centered on the true
+mean. Its standard error shrinks as
+
+$$\text{SE} = \frac{\sigma}{\sqrt{n}}$$
+
+so quadrupling the sample size halves the spread. This is why the normal distribution
+appears everywhere, and why averaging many measurements is so powerful.
+
+## Why it matters for CS
+
+Benchmarking reports a mean latency with error bars built from the standard error.
+A/B tests use the Central Limit Theorem to decide whether a difference is real or
+noise. Machine learning models minimize expected loss estimated from sampled
+batches. Statistics turns noisy measurements into trustworthy conclusions.
+
+## References
+
+- [Khan Academy: Statistics and probability](https://www.khanacademy.org/math/statistics-probability)
+- [OpenStax: Introductory Statistics](https://openstax.org/details/books/introductory-statistics)
+
+## Takeaways
+
+- Mean and median locate the center; variance and standard deviation measure spread.
+- A distribution lists how likely each value is; the normal curve is set by $\mu$ and
+  $\sigma$.
+- The Central Limit Theorem makes sample means normal with standard error
+  $\sigma/\sqrt{n}$, which is why averaging works.

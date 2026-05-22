@@ -1,0 +1,119 @@
+---
+title: Concurrency
+track: cpp
+order: 13
+summary: Run code on threads, avoid data races with mutexes and atomics, and get results back with std::async and futures.
+difficulty: hard
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppDataRace from '@/components/viz/CppDataRace.tsx';
+
+Modern CPUs have many cores, and `std::thread` lets a C++ program use them by
+running functions in parallel. The catch: when two threads touch the same data and
+at least one writes, you have a **data race** — undefined behavior, because an
+increment like `counter++` is really three steps (load, add, store) that can
+interleave. Toggle the mutex below to watch a shared counter lose updates without
+synchronization, then become correct with one.
+
+<CppDataRace client:visible />
+
+## Threads and the data race
+
+```cpp
+#include <thread>
+
+void work(int& counter) {
+    for (int i = 0; i < 100000; ++i)
+        counter++;          // load, add, store — NOT atomic
+}
+
+int counter = 0;
+std::thread t1(work, std::ref(counter));
+std::thread t2(work, std::ref(counter));
+t1.join();                  // wait for the thread to finish
+t2.join();
+// counter is < 200000: updates were lost to the race
+```
+
+You must `join()` (wait for) or `detach()` every thread before it is destroyed,
+or the program calls `std::terminate`. The lost updates are not a bug in your
+arithmetic — they are the interleaving the visualizer shows.
+
+## Mutexes and atomics
+
+Two tools fix the race. A **mutex** guards a *critical section* so only one thread
+runs it at a time; an **atomic** makes a single variable's read-modify-write
+indivisible in hardware.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `#include <mutex>
+
+std::mutex m;
+int counter = 0;
+
+void work() {
+    for (int i = 0; i < 100000; ++i) {
+        std::lock_guard<std::mutex> g(m);  // locks here
+        counter++;                          // critical section
+    }                                       // g unlocks at scope exit (RAII)
+}`
+  },
+  {
+    language: 'cpp',
+    code: `#include <atomic>
+
+std::atomic<int> counter{0};
+
+void work() {
+    for (int i = 0; i < 100000; ++i)
+        counter++;          // atomic: a single indivisible operation
+}
+// No mutex needed for one variable; faster than locking.`
+  }
+]} client:visible />
+
+Prefer `std::lock_guard` (or `std::scoped_lock`) over manual `lock()`/`unlock()`:
+RAII releases the mutex even if the body throws, which prevents deadlocks from a
+forgotten unlock. When you are only protecting a single counter or flag,
+`std::atomic` is simpler and faster than a mutex. Beware **deadlock**: if two
+threads lock two mutexes in opposite orders, both can wait forever — always acquire
+locks in a consistent order (or use `std::scoped_lock` on both at once).
+
+## Getting results back with futures
+
+Threads return `void`. To run a task and *receive its result*, use `std::async`,
+which hands you a `std::future` — a placeholder that you redeem later with `.get()`:
+
+```cpp
+#include <future>
+
+std::future<int> f = std::async(std::launch::async, [] {
+    return expensive_sum();      // runs on another thread
+});
+
+do_other_work();                 // meanwhile, keep going
+int result = f.get();            // blocks until the task finishes, returns its value
+```
+
+`std::async` manages the thread for you, and exceptions thrown in the task are
+re-thrown when you call `.get()`. This is the highest-level, safest way to express
+"compute this in the background, give me the answer when I ask."
+
+## Takeaways
+
+- `std::thread` runs a function in parallel; you must `join()` or `detach()` it before it is destroyed.
+- Concurrent access where at least one thread writes is a data race — undefined behavior, even for `counter++`.
+- A `std::mutex` with `lock_guard` serializes a critical section via RAII; release is automatic and exception-safe.
+- `std::atomic<T>` makes single-variable updates indivisible without a lock — simpler and faster for one counter or flag.
+- `std::async` returns a `std::future`; call `.get()` to retrieve the result (and re-raise any exception). Avoid deadlock by locking in a consistent order.
+
+## References
+
+- [cppreference: Thread support library](https://en.cppreference.com/w/cpp/thread)
+- [cppreference: std::mutex](https://en.cppreference.com/w/cpp/thread/mutex)
+- [cppreference: std::atomic](https://en.cppreference.com/w/cpp/atomic/atomic)
+- [cppreference: std::async](https://en.cppreference.com/w/cpp/thread/async)
+- [ISO C++ Core Guidelines: Concurrency and parallelism](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-concurrency)

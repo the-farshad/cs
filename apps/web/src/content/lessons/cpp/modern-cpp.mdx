@@ -1,0 +1,127 @@
+---
+title: Modern C++ Features
+track: cpp
+order: 14
+summary: Write cleaner, safer code with auto, range-based for, structured bindings, constexpr, and std::optional / std::variant.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppStructuredBindings from '@/components/viz/CppStructuredBindings.tsx';
+
+Since C++11, the language has gained features that cut boilerplate and make
+intent obvious without sacrificing speed. This lesson collects the everyday ones:
+`auto` for type deduction, range-based `for`, structured bindings, `constexpr` for
+compile-time computation, and the sum/optional types `std::optional` and
+`std::variant`. Switch the modes below to see structured bindings unpack an
+aggregate and `std::optional` move between its empty and engaged states.
+
+<CppStructuredBindings client:visible />
+
+## auto and range-based for
+
+`auto` asks the compiler to deduce a variable's type from its initializer — shorter
+and impossible to get wrong, especially for iterators. The range-based `for`
+iterates any container without manual `begin`/`end`:
+
+```cpp
+std::vector<int> v = {1, 2, 3};
+
+for (auto it = v.begin(); it != v.end(); ++it) { /* old style */ }
+
+for (const auto& x : v) { /* read each element, no copy */ }
+for (auto& x : v) x *= 2;             // modify in place
+```
+
+Use `const auto&` to read without copying, and `auto&` to modify. Reserve plain
+`auto` (a copy) for cheap types or when you truly want a copy.
+
+## Structured bindings
+
+Structured bindings unpack a `struct`, `std::pair`, `std::tuple`, or array into
+named locals in one line — no more `.first` / `std::get<0>`:
+
+```cpp
+struct Point { int x, y; };
+auto [a, b] = Point{3, 7};            // a = 3, b = 7
+
+std::map<std::string, int> ages;
+for (const auto& [name, age] : ages)  // unpack each key/value pair
+    std::cout << name << ": " << age << '\n';
+```
+
+The names bind positionally to the members in declaration order, as the visualizer
+shows. It pairs especially well with functions that return several values via a
+`struct` or `tuple`.
+
+## constexpr: compute at compile time
+
+`constexpr` marks a value or function that *can* be evaluated during compilation,
+moving work out of run time and enabling use in constant contexts (array sizes,
+template arguments):
+
+```cpp
+constexpr int square(int n) { return n * n; }
+
+constexpr int n = square(8);   // computed at compile time -> 64
+int arr[square(4)];            // legal: 16 is a compile-time constant
+
+if constexpr (sizeof(void*) == 8) { /* 64-bit branch, compiled away */ }
+```
+
+A `constexpr` function still works at run time when given run-time arguments; the
+keyword only *permits* compile-time evaluation. `if constexpr` discards the dead
+branch at compile time — invaluable in templates.
+
+## optional and variant
+
+These two type-safe vocabulary types replace error-prone idioms:
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `#include <optional>
+
+// "an int, or nothing" — no sentinel like -1 needed.
+std::optional<int> parse(std::string_view s);
+
+if (auto r = parse("42"); r.has_value())
+    use(*r);                    // safe: value is present
+int n = parse("oops").value_or(0);  // fallback instead of throwing`
+  },
+  {
+    language: 'cpp',
+    code: `#include <variant>
+
+// A type-safe union: holds exactly one of these alternatives.
+std::variant<int, std::string> v = 7;
+v = "hello";                    // now holds a string
+
+std::visit([](const auto& x) {  // dispatch on the active type
+    std::cout << x;
+}, v);`
+  }
+]} client:visible />
+
+`std::optional<T>` models a value that may be absent — far safer than a null pointer
+or magic sentinel, with `has_value()`, `value()`, and `value_or()`. `std::variant`
+is a type-safe union that holds exactly one of several types; `std::visit` applies
+the right handler for whichever type is active. Together they let the *type system*
+express "maybe" and "one of these," catching mistakes the compiler would otherwise
+miss.
+
+## Takeaways
+
+- `auto` deduces types; use `const auto&` in range-based `for` to iterate without copying.
+- Structured bindings unpack structs, pairs, tuples, and map entries into named locals positionally.
+- `constexpr` allows compile-time evaluation (and run-time use); `if constexpr` compiles away the dead branch.
+- `std::optional<T>` represents "value or nothing" safely — check `has_value()` or use `value_or` instead of sentinels.
+- `std::variant` is a type-safe union; `std::visit` dispatches on the currently held alternative.
+
+## References
+
+- [cppreference: auto specifier](https://en.cppreference.com/w/cpp/language/auto)
+- [cppreference: Structured binding declaration](https://en.cppreference.com/w/cpp/language/structured_binding)
+- [cppreference: constexpr specifier](https://en.cppreference.com/w/cpp/language/constexpr)
+- [cppreference: std::optional](https://en.cppreference.com/w/cpp/utility/optional)
+- [cppreference: std::variant](https://en.cppreference.com/w/cpp/utility/variant)

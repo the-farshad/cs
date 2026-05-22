@@ -1,0 +1,103 @@
+---
+title: Operator Overloading
+track: cpp
+order: 11
+summary: Give your own types natural syntax — define operator+, ==, <<, and [] as member or free functions, and know when not to.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppOperatorOverload from '@/components/viz/CppOperatorOverload.tsx';
+
+Operators in C++ are just functions with special names. When you write `a + b` for
+two objects of a custom type, the compiler rewrites it into a call to a function
+named `operator+`. Overloading these lets your types read like built-in ones — a
+`Vector2`, a `Matrix`, or a `BigInt` can use `+`, `==`, and `<<` directly. Step
+through the expression below to watch each operator desugar into its underlying
+call.
+
+<CppOperatorOverload client:visible />
+
+## Member versus free functions
+
+You can write an operator two ways. As a **member function**, the left operand is
+the implicit `this`; as a **free (non-member) function**, both operands are explicit
+parameters and the call is symmetric.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `struct Vec2 {
+    double x, y;
+
+    // Member: left operand is *this. Good for []  and compound assignment.
+    Vec2& operator+=(const Vec2& rhs) {
+        x += rhs.x; y += rhs.y;
+        return *this;
+    }
+    double operator[](int i) const { return i == 0 ? x : y; }
+};`
+  },
+  {
+    language: 'cpp',
+    code: `// Free function: symmetric operands. Often defined in terms of +=.
+Vec2 operator+(Vec2 lhs, const Vec2& rhs) {
+    lhs += rhs;      // reuse the member
+    return lhs;      // return by value (a new vector)
+}
+
+// Equality as a free function (C++20 lets you = default it).
+bool operator==(const Vec2& a, const Vec2& b) {
+    return a.x == b.x && a.y == b.y;
+}`
+  }
+]} client:visible />
+
+The rule of thumb: make it a **member** when it modifies the left operand
+(`+=`, `=`, `[]`, `()`), and a **free function** when both operands should be
+treated equally (`+`, `==`, `<`). A common pattern is to write the compound form
+(`+=`) as a member and define the binary form (`+`) as a free function that reuses
+it. Symmetric free functions also allow conversions on the left operand, so
+`2.0 * v` can work as well as `v * 2.0`.
+
+## The stream insertion operator
+
+`operator<<` *must* be a free function, because its left operand is a
+`std::ostream&` — a type you do not own and cannot add members to:
+
+```cpp
+#include <ostream>
+
+std::ostream& operator<<(std::ostream& os, const Vec2& v) {
+    return os << '(' << v.x << ", " << v.y << ')';   // return the stream
+}
+
+std::cout << v << '\n';   // -> operator<<(std::cout, v)
+```
+
+Returning the stream by reference is what makes chaining (`os << a << b`) work:
+each call hands the stream back to the next.
+
+## When not to overload
+
+Overloading is for operations that are *genuinely* arithmetic, comparison, or
+indexing on your type. Keep the meaning **intuitive** — `+` should combine, not
+delete. Do not overload `&&`, `||`, or `,` (you lose short-circuit and sequencing
+semantics), and never surprise the reader. Since C++20, defaulting `operator<=>`
+(the three-way "spaceship" comparison) and `operator==` generates a full, correct
+set of comparisons for you, so you rarely hand-write the six relational operators
+anymore.
+
+## Takeaways
+
+- `a @ b` compiles to a call to `operator@`; overloading gives custom types natural syntax.
+- Make operators that modify the left operand members (`+=`, `[]`, `=`); make symmetric ones free functions (`+`, `==`).
+- `operator<<` must be a free function taking `std::ostream&` and should return the stream for chaining.
+- Reuse: define `+` in terms of a member `+=` to avoid duplicate logic.
+- In C++20, default `operator<=>` and `operator==` instead of writing all comparisons by hand; never overload `&&`, `||`, or `,`.
+
+## References
+
+- [cppreference: Operator overloading](https://en.cppreference.com/w/cpp/language/operators)
+- [cppreference: Default comparisons (operator&lt;=&gt;)](https://en.cppreference.com/w/cpp/language/default_comparisons)
+- [ISO C++ Core Guidelines: Operator overloading](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c-operators)

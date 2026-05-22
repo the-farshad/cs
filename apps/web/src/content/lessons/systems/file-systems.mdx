@@ -1,0 +1,77 @@
+---
+title: File Systems
+track: systems
+order: 7
+summary: How files are stored — blocks, inodes, directories as name-to-inode maps, fragmentation, and journaling for crash safety.
+difficulty: medium
+---
+
+import FileSystemVisualizer from '@/components/viz/FileSystemVisualizer.tsx';
+
+A disk is just a long array of fixed-size **blocks**. A **file system** is the
+bookkeeping that turns that flat array into named files and folders you can open,
+grow, and delete without losing track of which block belongs to what. The central
+trick is a small record per file — the **inode** — that ties a file's metadata to
+its scattered data blocks.
+
+Open a file below and step through resolution: the directory maps the name to an
+inode number, the inode's pointers lead to data blocks on the grid, and a large
+file spills into an **indirect block** — a block that holds yet more pointers.
+
+<FileSystemVisualizer client:visible />
+
+## Blocks and inodes
+
+Storage is allocated in **blocks** (commonly 4 KB). Each file has an **inode**
+holding its **metadata** — size, owner, permissions, timestamps, link count — and
+a set of **block pointers** that say *where the data lives*. Notice what an inode
+does **not** contain: the file's name. That separation is deliberate and is what
+makes the next piece work.
+
+To address a large file without a giant inode, file systems use a few **direct**
+pointers plus an **indirect** pointer. A direct pointer names one data block; the
+indirect pointer names a block that is *itself full of pointers*. With double- and
+triple-indirect blocks, the same fixed-size inode can address enormous files. If
+$p$ is the number of pointers a block holds, one indirect level adds $p$ blocks,
+a double-indirect adds $p^2$, and so on.
+
+## Directories are just maps
+
+A **directory** is not a container of files — it is a special file whose contents
+are a table mapping **names to inode numbers**. Resolving `/home/notes.txt` means
+reading the root directory to find `home`'s inode, reading that directory to find
+`notes.txt`'s inode, then reading the inode to reach the data. Because the name
+lives in the directory and the data lives via the inode, two names can point to
+the *same* inode — that is a **hard link**.
+
+## Fragmentation
+
+A file's blocks need not be contiguous, as the scattered grid shows. Over time, as
+files are created and deleted, free space breaks into small gaps and new files get
+spread across the disk — **fragmentation**. On spinning disks this hurt badly
+because the head had to seek between scattered blocks; SSDs have no seek penalty,
+so fragmentation matters far less today, though locality still helps caching.
+
+## Journaling: surviving a crash
+
+Updating a file often means changing several structures — the inode, the data
+block, and the free-space map. If the machine loses power **between** those
+writes, the file system can be left inconsistent (a block marked used by no file,
+or vice versa). A **journal** fixes this: the change is first written to a
+sequential log and marked committed, *then* applied to the real structures. After
+a crash, the system replays the journal so every update is either fully done or
+not at all — the same all-or-nothing idea as a database transaction.
+
+## Takeaways
+
+- Disks store fixed-size blocks; an inode holds a file's metadata plus pointers
+  to its data blocks — but not its name.
+- Direct + indirect pointers let a small inode address very large files.
+- Directories are name-to-inode maps; sharing an inode is a hard link.
+- Fragmentation scatters blocks; journaling logs changes first so a crash leaves
+  the file system consistent.
+
+## References
+
+- [OSTEP — Operating Systems: Three Easy Pieces (File Systems)](https://pages.cs.wisc.edu/~remzi/OSTEP/)
+- [ext4 Disk Layout (kernel.org)](https://www.kernel.org/doc/html/latest/filesystems/ext4/index.html)

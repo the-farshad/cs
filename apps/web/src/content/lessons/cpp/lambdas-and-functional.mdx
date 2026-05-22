@@ -1,0 +1,108 @@
+---
+title: Lambdas & Functional Style
+track: cpp
+order: 12
+summary: Write inline callables, capture state by value or reference, store them in std::function, and feed them to STL algorithms.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppLambdaCapture from '@/components/viz/CppLambdaCapture.tsx';
+
+A **lambda** is an unnamed function you write right where you need it. It is the
+glue of modern C++: pass it to `std::sort` as a comparator, to `std::for_each` as
+an action, or to `std::transform` as a mapping. What makes lambdas more than plain
+functions is the **capture** — they can carry state from the surrounding scope.
+Toggle the capture mode below and watch what happens when that state changes mid-run.
+
+<CppLambdaCapture client:visible />
+
+## Anatomy of a lambda
+
+```cpp
+auto add = [](int a, int b) { return a + b; };   // no capture
+add(2, 3);                                        // 5
+
+int factor = 10;
+auto scale = [factor](int v) { return v * factor; };  // captures factor
+scale(4);                                              // 40
+```
+
+The brackets `[...]` are the **capture list**, then the parameter list, then the
+body. A lambda is really an anonymous struct with an `operator()`; the captures
+become its member variables. With no captures it is even convertible to a plain
+function pointer.
+
+## Capture by value versus reference
+
+This is the distinction the visualizer makes concrete:
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `int factor = 2;
+auto by_value = [factor](int v) { return v * factor; };  // copies 2
+auto by_ref   = [&factor](int v) { return v * factor; }; // aliases factor
+
+factor = 10;
+by_value(5);   // 10  -> used the frozen copy (2)
+by_ref(5);     // 50  -> sees the live value (10)`
+  },
+  {
+    language: 'cpp',
+    code: `// [=] captures everything used, by value (a copy).
+// [&] captures everything used, by reference (an alias).
+auto f = [=]() { /* reads copies of locals */ };
+auto g = [&]() { /* reads/writes the live locals */ };
+
+// 'mutable' lets a by-value capture be modified inside the body:
+int n = 0;
+auto counter = [n]() mutable { return ++n; };  // n is a private copy`
+  }
+]} client:visible />
+
+**By value** (`[factor]` or `[=]`) copies the variable into the closure at the
+moment it is created — later changes outside do not affect it. **By reference**
+(`[&factor]` or `[&]`) stores an alias, so the lambda always reads the live value.
+Reference captures are powerful but dangerous: if the lambda outlives the captured
+variable (stored and called later), you get a **dangling reference**. Prefer value
+capture unless you specifically need to observe or mutate the original.
+
+## std::function and STL algorithms
+
+Each lambda has its own unique, unnameable type. When you need to *store* a
+callable in a variable or container — losing the exact type — wrap it in
+`std::function`, a type-erased holder for "anything callable with this signature":
+
+```cpp
+#include <functional>
+#include <vector>
+#include <algorithm>
+
+std::function<int(int)> op = [](int x) { return x * x; };  // store any callable
+
+std::vector<int> v = {5, 2, 8, 1};
+std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });  // descending
+std::for_each(v.begin(), v.end(), [](int x) { /* use x */ });
+std::transform(v.begin(), v.end(), v.begin(), [](int x) { return x + 1; });
+```
+
+For hot paths, pass the lambda **directly** (or via a template parameter): the
+compiler can inline it, whereas `std::function` adds an indirect call and possible
+heap allocation. Reach for `std::function` only when you genuinely need a single
+named type to hold differing callables.
+
+## Takeaways
+
+- A lambda `[captures](params){ body }` is an inline, unnamed callable — an anonymous struct with `operator()`.
+- Value capture (`[=]`, `[x]`) freezes a copy; reference capture (`[&]`, `[&x]`) aliases the live variable.
+- Reference captures can dangle if the lambda outlives the variable — prefer value capture by default.
+- `std::function<R(Args)>` type-erases any callable so it can be stored, at the cost of an indirect call.
+- Lambdas are the natural arguments to `sort`, `for_each`, and `transform`; pass them directly in hot paths so they inline.
+
+## References
+
+- [cppreference: Lambda expressions](https://en.cppreference.com/w/cpp/language/lambda)
+- [cppreference: std::function](https://en.cppreference.com/w/cpp/utility/functional/function)
+- [cppreference: Algorithms library](https://en.cppreference.com/w/cpp/algorithm)
+- [ISO C++ Core Guidelines: Lambdas](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#f-lambdas-and-function-objects)

@@ -1,0 +1,111 @@
+---
+title: I/O & Strings
+track: cpp
+order: 10
+summary: Read and write with iostream, parse text with stringstream, and slice std::string — including the small-string optimization.
+difficulty: easy
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppStreamTokenizer from '@/components/viz/CppStreamTokenizer.tsx';
+
+C++ models input and output as **streams**: ordered sequences of bytes you read
+from or write to. The same `<<` (insertion) and `>>` (extraction) operators work
+on the console, files, and in-memory buffers, so one mental model covers them all.
+A stream carries a moving cursor; extraction consumes characters and advances it,
+while `std::string` is a separate, resizable character buffer you can index and
+slice. Step through both behaviours below.
+
+<CppStreamTokenizer client:visible />
+
+## Streams: console, file, and string
+
+The three streams you reach for most all share the same operators:
+
+```cpp
+#include <iostream>   // std::cin, std::cout, std::cerr
+#include <fstream>    // std::ifstream, std::ofstream
+#include <sstream>    // std::istringstream, std::ostringstream
+
+std::cout << "x = " << 42 << '\n';        // formatted output, chained
+
+std::ofstream out("data.txt");
+out << "line one\n";                       // write to a file
+
+std::ifstream in("data.txt");
+std::string line;
+std::getline(in, line);                    // read a whole line
+```
+
+`std::getline` reads up to (and discards) the newline, so it is the right tool for
+line-oriented input. The bare `>>` operator instead skips leading whitespace and
+stops at the next whitespace — ideal for tokens, awkward for lines.
+
+## Parsing with stringstream
+
+A `std::istringstream` turns a string into a stream so you can extract typed
+values from it. This is the clean way to parse without manual character fiddling:
+
+```cpp
+#include <sstream>
+std::string row = "3 1.5 hello";
+std::istringstream iss(row);
+
+int a; double b; std::string word;
+iss >> a >> b >> word;                      // a=3, b=1.5, word="hello"
+
+while (iss >> word) { /* loop over remaining tokens */ }
+```
+
+Extraction returns the stream, and a stream converts to `false` when it fails or
+hits the end — that is why `while (iss >> word)` is the canonical token loop. The
+mirror image, `std::ostringstream`, builds a string with `<<` for logging or
+formatting numbers into text.
+
+## std::string and SSO
+
+`std::string` owns a contiguous, null-resilient buffer and offers a deep toolbox:
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `std::string s = "rad/s";
+s.size();                 // 5
+s.substr(0, 3);           // "rad" (copy of [0, 3))
+s.find('/');              // 3  (npos if absent)
+s.replace(0, 3, "deg");   // "deg/s"
+s += " SI";               // append in place
+s[0];                     // 'r' (no bounds check)
+s.at(0);                  // 'r' (throws if out of range)`
+  },
+  {
+    language: 'cpp',
+    code: `// Small-String Optimization (SSO)
+std::string small = "hi";       // stored INLINE, no heap allocation
+std::string big   = "a very long string that exceeds the buffer";
+// 'big' allocates on the heap; 'small' does not.
+
+// Prefer std::string_view for read-only views (no copy):
+void log(std::string_view msg);  // takes any string/literal cheaply`
+  }
+]} client:visible />
+
+Most implementations apply the **small-string optimization**: short strings (often
+up to ~15 bytes) live directly inside the string object, avoiding a heap allocation
+entirely. Longer strings spill to the heap. When you only need to *read* characters,
+take a `std::string_view` to avoid copying the buffer at all.
+
+## Takeaways
+
+- Streams share `<<`/`>>`; the same operators drive the console, files, and string buffers.
+- Use `std::getline` for lines and `>>` for whitespace-delimited tokens; a stream is `false` at end/failure.
+- `std::istringstream` parses text into typed values; `std::ostringstream` formats values into text.
+- `std::string` is a resizable buffer with `find`, `substr`, `replace`, and append; short strings avoid the heap via SSO.
+- Pass read-only text as `std::string_view` to skip copies.
+
+## References
+
+- [cppreference: std::string](https://en.cppreference.com/w/cpp/string/basic_string)
+- [cppreference: Input/output library](https://en.cppreference.com/w/cpp/io)
+- [cppreference: std::string_view](https://en.cppreference.com/w/cpp/string/basic_string_view)
+- [ISO C++ Core Guidelines: String handling](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-strings)
