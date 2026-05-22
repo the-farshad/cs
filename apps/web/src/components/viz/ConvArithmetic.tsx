@@ -10,8 +10,16 @@ const VIOLET = '#8b5cf6';
 
 type Mode = 'conv' | 'transposed';
 
-/** Deterministic input-cell value, 1..9. */
-const valAt = (r: number, c: number) => ((r * 3 + c * 2) % 9) + 1;
+/** Deterministic but irregular input values, 1..9 (so window sums genuinely vary). */
+const VALS: number[][] = (() => {
+  let s = 0x9e3779b9;
+  const rnd = () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 0xffffffff;
+  };
+  return Array.from({ length: 24 }, () => Array.from({ length: 24 }, () => Math.floor(rnd() * 9) + 1));
+})();
+const valAt = (r: number, c: number) => VALS[((r % 24) + 24) % 24][((c % 24) + 24) % 24];
 
 function Slider({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
   return (
@@ -29,6 +37,7 @@ export default function ConvArithmetic() {
   const [s, setS] = useState(1);
   const [d, setD] = useState(1);
   const [mode, setMode] = useState<Mode>('conv');
+  const [op, setOp] = useState<'sum' | 'max' | 'avg'>('sum');
 
   const geom = useMemo(() => {
     if (mode === 'conv') {
@@ -93,13 +102,15 @@ export default function ConvArithmetic() {
 
   // Conv output value = box-sum of the real (non-padding) input cells the window covers.
   const convOut = (or: number, oc: number) => {
-    let sum = 0;
+    const vals: number[] = [];
     for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) {
       const rr = or * s + a * d - p;
       const cc = oc * s + b * d - p;
-      if (rr >= 0 && rr < i && cc >= 0 && cc < i) sum += valAt(rr, cc);
+      vals.push(rr >= 0 && rr < i && cc >= 0 && cc < i ? valAt(rr, cc) : 0);
     }
-    return sum;
+    if (op === 'max') return Math.max(...vals);
+    const total = vals.reduce((x, y) => x + y, 0);
+    return op === 'avg' ? Math.round(total / vals.length) : total;
   };
 
   const grid = (
@@ -194,7 +205,18 @@ export default function ConvArithmetic() {
             </button>
           ))}
         </div>
-        <span className="font-mono text-xs text-muted">{mode === 'conv' ? 'output cell = sum of covered inputs' : 'upsample (decoder)'}</span>
+        {mode === 'conv' ? (
+          <div className="inline-flex overflow-hidden rounded border border-edge" role="group" aria-label="Aggregation">
+            {(['sum', 'max', 'avg'] as const).map((o) => (
+              <button key={o} type="button" onClick={() => setOp(o)} aria-pressed={op === o} className={`px-2.5 py-1 text-xs uppercase transition ${op === o ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg'}`}>
+                {o}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <span className="font-mono text-xs text-muted">
+          {mode === 'conv' ? `output cell = ${op} of the window (padding = 0)` : 'each input paints a kernel-shaped patch'}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:max-w-md">

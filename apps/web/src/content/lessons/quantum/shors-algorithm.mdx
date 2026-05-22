@@ -1,0 +1,100 @@
+---
+title: Shor's Algorithm & Breaking RSA
+track: quantum
+order: 11
+summary: Factoring large numbers is the rock RSA stands on — Shor's algorithm reduces factoring to period finding and cracks it in polynomial time.
+difficulty: hard
+---
+
+import ShorPeriodFinding from '@/components/viz/ShorPeriodFinding.tsx';
+
+Most of the internet's encryption rests on one assumption: that factoring a large
+number $N = p \cdot q$ back into its prime factors $p$ and $q$ is **hard**. The
+best known classical algorithms take time that grows nearly exponentially in the
+number of digits, so a $2048$-bit RSA key is safe against classical machines.
+**Shor's algorithm** breaks that assumption by factoring in **polynomial time** on
+a quantum computer.
+
+Pick $N$ and a base $a$ below, then step through it: the animation reveals the
+sequence $a^0, a^1, a^2, \dots \bmod N$ until it returns to $1$ — that is the
+**period** $r$ — and then runs the classical $\gcd$ post-processing that produces
+the two factors.
+
+<ShorPeriodFinding client:visible />
+
+## Why factoring breaks RSA
+
+In RSA, the public key includes the modulus $N = p \cdot q$ and an exponent $e$.
+The matching private key depends on $\varphi(N) = (p-1)(q-1)$, which you can only
+compute if you know $p$ and $q$. So:
+
+$$\text{factor } N \;\Longrightarrow\; \text{recover } p, q \;\Longrightarrow\; \text{recover } \varphi(N) \;\Longrightarrow\; \text{recover the private key}$$
+
+Anyone who can factor $N$ can decrypt every message and forge every signature. RSA
+is secure *only* because nobody has an efficient classical factoring algorithm.
+
+## Reducing factoring to period finding
+
+Shor's key insight is that factoring is equivalent to **period finding**, and
+period finding is exactly what a quantum computer does well. The recipe:
+
+1. Pick a random $a$ with $1 < a < N$ that is **coprime** to $N$ (if $\gcd(a, N) \neq 1$,
+   then $\gcd(a, N)$ is already a factor — you got lucky).
+2. Find the **period** $r$ of the function $f(x) = a^x \bmod N$: the smallest
+   $r \geq 1$ with $a^r \equiv 1 \pmod N$. **This is the quantum step** — the
+   quantum Fourier transform extracts $r$ efficiently, where a classical computer
+   would have to search.
+3. If $r$ is **odd**, or if $a^{r/2} \equiv -1 \pmod N$, this $a$ is unlucky —
+   start over with a different $a$.
+4. Otherwise $a^{r/2}$ is a nontrivial square root of $1$, and
+
+$$\gcd\!\left(a^{r/2} - 1,\; N\right) \quad\text{and}\quad \gcd\!\left(a^{r/2} + 1,\; N\right)$$
+
+are nontrivial factors of $N$. Both gcds are computed classically and quickly with
+Euclid's algorithm.
+
+The reason it works: $a^r \equiv 1$ means $N$ divides $a^r - 1 = (a^{r/2}-1)(a^{r/2}+1)$.
+If $N$ doesn't divide either factor on its own (the conditions in step 3), then
+$N$ must share part of itself with each — and the gcd extracts that shared part.
+
+## Worked example: factoring $N = 15$
+
+Take $N = 15$ and $a = 7$. Compute the powers of $7$ modulo $15$:
+
+$$7^1 = 7, \quad 7^2 \equiv 4, \quad 7^3 \equiv 13, \quad 7^4 \equiv 1 \pmod{15}$$
+
+The sequence returns to $1$ at exponent $4$, so the period is $r = 4$. It is even,
+and $7^{2} = 49 \equiv 4 \not\equiv -1 \pmod{15}$, so this $a$ works. Now take the
+two gcds:
+
+$$\gcd(7^2 - 1,\; 15) = \gcd(48, 15) = 3, \qquad \gcd(7^2 + 1,\; 15) = \gcd(50, 15) = 5$$
+
+giving $15 = 3 \times 5$. With $p = 3$ and $q = 5$ recovered, the RSA private key
+built on $N = 15$ is fully exposed.
+
+## What is actually quantum here
+
+Only **step 2** — finding the period $r$ — needs a quantum computer. Everything
+else (picking $a$, computing gcds, checking parity) is ordinary classical
+arithmetic. The quantum subroutine prepares a superposition over many $x$, computes
+$a^x \bmod N$ in superposition, and applies the **quantum Fourier transform** so
+that measuring the result reveals the period. The visualizer above shows the
+*output* of that subroutine — the periodic sequence — together with the classical
+wrapper that turns the period into factors.
+
+## Takeaways
+
+- RSA's security rests entirely on the hardness of factoring $N = p \cdot q$;
+  factoring $N$ recovers the private key.
+- Shor reduces factoring to finding the **period** $r$ of $f(x) = a^x \bmod N$,
+  which a quantum computer does in polynomial time via the quantum Fourier
+  transform.
+- If $r$ is even and $a^{r/2} \not\equiv -1 \pmod N$, then $\gcd(a^{r/2} \pm 1, N)$
+  are nontrivial factors; otherwise pick a new $a$.
+- For $N = 15, a = 7$ the period is $r = 4$ and $\gcd(48,15)=3$, $\gcd(50,15)=5$,
+  so $15 = 3 \times 5$.
+
+## References
+
+- [Nielsen & Chuang, *Quantum Computation and Quantum Information* — §5.3 (the quantum factoring algorithm)](https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE)
+- [Qiskit Textbook — Shor's algorithm](https://qiskit.org/textbook/ch-algorithms/shor.html)

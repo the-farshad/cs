@@ -7,6 +7,7 @@ difficulty: hard
 ---
 
 import BitFlipCodeVisualizer from '@/components/viz/BitFlipCodeVisualizer.tsx';
+import ShorCodeVisualizer from '@/components/viz/ShorCodeVisualizer.tsx';
 
 Real qubits are fragile. Stray fields, heat, and unwanted interactions cause
 **decoherence** and **noise**, randomly disturbing the delicate amplitudes. Worse,
@@ -70,6 +71,39 @@ a phase-flip code to correct *any* single-qubit error, and modern **surface
 codes** extend the idea to large 2D lattices. The strategy is always the same:
 redundancy plus syndrome measurements that diagnose errors without disturbing the
 data — the foundation of fault-tolerant quantum computing.
+
+## The Shor code (9 qubits)
+
+The 3-qubit code above fixes a **bit flip** ($X$) but is blind to a **phase flip**
+($Z$). The fix for phase flips is elegant: a phase flip in the standard basis is a
+*bit flip in the Hadamard basis*. So the **phase-flip code** is just the bit-flip
+code conjugated by Hadamards — encode with $H$ on every qubit, and a $Z$ error
+becomes an $X$ error that the same parity machinery catches:
+
+$$Z = H X H$$
+
+Peter Shor's **9-qubit code** **concatenates** the two: it nests a bit-flip code
+*inside* a phase-flip code, encoding one logical qubit into $9$ physical qubits
+arranged as **3 blocks of 3**.
+
+$$|0\rangle_L = \tfrac{1}{2\sqrt2}\big(|000\rangle + |111\rangle\big)^{\otimes 3}, \qquad |1\rangle_L = \tfrac{1}{2\sqrt2}\big(|000\rangle - |111\rangle\big)^{\otimes 3}$$
+
+Two layers of syndrome measurement then cooperate:
+
+- **Inner (bit-flip) syndrome** — within each block of 3, the same parity checks as
+  before locate a single $X$ error and fix it with an $X$.
+- **Outer (phase-flip) syndrome** — a $Z$ on *any* qubit in a block flips that
+  block's sign ($|000\rangle + |111\rangle \to |000\rangle - |111\rangle$).
+  Comparing the signs *across* the three blocks locates which block carries the
+  phase error and fixes it with a $Z$.
+
+Because any single-qubit error is a combination of $X$, $Z$, and $Y = iXZ$,
+correcting bit flips and phase flips independently corrects **every** single-qubit
+error — even a small continuous rotation, which the syndrome measurement
+*discretizes* into one of these cases. Inject a bit flip, a phase flip, or both on
+any qubit and step through detection and correction:
+
+<ShorCodeVisualizer client:visible />
 
 ## Takeaways
 

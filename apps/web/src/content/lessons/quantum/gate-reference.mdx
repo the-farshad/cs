@@ -1,0 +1,159 @@
+---
+title: Quantum Gate Reference
+track: quantum
+order: 10
+summary: A catalog of the workhorse gates — single-qubit rotations and the multi-qubit controlled gates — with their matrices and exactly what they do.
+difficulty: medium
+---
+
+import GateExplorer from '@/components/viz/GateExplorer.tsx';
+
+Every quantum circuit is built from a small set of reusable **gates**. This lesson
+is a reference: each single-qubit gate is a $2\times2$ unitary matrix acting on the
+amplitude vector $\begin{bmatrix}\alpha\\\beta\end{bmatrix}$ of $\alpha|0\rangle + \beta|1\rangle$,
+and each multi-qubit gate is a permutation (or sign change) on the computational
+basis states.
+
+Pick a gate and an input below to see its matrix and the resulting amplitudes.
+Watch how $Y$, $S$, and $T$ paint a **phase** onto an amplitude without changing
+its probability.
+
+<GateExplorer client:visible />
+
+## Single-qubit gates
+
+### Pauli gates
+
+The three Pauli gates are the fundamental single-qubit errors and also useful
+operations in their own right.
+
+- **$X$ (NOT / bit flip):** swaps the amplitudes of $|0\rangle$ and $|1\rangle$.
+
+$$X = \begin{bmatrix}0&1\\1&0\end{bmatrix}, \qquad X|0\rangle = |1\rangle, \quad X|1\rangle = |0\rangle$$
+
+- **$Y$ (bit-and-phase flip):** combines a bit flip with a phase, using imaginary
+  entries.
+
+$$Y = \begin{bmatrix}0&-i\\i&0\end{bmatrix}, \qquad Y|0\rangle = i|1\rangle, \quad Y|1\rangle = -i|0\rangle$$
+
+- **$Z$ (phase flip):** leaves $|0\rangle$ alone and negates the $|1\rangle$ amplitude.
+
+$$Z = \begin{bmatrix}1&0\\0&-1\end{bmatrix}, \qquad Z|0\rangle = |0\rangle, \quad Z|1\rangle = -|1\rangle$$
+
+### Hadamard
+
+The **Hadamard** gate $H$ creates and destroys superposition. It maps the basis
+states to the even mixes $|+\rangle$ and $|-\rangle$:
+
+$$H = \tfrac{1}{\sqrt2}\begin{bmatrix}1&1\\1&-1\end{bmatrix}, \qquad H|0\rangle = \tfrac{1}{\sqrt2}\big(|0\rangle + |1\rangle\big) = |+\rangle, \quad H|1\rangle = \tfrac{1}{\sqrt2}\big(|0\rangle - |1\rangle\big) = |-\rangle$$
+
+Because $H^2 = I$, applying it twice returns the original state — the two branches
+**interfere** and recombine.
+
+### Phase gates: S and T
+
+The $S$ and $T$ gates rotate the **phase** of the $|1\rangle$ amplitude. They do
+nothing visible to a single measurement, but they are essential for interference
+and for building arbitrary rotations.
+
+$$S = \begin{bmatrix}1&0\\0&i\end{bmatrix}, \qquad T = \begin{bmatrix}1&0\\0&e^{i\pi/4}\end{bmatrix}$$
+
+Note the relationships $S = T^2$ and $Z = S^2 = T^4$: $T$ is a $45^\circ$ phase,
+$S$ a $90^\circ$ phase, and $Z$ a $180^\circ$ phase. The set $\{H, S\}$ generates
+the **Clifford group**; adding the non-Clifford $T$ gate makes the set **universal**
+for single-qubit operations.
+
+> A global phase like $e^{i\theta}$ multiplying the *whole* state is undetectable.
+> Only a **relative** phase — a different phase on $|1\rangle$ than on $|0\rangle$ —
+> changes physics, and it does so by steering later interference.
+
+## Multi-qubit gates
+
+Multi-qubit gates act on $2^n$ basis states. We order two-qubit states as
+$|00\rangle, |01\rangle, |10\rangle, |11\rangle$, with the left bit as the control
+where relevant.
+
+### CNOT (controlled-NOT)
+
+$\mathrm{CNOT}$ flips the **target** qubit when the **control** is $|1\rangle$, and
+does nothing when the control is $|0\rangle$:
+
+$$\mathrm{CNOT} = \begin{bmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{bmatrix}$$
+
+| input | output |
+| --- | --- |
+| $|00\rangle$ | $|00\rangle$ |
+| $|01\rangle$ | $|01\rangle$ |
+| $|10\rangle$ | $|11\rangle$ |
+| $|11\rangle$ | $|10\rangle$ |
+
+It is the entangling gate behind the Bell state: $\mathrm{CNOT}\,(H\otimes I)|00\rangle = \tfrac{1}{\sqrt2}(|00\rangle + |11\rangle)$.
+
+### CZ (controlled-Z)
+
+$\mathrm{CZ}$ applies a $Z$ to the target when the control is $|1\rangle$ — in
+practice it just flips the sign of $|11\rangle$. It is symmetric: control and
+target are interchangeable.
+
+$$\mathrm{CZ} = \begin{bmatrix}1&0&0&0\\0&1&0&0\\0&0&1&0\\0&0&0&-1\end{bmatrix}$$
+
+| input | output |
+| --- | --- |
+| $|00\rangle$ | $|00\rangle$ |
+| $|01\rangle$ | $|01\rangle$ |
+| $|10\rangle$ | $|10\rangle$ |
+| $|11\rangle$ | $-|11\rangle$ |
+
+Conjugating with Hadamards on the target turns one into the other:
+$\mathrm{CNOT} = (I\otimes H)\,\mathrm{CZ}\,(I\otimes H)$.
+
+### SWAP
+
+$\mathrm{SWAP}$ exchanges the states of the two qubits, leaving the matching
+basis states $|00\rangle$ and $|11\rangle$ fixed:
+
+$$\mathrm{SWAP} = \begin{bmatrix}1&0&0&0\\0&0&1&0\\0&1&0&0\\0&0&0&1\end{bmatrix}$$
+
+| input | output |
+| --- | --- |
+| $|00\rangle$ | $|00\rangle$ |
+| $|01\rangle$ | $|10\rangle$ |
+| $|10\rangle$ | $|01\rangle$ |
+| $|11\rangle$ | $|11\rangle$ |
+
+A $\mathrm{SWAP}$ decomposes into three CNOTs in alternating directions.
+
+### Toffoli (CCNOT)
+
+The **Toffoli** gate is a doubly-controlled NOT on three qubits ($8\times8$): it
+flips the target only when **both** controls are $|1\rangle$. Every basis state is
+unchanged except the last two, which are swapped:
+
+| input | output |
+| --- | --- |
+| $|110\rangle$ | $|111\rangle$ |
+| $|111\rangle$ | $|110\rangle$ |
+| all others | unchanged |
+
+$$\mathrm{CCNOT}\,|a, b, c\rangle = |a,\, b,\, c \oplus (a \wedge b)\rangle$$
+
+Toffoli is **universal for classical reversible computation** — it can build AND,
+NAND, and fan-out — so it bridges classical logic into the reversible quantum
+world.
+
+## Takeaways
+
+- Single-qubit gates are $2\times2$ unitaries: $X$ flips bits, $Z$ flips phase,
+  $Y$ does both, and $H$ creates superposition.
+- $S$ and $T$ add $90^\circ$ and $45^\circ$ phases to $|1\rangle$; with $\{H, S, T\}$
+  you can approximate any single-qubit gate, and $T$ is the non-Clifford piece.
+- A relative phase is invisible to one measurement but governs interference; a
+  global phase is never observable.
+- CNOT and CZ are the entangling two-qubit gates (related by Hadamards on the
+  target), SWAP exchanges two qubits, and Toffoli (CCNOT) is universal for
+  reversible classical logic.
+
+## References
+
+- [Nielsen & Chuang, *Quantum Computation and Quantum Information* — §4.2–4.3 (single- and multi-qubit gates)](https://www.cambridge.org/highereducation/books/quantum-computation-and-quantum-information/01E10196D0A682A6AEFFEA52D53BE9AE)
+- [Qiskit Textbook — Single-qubit and multi-qubit gates](https://qiskit.org/textbook/ch-states/single-qubit-gates.html)
