@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Layout from '@/layouts/Layout.astro';
 import Settings from '@/components/ui/Settings.tsx';
 import { TRACKS } from '@/lib/tracks';
+import { PROBLEMS } from '@/lib/problems';
 
 const lessons = (await getCollection('lessons')).filter((e) => !e.data.draft);
 const tracks = TRACKS.map((t) => ({
@@ -11,6 +12,12 @@ const tracks = TRACKS.map((t) => ({
   total: lessons.filter((e) => e.data.track === t.slug).length,
 })).filter((t) => t.total > 0);
 const totalLessons = tracks.reduce((sum, t) => sum + t.total, 0);
+
+// ref -> human title, for the recent-activity list (lessons + problems).
+const refTitles: Record<string, string> = {};
+for (const e of lessons) refTitles[e.id] = e.data.title;
+for (const p of PROBLEMS) refTitles[`problems/${p.slug}`] = p.title;
+const totalProblems = PROBLEMS.length;
 ---
 
 <Layout title="Settings — cs.thefarshad" description="Your progress and account settings.">
@@ -18,7 +25,7 @@ const totalLessons = tracks.reduce((sum, t) => sum + t.total, 0);
     <h1 class="font-display text-3xl text-fg">Settings</h1>
     <p class="mt-1 text-muted">Your progress and account.</p>
     <div class="mt-8">
-      <Settings tracks={tracks} totalLessons={totalLessons} client:load />
+      <Settings tracks={tracks} totalLessons={totalLessons} totalProblems={totalProblems} refTitles={refTitles} client:load />
     </div>
   </section>
 </Layout>

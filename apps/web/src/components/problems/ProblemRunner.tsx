@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { run, type TestResult } from '@/lib/runners';
 import type { Problem } from '@/lib/problems';
+import { setComplete } from '@/lib/progress';
 import CodeTabs from '@/components/ui/CodeTabs';
 import Icon from '@/components/ui/Icon';
 
@@ -31,6 +32,8 @@ export default function ProblemRunner({ problem }: { problem: Problem }) {
     const r = await run(lang, code, problem.funcName[lang], problem.tests);
     setResults(r);
     setRunning(false);
+    // Solving the problem (all tests green) records it in progress.
+    if (r.length > 0 && r.every((x) => x.ok)) setComplete(`problems/${problem.slug}`, true);
   };
 
   const passed = results ? results.filter((r) => r.ok).length : 0;
@@ -76,7 +79,7 @@ export default function ProblemRunner({ problem }: { problem: Problem }) {
       {results && (
         <div className="mt-4">
           <div className={`mb-2 font-mono text-sm ${passed === total ? 'text-emerald-400' : 'text-amber-300'}`}>
-            {passed}/{total} tests passed
+            {passed}/{total} tests passed{passed === total && total > 0 ? ' · solved' : ''}
           </div>
           <div className="space-y-1">
             {problem.tests.map((t, i) => {

@@ -158,3 +158,19 @@ export async function pushProgress(ids: string[]): Promise<string[] | null> {
   if (!data || !Array.isArray(data.completed)) return null;
   return data.completed;
 }
+
+// ---------------------------------------------------------------------------
+// Recent activity
+// ---------------------------------------------------------------------------
+
+export type RecentItem = { ref: string; completedAt: string };
+
+/** Recent completions with timestamps (newest first) plus last-active time. */
+export async function getRecentActivity(): Promise<{ items: RecentItem[]; lastActive: string | null } | null> {
+  if (!isLoggedIn()) return null;
+  const data = await fetchJson<{ items: RecentItem[]; lastActive: string | null }>('/progress/recent', {
+    headers: authHeaders(),
+  });
+  if (!data || !Array.isArray(data.items)) return null;
+  return data;
+}

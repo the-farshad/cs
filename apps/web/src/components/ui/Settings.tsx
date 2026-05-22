@@ -1,12 +1,42 @@
 import { useEffect, useMemo, useState } from 'react';
 import Icon from '@/components/ui/Icon';
-import { clearToken, deleteMe, getMe, getToken, updateMe, type User } from '@/lib/api';
+import {
+  clearToken,
+  deleteMe,
+  getMe,
+  getRecentActivity,
+  getToken,
+  updateMe,
+  type RecentItem,
+  type User,
+} from '@/lib/api';
 import { getCompleted } from '@/lib/progress';
 
 type Save = 'idle' | 'saving' | 'saved' | 'error';
 type TrackInfo = { slug: string; title: string; total: number };
+type Props = {
+  tracks: TrackInfo[];
+  totalLessons: number;
+  totalProblems: number;
+  refTitles: Record<string, string>;
+};
 
 const HANDLE_RE = /^[A-Za-z0-9_-]{3,20}$/;
+
+function relTime(iso: string | null): string {
+  if (!iso) return '—';
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return '—';
+  const s = Math.max(0, (Date.now() - then) / 1000);
+  if (s < 60) return 'just now';
+  const m = s / 60;
+  if (m < 60) return `${Math.floor(m)}m ago`;
+  const h = m / 60;
+  if (h < 24) return `${Math.floor(h)}h ago`;
+  const d = h / 24;
+  if (d < 30) return `${Math.floor(d)}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
 
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
@@ -45,13 +75,14 @@ function Ring({ pct }: { pct: number }) {
   );
 }
 
-export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]; totalLessons: number }) {
+export default function Settings({ tracks, totalLessons, totalProblems, refTitles }: Props) {
   const [user, setUser] = useState<User | null>(null);
   const [checked, setChecked] = useState(false);
   const [handle, setHandle] = useState('');
   const [save, setSave] = useState<Save>('idle');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const [recent, setRecent] = useState<{ items: RecentItem[]; lastActive: string | null } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -62,6 +93,8 @@ export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]
           setUser(me);
           setHandle(me.handle);
         }
+        const r = await getRecentActivity();
+        if (active) setRecent(r);
       }
       if (active) {
         setCompleted(getCompleted());
@@ -74,6 +107,8 @@ export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]
   }, []);
 
   const stats = useMemo(() => {
+    let problemsSolved = 0;
+    for (const id of completed) if (id.startsWith('problems/')) problemsSolved++;
     const per = tracks
       .map((t) => {
         let done = 0;
@@ -83,9 +118,14 @@ export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]
       .sort((a, b) => b.done / b.total - a.done / a.total || a.title.localeCompare(b.title));
     const totalDone = per.reduce((s, t) => s + t.done, 0);
     const pct = totalLessons > 0 ? Math.round((100 * totalDone) / totalLessons) : 0;
-    const started = per.filter((t) => t.done > 0).length;
-    return { per, totalDone, pct, started };
-  }, [completed, tracks, totalLessons]);
+    return {
+      per,
+      totalDone,
+      pct,
+      started: per.filter((t) => t.done > 0).length,
+      problemsSolved: Math.min(problemsSolved, totalProblems),
+    };
+  }, [completed, tracks, totalLessons, totalProblems]);
 
   if (!checked) return <p className="text-muted">Loading…</p>;
 
@@ -131,12 +171,13 @@ export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]
       {/* Progress dashboard */}
       <section className="rounded-xl border border-edge bg-surface p-5">
         <h2 className="font-display text-lg text-fg">Your progress</h2>
-        <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+        <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row">
           <Ring pct={stats.pct} />
-          <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid w-full flex-1 grid-cols-2 gap-3">
             <StatCard value={`${stats.totalDone}/${totalLessons}`} label="lessons completed" />
+            <StatCard value={`${stats.problemsSolved}/${totalProblems}`} label="problems solved" />
             <StatCard value={`${stats.started}/${tracks.length}`} label="tracks started" />
-            <StatCard value={memberSince} label="member since" />
+            <StatCard value={relTime(recent?.lastActive ?? null)} label="last active" />
           </div>
         </div>
 
@@ -163,12 +204,47 @@ export default function Settings({ tracks, totalLessons }: { tracks: TrackInfo[]
         </div>
       </section>
 
+      {/* Recent activity */}
+      {recent && recent.items.length > 0 && (
+        <section className="rounded-xl border border-edge bg-surface p-5">
+          <h2 className="font-display text-lg text-fg">Recent activity</h2>
+          <ul className="mt-2 divide-y divide-edge">
+            {recent.items.slice(0, 8).map((it) => {
+              const isProblem = it.ref.startsWith('problems/');
+              const href = isProblem ? `/problems/${it.ref.slice(9)}` : `/learn/${it.ref}`;
+              const title = refTitles[it.ref] ?? it.ref;
+              return (
+                <li key={it.ref} className="flex items-center justify-between gap-3 py-2">
+                  <a href={href} className="flex min-w-0 items-center gap-2 text-sm text-fg transition hover:text-accent">
+                    <span
+                      className="shrink-0 rounded px-1.5 py-0.5 text-[10px] uppercase"
+                      style={{
+                        background: isProblem ? 'rgba(139,92,246,0.15)' : 'color-mix(in srgb, var(--accent) 15%, transparent)',
+                        color: isProblem ? '#a78bfa' : 'var(--accent)',
+                      }}
+                    >
+                      {isProblem ? 'problem' : 'lesson'}
+                    </span>
+                    <span className="truncate">{title}</span>
+                  </a>
+                  <span className="shrink-0 font-mono text-xs text-muted">{relTime(it.completedAt)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
       {/* Account */}
       <section className="rounded-xl border border-edge bg-surface p-5">
         <h2 className="font-display text-lg text-fg">Account</h2>
-        <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+        <div className="mt-3 flex items-center justify-between gap-4 border-b border-edge pb-2 text-sm">
           <span className="text-muted">Email</span>
           <span className="text-fg">{user.email}</span>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-4 text-sm">
+          <span className="text-muted">Member since</span>
+          <span className="text-fg">{memberSince}</span>
         </div>
       </section>
 

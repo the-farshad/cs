@@ -33,6 +33,20 @@ progressRouter.get('/', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /progress/recent  (Bearer)
+ * Returns the most recently completed refs with timestamps (newest first) plus
+ * the last-active time: { items: [{ ref, completedAt }], lastActive }.
+ */
+progressRouter.get('/recent', requireAuth, async (req, res) => {
+  const { rows } = await pool.query<{ ref_id: string; completed_at: Date }>(
+    `select ref_id, completed_at from progress where user_id = $1 order by completed_at desc limit 12`,
+    [req.user!.id],
+  );
+  const items = rows.map((r) => ({ ref: r.ref_id, completedAt: r.completed_at }));
+  res.json({ items, lastActive: items[0]?.completedAt ?? null });
+});
+
+/**
  * POST /progress  (Bearer)
  * Body: { completed: string[] }
  * Stores the UNION of existing + provided ids, returns the full union.
