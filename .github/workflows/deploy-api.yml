@@ -14,13 +14,9 @@
 name: Deploy API
 
 on:
+  # Manual only. The current host (minerva) already runs Caddy and is deployed by
+  # hand; auto-deploy stays off until DEPLOY_* secrets are configured for a host.
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/api/**'
-      - 'infra/**'
-      - '.github/workflows/deploy-api.yml'
 
 # Avoid overlapping deploys stepping on each other.
 concurrency:

@@ -1,37 +1,39 @@
 import { useEffect, useState } from 'react';
-import { setToken, verify } from '@/lib/api';
+import { clearToken, getMe, setToken } from '@/lib/api';
 import { syncProgress } from '@/lib/progress';
 
 type Status = 'verifying' | 'success' | 'error';
 
-/** Handles the magic-link landing at /auth?token=RAW: verifies the token,
- *  stores the JWT, syncs progress, then redirects home. */
+/** Landing for the OAuth redirect at /auth?token=<jwt> (or ?error=...): stores the
+ *  JWT, confirms it, syncs progress, then redirects home. */
 export default function AuthVerify() {
   const [status, setStatus] = useState<Status>('verifying');
 
   useEffect(() => {
     let active = true;
     (async () => {
-      const raw = new URLSearchParams(window.location.search).get('token');
-      if (!raw) {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (params.get('error') || !token) {
         if (active) setStatus('error');
         return;
       }
 
-      const result = await verify(raw);
-      if (!result) {
+      setToken(token);
+      const me = await getMe(); // confirm the token actually works
+      if (!me) {
+        clearToken();
         if (active) setStatus('error');
         return;
       }
 
-      setToken(result.token);
       await syncProgress(); // merge local + server progress before leaving
       if (!active) return;
 
       setStatus('success');
       window.setTimeout(() => {
         window.location.href = '/';
-      }, 1000);
+      }, 900);
     })();
     return () => {
       active = false;
@@ -41,7 +43,7 @@ export default function AuthVerify() {
   if (status === 'error') {
     return (
       <div className="text-center">
-        <p className="text-lg text-fg">That sign-in link is invalid or has expired.</p>
+        <p className="text-lg text-fg">Sign-in didn't complete.</p>
         <a href="/" className="mt-3 inline-block text-accent underline underline-offset-2 hover:text-fg">
           Back home
         </a>

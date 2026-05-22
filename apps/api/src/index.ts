@@ -3,6 +3,7 @@ import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { migrate, pool } from './db.js';
 import { authRouter, meHandlers } from './routes/auth.js';
+import { oauthRouter } from './routes/oauth.js';
 import { progressRouter } from './routes/progress.js';
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -41,6 +42,8 @@ app.get('/health', (_req, res) => {
 
 // /auth/request and /auth/verify live under /auth.
 app.use('/auth', authRouter);
+// /auth/google, /auth/github and their callbacks (OAuth sign-in).
+app.use('/auth', oauthRouter);
 // /me lives at the root per the API contract (Bearer JWT).
 app.get('/me', ...meHandlers);
 // /progress (GET + POST) lives at the root.
