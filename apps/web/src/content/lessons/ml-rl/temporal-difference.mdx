@@ -1,0 +1,73 @@
+---
+title: Temporal-Difference Learning
+track: ml-rl
+order: 6
+summary: Learn value estimates from incomplete episodes — Monte Carlo returns vs TD(0) bootstrapping and the TD error.
+difficulty: medium
+---
+
+import TemporalDifferenceWalk from '@/components/viz/TemporalDifferenceWalk.tsx';
+
+How should an agent estimate the **value** of a state — the expected return from there
+on? Two ideas compete. **Monte Carlo (MC)** waits until an episode ends and learns from
+the actual return. **Temporal-difference (TD)** learning updates after every single
+step, using its own next estimate as a stand-in for the rest. TD is the key idea
+behind Q-learning and most modern RL.
+
+The visualizer below is the classic five-state **random walk**: start in the middle
+(C), step left or right with equal probability, exit right for $+1$ or left for $0$.
+The dashed lines mark each state's *true* value. Toggle **TD(0)** vs **Monte Carlo**
+and watch the estimates climb toward truth.
+
+<TemporalDifferenceWalk client:visible />
+
+## Monte Carlo: learn from the return
+
+MC waits for the full episode, computes the **return** $G_t$ (here the final reward,
+since $\gamma = 1$), then nudges each visited state's value toward it:
+
+$$
+V(s) \leftarrow V(s) + \alpha\,\bigl[\, G_t - V(s) \,\bigr]
+$$
+
+The target $G_t$ is an unbiased sample of the true value, but you must reach a terminal
+state before learning anything, and returns are noisy (high variance).
+
+## TD(0): bootstrap from the next estimate
+
+TD doesn't wait. After one transition $s \to s'$ with reward $r$, it updates using its
+*current* estimate of $V(s')$ as a proxy for the unseen rest of the episode:
+
+$$
+V(s) \leftarrow V(s) + \alpha\,\bigl[\, \underbrace{r + \gamma\,V(s') - V(s)}_{\text{TD error }\delta} \,\bigr]
+$$
+
+The bracketed quantity is the **TD error** $\delta$ — the gap between the one-step
+prediction $r + \gamma V(s')$ and the old estimate $V(s)$. Replacing the real return
+with an estimate is called **bootstrapping**: learning a guess from a guess.
+
+## The trade-off
+
+| | Monte Carlo | TD(0) |
+| --- | --- | --- |
+| Updates | end of episode | every step |
+| Target | actual return $G_t$ | $r + \gamma V(s')$ |
+| Bias / variance | unbiased, high variance | biased, low variance |
+| Needs episodes to end? | yes | no |
+
+In the walk, TD(0) typically settles faster and steadier because each update is small
+and low-variance, while MC jolts states by the full episode outcome. TD also works in
+**continuing** tasks that never terminate — a decisive practical advantage.
+
+## Takeaways
+
+- Value estimation can learn from full returns (MC) or from each step (TD).
+- TD(0) bootstraps: it updates toward $r + \gamma V(s')$ using its own estimate.
+- The TD error $\delta = r + \gamma V(s') - V(s)$ drives the update.
+- TD trades a little bias for much lower variance and learns online, without waiting
+  for episodes to end.
+
+## References
+
+- Sutton & Barto, [*Reinforcement Learning: An Introduction*](http://incompleteideas.net/book/the-book.html) — Chapter 6 (Temporal-Difference Learning).
+- Sutton, [*Learning to Predict by the Methods of Temporal Differences*](https://link.springer.com/article/10.1007/BF00115009), Machine Learning, 1988.

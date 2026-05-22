@@ -1,0 +1,84 @@
+---
+title: Undoing Changes
+track: git
+order: 4
+summary: Reset moves a branch pointer, revert adds an inverse commit, restore fixes files, and reflog rescues "lost" commits.
+difficulty: medium
+---
+
+import GitUndoVisualizer from '@/components/viz/GitUndoVisualizer.tsx';
+
+Sooner or later you commit something wrong. Git gives you several undo tools, and
+the trick is knowing which one *moves history*, which one *adds to it*, and which
+one just touches files. Step through each mode below and watch the `main` pointer.
+
+<GitUndoVisualizer client:visible />
+
+## reset: move the branch pointer
+
+`git reset <commit>` slides the current branch back to an earlier commit. What
+happens to the changes from the commits you skipped depends on the flag:
+
+```bash
+git reset --soft HEAD~1   # move pointer; keep changes STAGED
+git reset --mixed HEAD~1  # move pointer; keep changes, UNSTAGED (default)
+git reset --hard HEAD~1   # move pointer AND discard changes — destructive
+```
+
+`--soft` is great for squashing your last few commits into one. `--mixed` (the
+default) un-commits but leaves your edits in the working tree. `--hard` throws the
+work away entirely, so reach for it carefully. Because reset *rewrites* where the
+branch points, avoid it on commits you have already pushed.
+
+## revert: add an inverse commit
+
+`git revert <commit>` does the opposite philosophy: instead of erasing history, it
+creates a **new commit** whose diff is the inverse of the target. The original
+commit stays in the log forever.
+
+```bash
+git revert HEAD       # make a new commit that undoes the last one
+```
+
+If the math helps: a commit applies a change $\Delta$, and `revert` appends a
+commit applying $-\Delta$, so the net effect on the files is zero while the history
+keeps growing forward. This is the **safe** way to undo something that is already
+shared, because it does not rewrite anyone else's history.
+
+## restore: fix files, not history
+
+`git restore` works at the file level and never moves branch pointers:
+
+```bash
+git restore app.js              # discard unstaged edits to app.js
+git restore --staged app.js     # unstage app.js (keep the edits)
+```
+
+## reflog: the safety net
+
+Even a `git reset --hard` rarely destroys a commit immediately. Git keeps a
+**reflog** — a log of every position `HEAD` has held. Find the old commit's hash
+there and point a branch back at it:
+
+```bash
+git reflog                       # list recent HEAD positions
+git reset --hard HEAD@{1}        # jump back to where HEAD was one move ago
+```
+
+The visualizer's "reflog recover" mode shows exactly this: a commit that looked
+lost is still in the reflog and gets restored. (Unreferenced commits are only
+pruned later by garbage collection, so act reasonably soon.)
+
+## Takeaways
+
+- `reset` moves the branch pointer; `--soft`/`--mixed`/`--hard` decide what
+  happens to your changes — `--hard` is destructive.
+- `revert` adds a new inverse commit and is the safe choice for shared history.
+- `restore` operates on files only and never rewrites the commit graph.
+- `reflog` records where `HEAD` has been, so most "lost" commits are recoverable.
+
+## References
+
+- [Pro Git — Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things)
+- [Pro Git — Reset Demystified](https://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified)
+- [git reflog documentation](https://git-scm.com/docs/git-reflog)

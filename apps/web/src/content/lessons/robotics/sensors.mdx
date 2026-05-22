@@ -1,0 +1,76 @@
+---
+title: Sensors & Noise
+track: robotics
+order: 8
+summary: How robots perceive — encoders, IMUs, LIDAR, and cameras, plus sampling and the noise every reading carries.
+difficulty: medium
+---
+
+import LidarScan from '@/components/viz/LidarScan.tsx';
+
+Every estimate a robot makes starts with a **sensor**, and every sensor is imperfect:
+it samples reality at discrete instants, with limited range and resolution, and adds
+**noise**. Understanding what each sensor measures — and how it lies — is the
+foundation under localization, SLAM, and control.
+
+The visualizer sweeps a **2D LIDAR** around a room. Each beam returns the distance to
+the nearest surface, and the returns form a **point cloud**. Drag the noise slider:
+at zero the points sit exactly on the walls; raise it and they scatter, more so at
+longer range — just like real hardware.
+
+<LidarScan client:visible />
+
+## The common sensors
+
+- **Encoders** — count wheel or joint rotation for **odometry**. Cheap and precise
+  per step, but errors **integrate**, so position drifts over distance.
+- **IMU** (inertial measurement unit) — accelerometers and gyroscopes report
+  acceleration and angular rate. Great short-term, but integrating twice to get
+  position lets bias **drift** quickly.
+- **LIDAR** — fires laser beams and times the reflections to measure range, producing
+  the point cloud above. Accurate geometry; struggles with glass and rain.
+- **Cameras** — dense, rich, cheap pixels, but they need heavy computation to recover
+  geometry and falter in poor light.
+
+These split into **proprioceptive** (about the robot itself: encoders, IMU) and
+**exteroceptive** (about the world: LIDAR, cameras).
+
+## Sampling
+
+Sensors are **discrete**. A reading arrives every $\Delta t = 1/f$ seconds at sample
+rate $f$, and a scanner has finite **angular resolution**. Sample too slowly and you
+miss fast events — the **Nyquist** limit (Math track) says you must sample faster than
+twice the highest frequency you care about. Resolution and rate bound everything
+downstream.
+
+## Noise
+
+A real reading is the true value plus error. The standard model is **additive
+Gaussian** noise,
+
+$$
+z = z^{\star} + \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, \sigma^2),
+$$
+
+where $z^{\star}$ is the true measurement and $\sigma$ is the noise standard deviation —
+the slider in the demo. Larger $\sigma$ means a wider spread of returns. Often
+$\sigma$ itself **grows with range** (more distant points are noisier), which is why
+the far walls scatter more than the near ones.
+
+Beyond Gaussian noise, sensors also suffer **bias** (a constant offset), **outliers**
+(spurious returns off reflections), and **quantization** from finite resolution. This
+is exactly why robots **fuse** many sensors and track **uncertainty** explicitly — a
+filter weights each reading by how much, given its $\sigma$, it should be trusted.
+
+## Takeaways
+
+- Sensors are proprioceptive (encoders, IMU) or exteroceptive (LIDAR, cameras); each
+  has distinct strengths and failure modes.
+- Sampling is discrete in time and resolution; the rate bounds what you can observe.
+- Real readings carry noise (often Gaussian, growing with range) plus bias and
+  outliers, which downstream estimators model and fuse.
+
+## References
+
+- Thrun, Burgard & Fox, [*Probabilistic Robotics*](https://mitpress.mit.edu/9780262201629/probabilistic-robotics/) — Ch. 6 (sensor models, including beam and range models).
+- Siegwart, Nourbakhsh & Scaramuzza, [*Introduction to Autonomous Mobile Robots*](https://mitpress.mit.edu/9780262015356/introduction-to-autonomous-mobile-robots/) — Ch. 4 (perception and sensors).

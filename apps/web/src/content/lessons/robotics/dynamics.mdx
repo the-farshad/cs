@@ -1,0 +1,86 @@
+---
+title: Dynamics
+track: robotics
+order: 7
+summary: Beyond kinematics — forces, torques, mass and inertia, and integrating the equations of motion.
+difficulty: hard
+---
+
+import PendulumDynamics from '@/components/viz/PendulumDynamics.tsx';
+
+Kinematics tells you **where** a robot's parts are for a given set of joint angles.
+**Dynamics** asks the harder question: **why** they move that way — how forces and
+torques, fighting mass and inertia, produce acceleration over time. You cannot make a
+fast arm or a balancing robot without it.
+
+The visualizer integrates a **damped pendulum**, the simplest non-trivial dynamical
+system. The left panel swings the bob; the right plots its **phase portrait** (angle
+versus angular velocity). Drag the sliders for length, damping, and mass, then press
+play to step the equations of motion forward in time.
+
+<PendulumDynamics client:visible />
+
+## From forces to acceleration
+
+The foundation is **Newton's second law**, $F = ma$, and its rotational twin for
+spinning bodies,
+
+$$
+\tau = I\,\alpha,
+$$
+
+where $\tau$ is **torque**, $I$ is the **moment of inertia** (how mass is distributed
+about the axis), and $\alpha$ is angular acceleration. Mass resists linear
+acceleration; inertia resists angular acceleration. Both are why a heavy arm cannot
+stop on a dime.
+
+## Equations of motion
+
+For the pendulum, summing the gravitational torque and a damping torque gives a
+second-order **equation of motion**:
+
+$$
+\ddot{\theta} = -\frac{g}{L}\sin\theta \;-\; b\,\dot{\theta}.
+$$
+
+The $\sin\theta$ term is the restoring pull of gravity; the $b\dot\theta$ term bleeds
+off energy. There is no closed-form solution for large swings, so we **simulate**.
+
+## Integrating forward in time
+
+To animate the system we turn the equation into first-order updates and step it with a
+small time increment $\Delta t$ (**semi-implicit Euler**, which stays stable here):
+
+$$
+\dot{\theta} \;\leftarrow\; \dot{\theta} + \ddot{\theta}\,\Delta t,
+\qquad
+\theta \;\leftarrow\; \theta + \dot{\theta}\,\Delta t.
+$$
+
+Repeat thousands of times and the trajectory emerges. In the phase portrait, damping
+makes the state **spiral inward** to the resting equilibrium at the origin; set
+damping to zero and energy is conserved, so the orbit becomes a closed loop. Smaller
+$\Delta t$ means more accuracy at more compute — the same trade-off behind every
+physics engine.
+
+## Why robots care
+
+Robot arms obey the **manipulator equation**
+$M(q)\ddot q + C(q,\dot q)\dot q + g(q) = \tau$, where the inertia matrix $M$, the
+Coriolis term $C$, and gravity $g$ all depend on configuration. **Inverse dynamics**
+runs it backward — *what torques achieve this motion?* — to drive motors precisely,
+plan energy-efficient trajectories, and keep legged robots upright.
+
+## Takeaways
+
+- Dynamics relates forces and torques to acceleration through mass and inertia
+  ($F = ma$, $\tau = I\alpha$).
+- A system's equations of motion are differential equations; most are solved by
+  numerical integration over small time steps.
+- Robot control relies on dynamics — the manipulator equation and inverse dynamics
+  turn desired motion into motor torques.
+
+## References
+
+- Lynch & Park, [*Modern Robotics*](https://hades.mech.northwestern.edu/index.php/Modern_Robotics) — Ch. 8 (dynamics of open chains).
+- Featherstone, [*Rigid Body Dynamics Algorithms*](https://link.springer.com/book/10.1007/978-1-4899-7560-7) — efficient forward and inverse dynamics.

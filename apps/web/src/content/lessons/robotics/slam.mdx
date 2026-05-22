@@ -1,0 +1,74 @@
+---
+title: SLAM
+track: robotics
+order: 6
+summary: Build a map while localizing within it — occupancy grids, pose uncertainty, and loop closure.
+difficulty: hard
+---
+
+import OccupancyGridSLAM from '@/components/viz/OccupancyGridSLAM.tsx';
+
+Localization assumes you already have a **map**. But what if you don't? **SLAM** —
+**Simultaneous Localization And Mapping** — has the robot build a map of an unknown
+environment *while* tracking its own pose inside that same, half-built map. It is the
+technology behind self-mapping vacuums, warehouse robots, and indoor drones.
+
+Below, a robot drives a loop through a room, firing range beams at each pose. Cells a
+beam passes through are carved as **free**; the cell it strikes is marked
+**occupied** — together they fill an **occupancy grid**. The violet ellipse is the
+robot's growing **pose uncertainty**. Drive it around and watch the loop closure at
+the end snap the drift away.
+
+<OccupancyGridSLAM client:visible />
+
+## The chicken-and-egg problem
+
+To build a good map you need to know where you are; to know where you are you need a
+map. SLAM does both at once, estimating the joint posterior over the **whole path**
+and the **map** together:
+
+$$
+p\big(x_{1:t},\, m \mid z_{1:t},\, u_{1:t}\big).
+$$
+
+Solving for both couples them: every new observation refines the map *and* the pose
+estimate. There is no fixed reference, so errors in one feed into the other.
+
+## Occupancy grids
+
+A common map is the **occupancy grid**: the world is diced into cells, each holding
+the probability $p(m_i)$ that it is occupied. Beams update cells with a sensor model
+and are accumulated in **log-odds**, which makes repeated evidence a simple sum:
+
+$$
+\ell_i \;\leftarrow\; \ell_i + \log\frac{p(m_i \mid z_t)}{1 - p(m_i \mid z_t)}.
+$$
+
+Free, occupied, and unknown cells emerge as many noisy scans average out. The map is
+clean only if the **poses** that placed those scans were accurate.
+
+## Drift and loop closure
+
+Pose comes from **odometry** — integrating wheel motion — but small errors compound,
+so the estimate **drifts** ever further from the truth (the ellipse swells). The fix
+is **loop closure**: when the robot recognizes a place it has already mapped, it adds
+a constraint tying "here" back to "there." That single link lets the whole trajectory
+be re-optimized, snapping accumulated error out of both the path and the map.
+
+Modern systems treat this as a **graph**: nodes are poses, edges are motion and
+loop-closure constraints, and a least-squares solver finds the configuration that
+best satisfies them all — **graph-based** (or pose-graph) SLAM. Filtering approaches
+like **EKF-SLAM** instead track poses and landmarks in one growing covariance matrix.
+
+## Takeaways
+
+- SLAM estimates the path and the map jointly — neither is known in advance.
+- Occupancy grids store per-cell occupancy probabilities, updated in log-odds from
+  range scans.
+- Odometry drift accumulates; loop closure recognizes revisited places and corrects
+  the whole trajectory, the defining trick of SLAM.
+
+## References
+
+- Thrun, Burgard & Fox, [*Probabilistic Robotics*](https://mitpress.mit.edu/9780262201629/probabilistic-robotics/) — Ch. 9 (occupancy grids), Ch. 10–13 (EKF and graph SLAM).
+- Grisetti, Kümmerle, Stachniss & Burgard, [*A Tutorial on Graph-Based SLAM*](https://ieeexplore.ieee.org/document/5681215) — pose graphs and optimization.

@@ -1,0 +1,105 @@
+---
+title: Files & Processes
+track: bash
+order: 7
+summary: Read and set Unix permissions (the rwx bits and their octal form) and manage running programs with ps, kill, jobs, and background control.
+difficulty: medium
+---
+
+import PermissionBitsEditor from '@/components/viz/PermissionBitsEditor.tsx';
+
+Two things every shell user must control: **who may touch a file**, and **what
+is running**. The first is the permission model; the second is process and job
+control. Both look cryptic until you see the structure underneath.
+
+Toggle the read/write/execute bits below for the owner, group, and others, and
+watch the symbolic string (`rwxr-x---`) and the octal form (`750`) update
+together.
+
+<PermissionBitsEditor client:visible />
+
+## The permission bits
+
+Every file has three permission *classes* — **user** (owner), **group**, and
+**other** — each with three bits: **r**ead, **w**rite, **e**x*ecute. `ls -l`
+shows them as a 9-character string after the file type:
+
+```bash
+$ ls -l deploy.sh
+-rwxr-x---  1 learner staff  deploy.sh
+ │└┬┘└┬┘└┬┘
+ │ u  g  o
+ type
+```
+
+Here the owner has `rwx`, the group has `r-x`, others have nothing.
+
+## Octal: each digit is a class
+
+Each class is a single octal digit, summing **r=4, w=2, x=1**:
+
+$$\text{r}=4,\quad \text{w}=2,\quad \text{x}=1 \;\Rightarrow\; \text{rwx} = 4+2+1 = 7$$
+
+So `rwxr-x---` is `7 5 0`. Common values worth memorizing:
+
+- `644` — `rw-r--r--`: a normal file (owner edits, everyone reads).
+- `755` — `rwxr-xr-x`: a script or directory anyone may run/enter.
+- `600` — `rw-------`: private file (owner only). Good for secrets and keys.
+
+For a **directory**, `x` means "may enter / traverse it" rather than "execute".
+
+## chmod and chown
+
+```bash
+chmod 755 deploy.sh        # octal: set all nine bits at once
+chmod +x deploy.sh         # symbolic: add execute for all classes
+chmod u+x,go-w deploy.sh   # add x for user; remove w for group/other
+chmod -R 644 docs/         # recurse into a directory tree
+
+chown alice file.txt       # change the owner
+chown alice:staff file.txt # change owner and group
+```
+
+Octal sets everything absolutely; symbolic (`+`, `-`, `=` with `u`/`g`/`o`/`a`)
+adjusts relative to what's there.
+
+## Processes
+
+A running program is a **process** with a numeric PID:
+
+```bash
+ps aux                 # every process: user, PID, CPU, memory, command
+ps aux | grep nginx    # find a specific one
+top                    # live, sorted view (q to quit)
+kill 4321              # ask process 4321 to terminate (signal TERM)
+kill -9 4321           # force it (signal KILL) — last resort
+pkill -f "node app"    # kill by matching the command line
+```
+
+## Jobs: background and foreground
+
+The shell manages programs you start from it as **jobs**:
+
+```bash
+sleep 60 &        # run in the background; prints [1] 4321 (job# and PID)
+jobs              # list this shell's jobs
+fg %1             # bring job 1 back to the foreground
+bg %1             # resume a stopped job in the background
+```
+
+Press `Ctrl-Z` to suspend the foreground job, then `bg` to keep it running while
+you get your prompt back. Append `&` to launch a long task without blocking the
+terminal.
+
+## Takeaways
+
+- Permissions are r/w/x for user, group, and other; `ls -l` shows them as `rwx`.
+- Octal encodes each class as one digit (r=4, w=2, x=1), so `rwxr-x---` is `750`.
+- `chmod` sets bits (octal or symbolic); `chown` sets owner and group.
+- `ps`/`kill` manage processes; `&`, `jobs`, `fg`, `bg`, and `Ctrl-Z` manage jobs.
+
+## References
+
+- [GNU Coreutils: chmod and File Permissions](https://www.gnu.org/software/coreutils/manual/html_node/File-permissions.html)
+- [GNU Bash Manual: Job Control](https://www.gnu.org/software/bash/manual/html_node/Job-Control.html)
+- [BashGuide: Special Characters and Job Control](https://mywiki.wooledge.org/BashGuide/JobControl)

@@ -1,0 +1,98 @@
+---
+title: Variables & Expansion
+track: bash
+order: 4
+summary: Master variables, quoting, parameter expansion, command and arithmetic substitution, and globbing — and the exact order the shell applies them.
+difficulty: medium
+---
+
+import ExpansionStepper from '@/components/viz/ExpansionStepper.tsx';
+
+Before bash runs a command, it **expands** the line you typed: it substitutes
+variables, runs sub-commands, does arithmetic, splits the result into words, and
+matches filename patterns. These steps happen in a *fixed order*, and getting the
+order wrong is the source of countless shell bugs.
+
+The stepper below rewrites one command line stage by stage, ending in the final
+argument list (`argv`) the program actually receives. Step through each example.
+
+<ExpansionStepper client:visible />
+
+## Variables and quoting
+
+Assign with no spaces around `=`; read back with `$`:
+
+```bash
+name="Ada Lovelace"
+echo $name      # Ada Lovelace  -> but TWO arguments after word-splitting
+echo "$name"    # Ada Lovelace  -> ONE argument; quotes preserve the space
+```
+
+The difference between quotes is the single most important rule:
+
+- **Single quotes** `'...'` are literal: *nothing* inside is expanded.
+- **Double quotes** `"..."` expand `$var`, `$(...)`, and `$(( ))`, but suppress
+  word-splitting and globbing.
+
+```bash
+echo '$name costs $5'   # $name costs $5
+echo "$name is here"    # Ada Lovelace is here
+```
+
+Rule of thumb: **always double-quote your variable expansions** unless you
+specifically want splitting or globbing.
+
+## Parameter expansion
+
+`${...}` does more than fetch a value — it can supply defaults and trim text:
+
+```bash
+echo "${greeting:-hello}"   # use "hello" if greeting is unset/empty
+echo "${count:=0}"          # also ASSIGN the default back to count
+file=report.tar.gz
+echo "${file%.gz}"          # report.tar   -> %  strips shortest suffix
+echo "${file%%.*}"          # report       -> %% strips longest suffix
+echo "${file#*.}"           # tar.gz       -> #  strips shortest prefix
+echo "${#file}"             # 14           -> length
+```
+
+## Command and arithmetic substitution
+
+`$(...)` runs a command and pastes its standard output into the line. `$(( ))`
+evaluates integer math:
+
+```bash
+today=$(date +%F)            # capture command output
+files=$(ls | wc -l)          # count entries in the current directory
+echo "$(( (3 + 4) * 2 ))"    # 14  -> normal arithmetic precedence
+i=0; echo "$(( i + 1 ))"     # 1
+```
+
+## Word splitting and globbing — last
+
+After substitution, *unquoted* results are split on `$IFS` (space, tab,
+newline), then patterns are matched against filenames:
+
+- `*` matches any run of characters, `?` matches one, `[abc]` a character set.
+- A pattern that matches nothing is left unchanged (by default).
+
+```bash
+for f in *.txt; do echo "$f"; done   # loops over matching files
+```
+
+This is exactly why `rm "$file"` is safe but `rm $file` can detonate when the
+name has spaces or globs.
+
+## Takeaways
+
+- Expansion order is fixed: brace, tilde, parameter/command/arithmetic, word
+  splitting, then globbing.
+- Single quotes are literal; double quotes expand but block splitting and globs.
+- Double-quote variable expansions by default to avoid word-splitting surprises.
+- `${var:-default}`, `${var%pat}`, `$(...)`, and `$(( ))` are everyday tools.
+
+## References
+
+- [GNU Bash Manual: Shell Expansions](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html)
+- [GNU Bash Manual: Shell Parameter Expansion](https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html)
+- [BashGuide: Parameters and Word Splitting](https://mywiki.wooledge.org/BashGuide/Parameters)

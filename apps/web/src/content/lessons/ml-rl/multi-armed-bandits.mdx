@@ -1,0 +1,86 @@
+---
+title: Multi-Armed Bandits
+track: ml-rl
+order: 5
+summary: The purest exploration-vs-exploitation problem — ε-greedy, UCB, estimated action values, and regret.
+difficulty: medium
+---
+
+import BanditVisualizer from '@/components/viz/BanditVisualizer.tsx';
+
+A **multi-armed bandit** is reinforcement learning stripped to its core: there is no
+state to navigate, just $k$ slot machines (the "arms"), each paying a random reward
+from an unknown distribution. Pull arms one at a time to maximize total reward. With
+no transitions or planning, what remains is the central dilemma — **exploration vs
+exploitation**.
+
+Press **Pull** below. Each bar is the learner's *estimated* mean for an arm; the
+dashed lines are the unknown *true* means. The lower chart tracks **cumulative
+regret**. Switch between ε-greedy and UCB and watch how fast each homes in on the
+best arm (arm 3).
+
+<BanditVisualizer client:visible />
+
+## Estimated action values
+
+The learner keeps a running estimate $Q_t(a)$ of each arm's mean — just the average
+reward seen from that arm so far:
+
+$$
+Q_t(a) = \frac{1}{N_t(a)} \sum_{i=1}^{t}\, r_i \,\mathbf{1}[a_i = a]
+$$
+
+where $N_t(a)$ is how many times arm $a$ has been pulled. By the law of large numbers
+these estimates converge to the true means — but only for arms you actually pull,
+which is exactly why exploration matters.
+
+## ε-greedy
+
+The simplest strategy: most of the time exploit the current best arm, but with
+probability $\varepsilon$ pick a random arm to keep learning.
+
+```
+a = random arm           with probability ε
+a = argmaxₐ Qₜ(a)        otherwise
+```
+
+It works, but it keeps exploring arms it already knows are bad. A larger
+$\varepsilon$ explores faster yet wastes more pulls; the trade-off shows up directly
+in the regret curve.
+
+## UCB: optimism under uncertainty
+
+**Upper Confidence Bound** explores smarter. It adds a bonus to arms it is *uncertain*
+about — ones pulled few times — and picks the highest optimistic estimate:
+
+$$
+a_t = \arg\max_a \left[\, Q_t(a) + c\,\sqrt{\frac{\ln t}{N_t(a)}} \,\right]
+$$
+
+The bonus shrinks as $N_t(a)$ grows, so UCB naturally stops over-exploring well-known
+arms and focuses on the genuinely promising ones — usually beating ε-greedy in the
+visualizer.
+
+## Regret
+
+We measure performance by **regret**: how much reward was lost versus always playing
+the best arm $a^* $. After $T$ pulls,
+
+$$
+\text{Regret}(T) = \sum_{t=1}^{T} \bigl(\, \mu^* - \mu_{a_t} \,\bigr)
+$$
+
+Good strategies achieve regret growing only as $O(\log T)$ — the curve flattens as the
+learner stops making mistakes.
+
+## Takeaways
+
+- A bandit is RL with no states: pull $k$ arms to maximize reward.
+- Action-value estimates $Q_t(a)$ are running averages and converge only for arms you pull.
+- ε-greedy explores randomly; UCB explores by optimism, favoring uncertain arms.
+- Regret measures lost reward; the best strategies grow it only logarithmically.
+
+## References
+
+- Sutton & Barto, [*Reinforcement Learning: An Introduction*](http://incompleteideas.net/book/the-book.html) — Chapter 2 (Multi-armed Bandits).
+- Auer, Cesa-Bianchi & Fischer, [*Finite-time Analysis of the Multiarmed Bandit Problem*](https://link.springer.com/article/10.1023/A:1013689704352), Machine Learning, 2002.

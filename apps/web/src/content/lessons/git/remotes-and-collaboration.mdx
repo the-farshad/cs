@@ -1,0 +1,97 @@
+---
+title: Remotes & Collaboration
+track: git
+order: 7
+summary: Clone, fetch, pull, and push move commits between your local repo and a remote called origin, with tracking branches telling you when you're ahead or behind.
+difficulty: medium
+---
+
+import GitRemoteVisualizer from '@/components/viz/GitRemoteVisualizer.tsx';
+
+Everything so far happened in one repository. Collaboration adds a second one — a
+**remote**, conventionally named `origin` — that everyone shares. Your commands
+copy commits between your local clone and that remote. Step through a full
+round-trip below: commit, push, a teammate's commit, fetch, then pull.
+
+<GitRemoteVisualizer client:visible />
+
+## Clone and origin
+
+`git clone <url>` makes a full local copy of a remote repo and records that remote
+as `origin`. Your local `main` starts pointing at the same commit as the remote's.
+
+```bash
+git clone https://example.com/team/app.git
+git remote -v        # origin  https://example.com/team/app.git (fetch/push)
+```
+
+## Tracking branches: ahead and behind
+
+Alongside your local `main`, Git keeps a **remote-tracking branch** called
+`origin/main`: a read-only bookmark of where the remote was the last time you
+talked to it. Comparing the two tells you your status:
+
+```bash
+git status
+# Your branch is ahead of 'origin/main' by 1 commit.
+```
+
+- **Ahead** $n$: you have $n$ local commits the remote doesn't have yet — `push`
+  them.
+- **Behind** $n$: the remote has $n$ commits you don't — `pull` them.
+- Both at once means the branches **diverged** and need a merge or rebase.
+
+## fetch vs pull
+
+These two are often confused. **`fetch`** downloads new commits and updates
+`origin/main`, but does **not** touch your working branch — it is purely
+informational until you decide what to do. **`pull`** is `fetch` followed by an
+integration of those commits into your branch.
+
+```bash
+git fetch origin     # update origin/main only; your main is unchanged
+git pull origin main # fetch, then merge (or --rebase) into your main
+```
+
+When your branch hasn't diverged, the integration is just a fast-forward, exactly
+as in the visualizer's final step.
+
+## push
+
+`push` is the mirror image: it uploads your local commits to the remote and moves
+the remote's branch forward.
+
+```bash
+git push origin main          # send local commits up to origin/main
+git push -u origin feature    # push and set up tracking for a new branch
+```
+
+Git refuses a push that isn't a fast-forward (someone pushed first) — `fetch` and
+integrate, then push again. Avoid `--force`; prefer `--force-with-lease`, which
+fails if the remote moved unexpectedly.
+
+## The fork and pull-request flow
+
+On shared platforms you often can't push to the main repo directly. Instead you
+**fork** it (your own server-side copy), push your branch to *your* fork, and open
+a **pull request** asking the upstream project to merge your branch. Reviewers
+discuss and approve, then it merges into the upstream `main`. It's the same
+push/fetch machinery, just with two remotes (`origin` = your fork, `upstream` =
+the original).
+
+## Takeaways
+
+- `clone` copies a remote and records it as `origin`; `origin/main` tracks where
+  the remote was last seen.
+- **Ahead/behind** compares your branch to its tracking branch — push when ahead,
+  pull when behind.
+- `fetch` only updates tracking refs; `pull` = `fetch` + merge/rebase into your
+  branch.
+- `push` uploads your commits and must be a fast-forward; the fork/PR flow layers
+  review on top of the same commands.
+
+## References
+
+- [Pro Git — Working with Remotes](https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes)
+- [Pro Git — Remote Branches](https://git-scm.com/book/en/v2/Git-Branching-Remote-Branches)
+- [git push documentation](https://git-scm.com/docs/git-push)

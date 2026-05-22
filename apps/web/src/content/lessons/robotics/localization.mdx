@@ -1,0 +1,82 @@
+---
+title: Localization
+track: robotics
+order: 5
+summary: Estimate the robot's pose from noisy motion and sensors with Monte Carlo (particle filter) localization.
+difficulty: hard
+---
+
+import ParticleFilterLocalization from '@/components/viz/ParticleFilterLocalization.tsx';
+
+A robot rarely knows exactly **where it is**. Wheels slip, sensors are noisy, and a
+known map only helps if you can place yourself inside it. **Localization** is the
+problem of estimating the robot's **pose** $x_t$ — its position and orientation —
+from a stream of motion commands $u_{1:t}$ and sensor readings $z_{1:t}$, given a
+map $m$.
+
+The visualizer below runs **Monte Carlo localization** on a 1D corridor with three
+doors. The robot drives right; its only sensor noisily reports "door" or "wall."
+The amber cloud is a swarm of guesses about the pose. Step through it and watch the
+cloud collapse onto the true pose (green) as readings pile up.
+
+<ParticleFilterLocalization client:visible />
+
+## A belief, not a point
+
+Instead of a single guess, we track a **belief**: a probability distribution over
+all possible poses. After incorporating everything so far, the belief is the
+posterior
+
+$$
+bel(x_t) = p\big(x_t \mid z_{1:t},\, u_{1:t},\, m\big).
+$$
+
+Each step updates it in two phases, exactly like the Kalman filter from the
+perception lesson — but here the belief can be **any** shape, not just a single
+Gaussian bump.
+
+## Predict, then correct
+
+**Predict (motion update).** Apply the motion command and its uncertainty, pushing
+the belief forward through the motion model $p(x_t \mid u_t, x_{t-1})$. This spreads
+the belief out — moving makes you less certain.
+
+**Correct (measurement update).** Reweight by how well each pose explains the latest
+reading via the sensor model $p(z_t \mid x_t, m)$:
+
+$$
+bel(x_t) \;\propto\; p(z_t \mid x_t, m)\, \overline{bel}(x_t).
+$$
+
+A pose that predicts "door" when the sensor saw a door gains weight; one that
+predicts "wall" loses it. Correcting **sharpens** the belief.
+
+## The particle filter
+
+A **particle filter** represents the belief with a finite set of samples
+(particles), each a hypothesis $x_t^{[i]}$ with a weight $w_t^{[i]}$. Each step:
+
+1. **Move** every particle through the motion model (with noise).
+2. **Weight** each by the sensor likelihood: $w_t^{[i]} \propto p(z_t \mid x_t^{[i]}, m)$.
+3. **Resample** — draw a new set in proportion to the weights, so likely
+   hypotheses multiply and unlikely ones die out.
+
+With enough particles this approximates the true posterior for **arbitrary**,
+multi-peaked distributions — which is why it shines at the **global** localization
+and **kidnapped robot** problems, where the robot starts with no idea where it is.
+Notice in the demo that ambiguous readings keep several clusters alive until a
+distinctive sequence of doors picks the winner.
+
+## Takeaways
+
+- Localization estimates pose by maintaining a belief — a distribution over poses,
+  not a single point.
+- Predict with the motion model (spreads the belief), correct with the sensor model
+  (sharpens it).
+- Particle filters approximate arbitrary, multi-modal beliefs with weighted samples
+  and resampling, handling global localization where a single Gaussian cannot.
+
+## References
+
+- Thrun, Burgard & Fox, [*Probabilistic Robotics*](https://mitpress.mit.edu/9780262201629/probabilistic-robotics/) — Ch. 4 (nonparametric filters) and Ch. 8 (Monte Carlo localization).
+- Lynch & Park, [*Modern Robotics*](https://hades.mech.northwestern.edu/index.php/Modern_Robotics) — configuration and pose representations.

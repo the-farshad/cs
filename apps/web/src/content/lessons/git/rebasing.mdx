@@ -1,0 +1,83 @@
+---
+title: Rebasing
+track: git
+order: 5
+summary: Rebase replays your commits onto a new base for a linear history, while merge ties branches with a merge commit — and why you never rebase shared history.
+difficulty: medium
+---
+
+import GitRebaseVisualizer from '@/components/viz/GitRebaseVisualizer.tsx';
+
+When your branch and `main` have both moved on, you have two ways to integrate:
+**merge** or **rebase**. Merge keeps the true shape of history; rebase rewrites
+your commits so the history reads as a straight line. Toggle between the two below
+and watch what happens to the commit hashes.
+
+<GitRebaseVisualizer client:visible />
+
+## Replaying onto a new base
+
+A **rebase** takes the commits that are unique to your branch, sets them aside as
+patches, rewinds your branch to the tip of the target, and **replays** each patch
+on top. Because every replayed commit has a new parent, it also gets a **new
+hash** — these are brand-new commits with the same changes (`e1` becomes `e1'`).
+
+```bash
+git switch feature
+git rebase main          # replay feature's commits on top of main's tip
+```
+
+The result is a clean, linear history: `A B C D e1' e2'`. Compare that with a
+merge, which instead records a **merge commit** `M` with two parents and leaves
+every original commit exactly where it was.
+
+```bash
+git switch main
+git merge feature        # creates a two-parent merge commit M
+```
+
+## Interactive rebase
+
+`git rebase -i` opens an editor listing your commits, where you can rewrite the
+sequence before it is replayed. The common verbs:
+
+```bash
+git rebase -i HEAD~3
+# pick   abc123 add login form
+# squash def456 fix typo        <- folds into the commit above
+# reword ghi789 tidy up         <- replay, but edit the message
+```
+
+- **squash** (or `fixup`) combines several commits into one — perfect for turning
+  "wip", "fix", "oops" into a single clean commit.
+- **reorder** by moving lines; **drop** by deleting them.
+
+Conceptually it is still the same machine as a plain rebase: lift commits off,
+optionally edit the list, then replay them one by one.
+
+## The golden rule
+
+Rebasing creates *new* commits and abandons the old ones. If you have already
+pushed those commits and a teammate has based work on them, rewriting them splits
+history in two and forces painful reconciliation. So:
+
+> **Never rebase commits that exist outside your own repository.**
+
+Rebase freely on your *local, unpushed* work to tidy it up; once it is shared,
+prefer `merge` (or `revert`) instead. Both rebase and merge end at the same files
+— they differ only in what the recorded history looks like.
+
+## Takeaways
+
+- Rebase replays your commits onto a new base, producing a linear history with
+  **new hashes**.
+- Merge preserves history exactly and records the join with a two-parent merge
+  commit.
+- Interactive rebase (`-i`) lets you squash, reorder, reword, or drop commits
+  before replaying.
+- Golden rule: do not rebase commits you have already shared.
+
+## References
+
+- [Pro Git — Rebasing](https://git-scm.com/book/en/v2/Git-Branching-Rebasing)
+- [git rebase documentation](https://git-scm.com/docs/git-rebase)

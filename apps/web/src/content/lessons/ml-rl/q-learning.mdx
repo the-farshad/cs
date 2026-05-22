@@ -1,0 +1,76 @@
+---
+title: Q-Learning
+track: ml-rl
+order: 4
+summary: Model-free control — learn a Q-table from experience with the temporal-difference update and ε-greedy exploration.
+difficulty: hard
+---
+
+import QLearningGrid from '@/components/viz/QLearningGrid.tsx';
+
+In the [reinforcement learning](/learn/ml-rl/reinforcement-learning) lesson,
+value iteration assumed we *knew* the environment's rules. **Q-learning** drops that
+assumption: the agent learns purely from experience — by acting, observing rewards,
+and updating estimates. It is the canonical **model-free control** algorithm.
+
+Press **Learn** below. The agent starts at **S** with no knowledge; each cell shows
+its current $\max_a Q(s,a)$ and the greedy arrow. Watch a coherent policy crystallize
+from rewards alone. Drag $\varepsilon$ to change how much it explores, or shuffle for
+a fresh random seed.
+
+<QLearningGrid client:visible />
+
+## The Q-table
+
+Instead of a value per state, Q-learning stores an **action-value** $Q(s,a)$: the
+expected discounted return from taking action $a$ in state $s$ and acting greedily
+afterward. For a small world this is just a table with one row per state and one
+column per action. The optimal action-values satisfy the **Bellman optimality
+equation**:
+
+$$
+Q^*(s,a) = \mathbb{E}\!\left[\, r + \gamma \max_{a'} Q^*(s', a') \,\right]
+$$
+
+## The update
+
+After each transition $(s, a, r, s')$ we nudge $Q(s,a)$ toward the bootstrapped
+target $r + \gamma \max_{a'} Q(s',a')$:
+
+$$
+Q(s,a) \leftarrow Q(s,a) + \alpha\,\bigl[\, r + \gamma \max_{a'} Q(s',a') - Q(s,a) \,\bigr]
+$$
+
+The bracketed quantity is the **TD error** $\delta$. The learning rate $\alpha$ (here
+0.5) controls step size; the discount $\gamma$ (0.9) weights future reward. Crucially
+the target uses $\max_{a'}$ — Q-learning learns the value of the *greedy* policy even
+while behaving more randomly, which makes it an **off-policy** method.
+
+## ε-greedy exploration
+
+If the agent always took its current best action it might never discover a better
+route — the **exploration vs exploitation** trade-off. **ε-greedy** picks a random
+action with probability $\varepsilon$ and the greedy one otherwise:
+
+```
+a = random action      with probability ε
+a = argmaxₐ Q(s, a)    otherwise
+```
+
+Set $\varepsilon = 0$ in the visualizer and the agent often gets stuck; a little
+exploration lets it find the goal and propagate value back. Under standard conditions
+(every state-action visited infinitely often, $\alpha$ decaying) Q-learning provably
+converges to $Q^*$.
+
+## Takeaways
+
+- Q-learning learns action-values $Q(s,a)$ from experience, with no model of the
+  environment.
+- Each step applies the TD update $Q(s,a) \mathrel{+}= \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]$.
+- It is off-policy: the $\max$ target learns the greedy policy regardless of behavior.
+- ε-greedy balances exploring new actions against exploiting known-good ones.
+
+## References
+
+- Sutton & Barto, [*Reinforcement Learning: An Introduction*](http://incompleteideas.net/book/the-book.html) — Chapter 6 (Temporal-Difference Learning).
+- Watkins & Dayan, [*Q-learning*](https://link.springer.com/article/10.1007/BF00992698), Machine Learning, 1992.

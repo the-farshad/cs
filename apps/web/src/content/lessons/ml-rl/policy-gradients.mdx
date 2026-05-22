@@ -1,0 +1,88 @@
+---
+title: Policy Gradients
+track: ml-rl
+order: 7
+summary: Optimize a parameterized policy directly — the REINFORCE idea, the log-likelihood trick, and how it contrasts with value-based RL.
+difficulty: hard
+---
+
+import PolicyGradientVisualizer from '@/components/viz/PolicyGradientVisualizer.tsx';
+
+Q-learning and TD learn *values* and read off a policy by acting greedily. **Policy
+gradient** methods skip the middleman: they parameterize the policy $\pi_\theta(a\mid s)$
+directly and adjust $\theta$ by gradient ascent on expected return. The core intuition
+of **REINFORCE** is simple — *push up the probability of actions that led to high
+return, push down the rest.*
+
+The visualizer below has one decision with four actions and a **softmax** policy. Each
+bar is the current probability $\pi_\theta(a)$; dashed lines mark each action's true
+mean reward. Press **Learn** and watch probability mass flow toward the best action
+(a2) as returns are observed.
+
+<PolicyGradientVisualizer client:visible />
+
+## A parameterized policy
+
+A common choice is the **softmax** over learnable preferences (logits) $\theta_a$:
+
+$$
+\pi_\theta(a) = \frac{e^{\theta_a}}{\sum_{b} e^{\theta_b}}
+$$
+
+This always yields a valid probability distribution, is differentiable in $\theta$, and
+naturally captures *stochastic* policies — sometimes the optimal behavior is to
+randomize. In deep RL the logits are the output of a neural network instead of a plain
+table.
+
+## The objective and its gradient
+
+We maximize the expected return $J(\theta) = \mathbb{E}_{\pi_\theta}[\,G\,]$. The
+**policy gradient theorem** gives a gradient we can estimate from sampled episodes —
+the "log-likelihood trick":
+
+$$
+\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\, G \,\nabla_\theta \log \pi_\theta(a) \,\right]
+$$
+
+REINFORCE turns this into a stochastic ascent step. After sampling action $a$ and
+observing return $G$:
+
+$$
+\theta \leftarrow \theta + \alpha\, G\, \nabla_\theta \log \pi_\theta(a)
+$$
+
+Each update scales the log-probability gradient by the return: good outcomes increase
+$\log \pi_\theta(a)$, bad ones decrease it. For the softmax, $\nabla_{\theta_i} \log \pi_\theta(a) = \mathbf{1}[i = a] - \pi_\theta(i)$.
+
+## Baselines reduce variance
+
+Raw returns make these estimates noisy. Subtracting a **baseline** $b$ (such as the
+average return) leaves the gradient unbiased but far less variable:
+
+$$
+\theta \leftarrow \theta + \alpha\,(G - b)\,\nabla_\theta \log \pi_\theta(a)
+$$
+
+Now only actions that beat the baseline get reinforced — the quantity $G - b$ is an
+estimate of the **advantage**. The visualizer uses a running-average baseline.
+
+## Policy-based vs value-based
+
+- **Value-based** (Q-learning): learn $Q$, act greedily. Great for discrete actions;
+  the policy is implicit and deterministic.
+- **Policy-based** (REINFORCE): learn $\pi_\theta$ directly. Handles **continuous**
+  action spaces and stochastic policies, but gradient estimates are high-variance.
+- **Actor-critic** combines both — a policy (actor) guided by a learned value function
+  (critic) as the baseline — and underlies most state-of-the-art RL.
+
+## Takeaways
+
+- Policy gradients optimize a parameterized policy $\pi_\theta$ directly, not via values.
+- REINFORCE updates $\theta \mathrel{+}= \alpha\, G\, \nabla_\theta \log \pi_\theta(a)$ — reinforce high-return actions.
+- A baseline subtracts the average return to cut variance, yielding the advantage.
+- Policy methods shine for continuous/stochastic actions; actor-critic blends policy and value.
+
+## References
+
+- Sutton & Barto, [*Reinforcement Learning: An Introduction*](http://incompleteideas.net/book/the-book.html) — Chapter 13 (Policy Gradient Methods).
+- Williams, [*Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning*](https://link.springer.com/article/10.1007/BF00992696), Machine Learning, 1992.

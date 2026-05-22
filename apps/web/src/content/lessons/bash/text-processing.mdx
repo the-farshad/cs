@@ -1,0 +1,87 @@
+---
+title: Text Processing
+track: bash
+order: 5
+summary: Slice, filter, and reshape text with grep, sed, awk, cut, sort, uniq, and tr — the workhorses of every shell pipeline.
+difficulty: medium
+---
+
+import PipelineVisualizer from '@/components/viz/PipelineVisualizer.tsx';
+
+Most shell work is *transforming text*: log lines, CSV rows, command output. A
+handful of small tools, chained with pipes, can do almost anything. Each reads
+lines, transforms them, and writes lines for the next stage.
+
+The visualizer below pushes a few lines through a real pipeline, showing each
+command's `stdin` and `stdout` so you can watch the text take shape.
+
+<PipelineVisualizer client:visible />
+
+## Selecting lines and columns
+
+- **`grep PATTERN`** keeps lines that match; `grep -v` *inverts* (drops matches);
+  `grep -i` ignores case; `grep -E` enables extended regex.
+- **`cut`** slices columns: `-d` sets the delimiter, `-f` picks fields.
+
+```bash
+grep -i error app.log              # lines mentioning "error" (any case)
+cut -d',' -f1,3 data.csv           # columns 1 and 3 of a CSV
+ps aux | grep -v grep | grep nginx # find nginx processes, hide the grep itself
+```
+
+## Sorting and counting
+
+`sort` orders lines; `uniq` collapses *adjacent* duplicates — so they are almost
+always paired, and `uniq -c` prefixes a count:
+
+```bash
+sort names.txt                 # alphabetical
+sort -n nums.txt               # numeric (10 after 9, not before)
+sort -rn nums.txt              # numeric, reversed (largest first)
+sort access.log | uniq -c | sort -rn   # the classic "top N" idiom
+```
+
+## Translating and substituting
+
+- **`tr`** translates or deletes *characters* (not words):
+  `tr 'A-Z' 'a-z'` lowercases; `tr -d ' '` deletes spaces; `tr -s ' '`
+  squeezes repeats.
+- **`sed`** does line-oriented edits; the substitute command is everywhere:
+
+```bash
+echo "hello world" | tr 'a-z' 'A-Z'    # HELLO WORLD
+sed 's/red/teal/'  styles.css          # replace FIRST "red" per line
+sed 's/red/teal/g' styles.css          # replace ALL with the g flag
+sed -n '2,5p'      file.txt            # print only lines 2 through 5
+```
+
+## awk: fields and conditions
+
+`awk` shines when text has columns. It splits each line into `$1`, `$2`, … (with
+`-F` choosing the separator) and runs a `condition { action }`:
+
+```bash
+awk '{ print $1 }'             access.log    # first field of every line
+awk -F',' '$3 > 100 { print $1 }' data.csv   # name where column 3 exceeds 100
+awk '{ sum += $1 } END { print sum }' nums.txt  # total a column
+```
+
+Put together, a single line answers real questions — e.g. the busiest client in
+a log:
+
+```bash
+cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head -n 5
+```
+
+## Takeaways
+
+- `grep`/`cut` select lines and columns; `sort`/`uniq` order and count them.
+- `uniq` only removes *adjacent* duplicates, so sort first (`sort | uniq -c`).
+- `tr` works on characters; `sed` edits lines; `awk` handles fields and math.
+- Compose these filters with pipes to answer questions in one line.
+
+## References
+
+- [GNU Coreutils Manual](https://www.gnu.org/software/coreutils/manual/html_node/index.html)
+- [GNU sed Manual](https://www.gnu.org/software/sed/manual/sed.html)
+- [BashGuide: Practices and Tools](https://mywiki.wooledge.org/BashGuide/Practices)

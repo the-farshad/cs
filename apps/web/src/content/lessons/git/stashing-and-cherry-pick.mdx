@@ -1,0 +1,76 @@
+---
+title: Stashing & Cherry-pick
+track: git
+order: 6
+summary: Stash shelves uncommitted work so your tree is clean, and cherry-pick copies a single commit from one branch onto another.
+difficulty: medium
+---
+
+import GitStashCherryVisualizer from '@/components/viz/GitStashCherryVisualizer.tsx';
+
+Two everyday tools that don't fit the merge/rebase story. **Stash** parks
+uncommitted edits aside so you can switch context with a clean tree. **Cherry-pick**
+copies one specific commit onto your current branch. Flip between the two demos
+below.
+
+<GitStashCherryVisualizer client:visible />
+
+## Stash: shelve work in progress
+
+You're halfway through an edit when an urgent fix lands. You don't want to commit
+half-finished work, but Git won't let you switch branches with a dirty tree. So
+shelve it:
+
+```bash
+git stash push -m "wip navbar"   # save tracked changes, clean the working tree
+git stash list                   # stash@{0}: On main: wip navbar
+# ... do the urgent thing, switch branches, pull ...
+git stash pop                    # reapply the changes and drop the entry
+```
+
+`pop` applies the top stash and removes it; `git stash apply` reapplies but
+**keeps** the entry so you can use it again. Use `--include-untracked` to stash new
+files too. The stash is a small stack: the most recent push is `stash@{0}`.
+
+## Cherry-pick: copy one commit
+
+Sometimes a single commit on another branch — a bug fix, say — needs to land on
+`main` *now*, without bringing the rest of that branch along. `git cherry-pick`
+takes that one commit's change and applies it as a **new commit** on your current
+branch.
+
+```bash
+git switch main
+git cherry-pick f1               # apply f1's change here as a new commit f1'
+git cherry-pick a1b2c3..d4e5f6   # a range (exclusive of the first)
+```
+
+Like a rebase, the copy gets a **new hash** (`f1` becomes `f1'`) because it has a
+different parent — the original commit on the source branch is left untouched.
+
+## When to use which
+
+- Reach for **stash** when the work *isn't ready to commit* and you need a clean
+  tree for a moment. (If it is ready, a throwaway commit on a branch is often
+  clearer.)
+- Reach for **cherry-pick** to **port a finished commit** to another line — for
+  example backporting a hotfix from `main` to a release branch.
+
+Both can hit conflicts (a stash that no longer applies cleanly, or a cherry-pick
+whose context changed). Resolve them like a merge: edit, `git add`, then
+`git cherry-pick --continue` or re-run `git stash pop`.
+
+## Takeaways
+
+- `git stash push` shelves uncommitted changes and cleans the working tree;
+  `pop` reapplies and drops them, `apply` keeps the entry.
+- The stash is a stack — the latest entry is `stash@{0}`.
+- `git cherry-pick <commit>` copies one commit onto the current branch as a **new
+  commit with a new hash**.
+- Cherry-pick is ideal for backporting a single fix without merging a whole branch.
+
+## References
+
+- [Pro Git — Stashing and Cleaning](https://git-scm.com/book/en/v2/Git-Tools-Stashing-and-Cleaning)
+- [git stash documentation](https://git-scm.com/docs/git-stash)
+- [git cherry-pick documentation](https://git-scm.com/docs/git-cherry-pick)

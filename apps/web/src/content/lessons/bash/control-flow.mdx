@@ -1,0 +1,112 @@
+---
+title: Control Flow & Exit Codes
+track: bash
+order: 6
+summary: Branch and loop with if, test, case, for, while, and functions — all driven by the exit status that every command returns.
+difficulty: medium
+---
+
+import ControlFlowVisualizer from '@/components/viz/ControlFlowVisualizer.tsx';
+
+Shell logic is built on one idea: **every command returns an exit status** — `0`
+for success, non-zero for failure. That number, available as `$?`, is what `if`,
+`&&`, and `||` test. Once you internalize this, control flow falls into place.
+
+Step through the scripts below to watch which branch or iteration runs and how
+`$?` changes after each line.
+
+<ControlFlowVisualizer client:visible />
+
+## Tests and `if`
+
+`if` runs a command and branches on *its* exit status. The "command" is usually a
+test:
+
+- `[[ ... ]]` is bash's modern test: string and file checks, no surprises with
+  empty variables.
+- `(( ... ))` is arithmetic: it's true when the expression is non-zero.
+- `[ ... ]` (a.k.a. `test`) is the older, portable form.
+
+```bash
+if [[ -f config.yml ]]; then
+  echo "found config"
+elif [[ -d config.d ]]; then
+  echo "found config dir"
+else
+  echo "no config"
+fi
+
+if (( count > 10 )); then echo "many"; fi
+```
+
+Common `[[ ]]` tests: `-f file`, `-d dir`, `-z str` (empty), `-n str`
+(non-empty), `==`, `!=`, and `=~` for regex.
+
+## `&&` and `||`
+
+These chain commands by exit status — no `if` needed:
+
+```bash
+mkdir build && cd build        # cd only if mkdir succeeded
+grep -q TODO file || echo "clean"   # echo only if grep found nothing
+make && echo OK || echo FAILED
+```
+
+`&&` runs the right side only on success (`$? == 0`); `||` only on failure.
+
+## Loops
+
+```bash
+for f in *.log; do
+  echo "processing $f"
+done
+
+i=1
+while (( i <= 3 )); do
+  echo "tick $i"
+  (( i++ ))
+done
+
+until ping -c1 host &>/dev/null; do
+  sleep 1                       # retry until the host answers
+done
+```
+
+`for` iterates a list, `while` repeats *while* a test succeeds, and `until`
+repeats *until* it does.
+
+## `case` and functions
+
+`case` matches a value against glob-style patterns — cleaner than a long
+`if`/`elif` chain:
+
+```bash
+case "$1" in
+  *.txt|*.md) echo "text file" ;;
+  *.png)      echo "image" ;;
+  *)          echo "unknown" ;;   # default
+esac
+```
+
+Functions group commands and return an exit code with `return`:
+
+```bash
+is_even() { (( $1 % 2 == 0 )); }   # the last command's status IS the return
+is_even 4 && echo "yes"            # prints yes
+```
+
+A function's exit status is that of its last command (or an explicit `return N`),
+so it slots straight into `if`, `&&`, and `||`.
+
+## Takeaways
+
+- Every command yields an exit status; `0` is success, non-zero is failure.
+- `if`/`while`/`until` branch on a command's status; `[[ ]]` and `(( ))` are tests.
+- `&&` runs on success, `||` on failure — concise alternatives to `if`.
+- `case` matches patterns; functions return their last command's status.
+
+## References
+
+- [GNU Bash Manual: Conditional Constructs](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html)
+- [GNU Bash Manual: Exit Status](https://www.gnu.org/software/bash/manual/html_node/Exit-Status.html)
+- [BashGuide: Tests and Conditionals](https://mywiki.wooledge.org/BashGuide/TestsAndConditionals)
