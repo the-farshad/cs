@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useStepper } from './useStepper';
 import Icon from '@/components/ui/Icon';
 
@@ -32,11 +32,33 @@ const btn =
 
 export default function StackQueueVisualizer() {
   const [mode, setMode] = useState<Mode>('stack');
-  const [ops, setOps] = useState<Op[]>(() => [5, 8, 2].map((v) => ({ type: 'push', value: v }) as Op));
+  // A complete cycle by default: push three values, then remove all three.
+  const [ops, setOps] = useState<Op[]>(() => [
+    { type: 'push', value: 5 },
+    { type: 'push', value: 8 },
+    { type: 'push', value: 2 },
+    { type: 'pop' },
+    { type: 'pop' },
+    { type: 'pop' },
+  ]);
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops, mode), [ops, mode]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 12, true);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
+
+  // Auto-play the fill-then-drain cycle and loop it, so the full behavior is always visible.
+  useEffect(() => {
+    play();
+  }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!playing && index >= frames.length - 1 && frames.length > 1) {
+      const id = window.setTimeout(() => {
+        seek(0);
+        play();
+      }, 1100);
+      return () => window.clearTimeout(id);
+    }
+  }, [playing, index, frames.length, play, seek]);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { arr: [] };
 
   const cls = (i: number) => {

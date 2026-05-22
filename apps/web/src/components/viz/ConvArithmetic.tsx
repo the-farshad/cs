@@ -10,6 +10,9 @@ const VIOLET = '#8b5cf6';
 
 type Mode = 'conv' | 'transposed';
 
+/** Deterministic input-cell value, 1..9. */
+const valAt = (r: number, c: number) => ((r * 3 + c * 2) % 9) + 1;
+
 function Slider({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
   return (
     <label className="flex items-center gap-2 text-xs text-muted">
@@ -43,11 +46,11 @@ export default function ConvArithmetic() {
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(positions, 4);
   const step = Math.min(index, positions - 1);
 
-  // Current focus + which output cells are done.
-  const { taps, block, doneOut, cur } = useMemo(() => {
-    const taps = new Set<string>(); // conv: dilated kernel taps on the padded grid
-    const block = new Set<string>(); // transposed: output cells the current input writes
-    const doneOut = new Set<string>(); // output cells already produced
+  const { taps, block, doneOut, outAcc, cur } = useMemo(() => {
+    const taps = new Set<string>();
+    const block = new Set<string>();
+    const doneOut = new Set<string>();
+    const outAcc = new Map<string, number>();
     let cur = { r: 0, c: 0 };
     if (mode === 'conv') {
       if (o > 0) {
@@ -61,32 +64,50 @@ export default function ConvArithmetic() {
       const ir = Math.floor(step / i);
       const ic = step % i;
       cur = { r: ir, c: ic };
-      const stamp = (t: number, set: Set<string>) => {
+      const stamp = (t: number, sets: { cover?: Set<string>; acc?: Map<string, number> }) => {
         const sr = Math.floor(t / i);
         const sc = t % i;
+        const v = valAt(sr, sc);
         for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) {
           const rr = sr * s - p + a;
           const cc = sc * s - p + b;
-          if (rr >= 0 && rr < o && cc >= 0 && cc < o) set.add(`${rr},${cc}`);
+          if (rr >= 0 && rr < o && cc >= 0 && cc < o) {
+            const key = `${rr},${cc}`;
+            sets.cover?.add(key);
+            if (sets.acc) sets.acc.set(key, (sets.acc.get(key) ?? 0) + v);
+          }
         }
       };
-      stamp(step, block);
-      for (let st = 0; st <= step; st++) stamp(st, doneOut);
+      stamp(step, { cover: block });
+      for (let st = 0; st <= step; st++) stamp(st, { cover: doneOut, acc: outAcc });
     }
-    return { taps, block, doneOut, cur };
+    return { taps, block, doneOut, outAcc, cur };
   }, [mode, step, i, k, p, s, d, o]);
 
   const inDim = mode === 'conv' ? padded : i;
-  const cell = Math.max(12, Math.min(38, Math.floor(230 / Math.max(inDim, o, 1))));
+  const cell = Math.max(11, Math.min(40, Math.floor(300 / Math.max(inDim, o, 1))));
   const gap = 3;
+  const showNums = cell >= 16;
   const xy = (n: number) => n * (cell + gap);
   const dimPx = (n: number) => n * cell + (n - 1) * gap;
+
+  // Conv output value = box-sum of the real (non-padding) input cells the window covers.
+  const convOut = (or: number, oc: number) => {
+    let sum = 0;
+    for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) {
+      const rr = or * s + a * d - p;
+      const cc = oc * s + b * d - p;
+      if (rr >= 0 && rr < i && cc >= 0 && cc < i) sum += valAt(rr, cc);
+    }
+    return sum;
+  };
 
   const grid = (
     rows: number,
     cols: number,
     label: string,
     cellFn: (r: number, c: number) => { fill: string; stroke: string; dash?: boolean; faded?: boolean },
+    valueFn: (r: number, c: number) => string | null,
   ) => (
     <div>
       <div className="mb-1 text-center text-xs text-muted">{label} · {rows}×{cols}</div>
@@ -94,20 +115,16 @@ export default function ConvArithmetic() {
         {Array.from({ length: rows }, (_, r) =>
           Array.from({ length: cols }, (_, c) => {
             const st = cellFn(r, c);
+            const v = valueFn(r, c);
             return (
-              <rect
-                key={`${r}-${c}`}
-                x={xy(c)}
-                y={xy(r)}
-                width={cell}
-                height={cell}
-                rx={2}
-                fill={st.fill}
-                stroke={st.stroke}
-                strokeWidth={st.dash ? 1 : 2}
-                strokeDasharray={st.dash ? '3 2' : undefined}
-                opacity={st.faded ? 0.5 : 1}
-              />
+              <g key={`${r}-${c}`} opacity={st.faded ? 0.55 : 1}>
+                <rect x={xy(c)} y={xy(r)} width={cell} height={cell} rx={2} fill={st.fill} stroke={st.stroke} strokeWidth={st.dash ? 1 : 2} strokeDasharray={st.dash ? '3 2' : undefined} />
+                {showNums && v != null && (
+                  <text x={xy(c) + cell / 2} y={xy(r) + cell / 2} textAnchor="middle" dominantBaseline="central" fontSize={Math.round(cell * 0.42)} style={{ fill: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>
+                    {v}
+                  </text>
+                )}
+              </g>
             );
           }),
         )}
@@ -115,26 +132,47 @@ export default function ConvArithmetic() {
     </div>
   );
 
-  // Input renderer.
-  const inputGrid = grid(inDim, inDim, mode === 'conv' ? 'input + padding' : 'input', (r, c) => {
-    if (mode === 'conv') {
-      const isReal = r >= p && r < p + i && c >= p && c < p + i;
-      const isTap = o > 0 && taps.has(`${r},${c}`);
-      if (!isReal) return { fill: 'var(--bg)', stroke: 'var(--border)', dash: true };
-      return { fill: isTap ? SKY : 'var(--surface)', stroke: isTap ? SKY : 'var(--border)' };
-    }
-    const isCur = r === cur.r && c === cur.c;
-    return { fill: isCur ? SKY : 'var(--surface)', stroke: isCur ? SKY : 'var(--border)' };
-  });
+  const inputGrid = grid(
+    inDim,
+    inDim,
+    mode === 'conv' ? 'input + padding' : 'input',
+    (r, c) => {
+      if (mode === 'conv') {
+        const isReal = r >= p && r < p + i && c >= p && c < p + i;
+        const isTap = o > 0 && taps.has(`${r},${c}`);
+        if (!isReal) return { fill: 'var(--bg)', stroke: 'var(--border)', dash: true };
+        return { fill: isTap ? SKY : 'var(--surface)', stroke: isTap ? SKY : 'var(--border)' };
+      }
+      const isCur = r === cur.r && c === cur.c;
+      return { fill: isCur ? SKY : 'var(--surface)', stroke: isCur ? SKY : 'var(--border)' };
+    },
+    (r, c) => {
+      if (mode === 'conv') {
+        const isReal = r >= p && r < p + i && c >= p && c < p + i;
+        return isReal ? String(valAt(r - p, c - p)) : '0';
+      }
+      return String(valAt(r, c));
+    },
+  );
 
   const outputGrid =
     o > 0
-      ? grid(o, o, 'output', (r, c) => {
-          const key = `${r},${c}`;
-          const isCur = mode === 'conv' ? r === cur.r && c === cur.c : block.has(key);
-          const done = doneOut.has(key);
-          return { fill: done ? VIOLET : 'var(--bg)', stroke: isCur ? SKY : 'var(--border)', faded: done && !isCur };
-        })
+      ? grid(
+          o,
+          o,
+          'output',
+          (r, c) => {
+            const key = `${r},${c}`;
+            const isCur = mode === 'conv' ? r === cur.r && c === cur.c : block.has(key);
+            const done = doneOut.has(key);
+            return { fill: done ? VIOLET : 'var(--bg)', stroke: isCur ? SKY : 'var(--border)', faded: done && !isCur };
+          },
+          (r, c) => {
+            const key = `${r},${c}`;
+            if (mode === 'conv') return doneOut.has(key) ? String(convOut(r, c)) : null;
+            return doneOut.has(key) ? String(outAcc.get(key) ?? 0) : null;
+          },
+        )
       : (
         <div className="flex h-32 w-32 items-center justify-center rounded border border-dashed border-rose-500/60 text-center text-xs text-rose-300">
           kernel doesn't fit — increase input or padding
@@ -156,15 +194,15 @@ export default function ConvArithmetic() {
             </button>
           ))}
         </div>
-        <span className="font-mono text-xs text-muted">{mode === 'conv' ? 'downsample / extract' : 'upsample (decoder)'}</span>
+        <span className="font-mono text-xs text-muted">{mode === 'conv' ? 'output cell = sum of covered inputs' : 'upsample (decoder)'}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:max-w-md">
-        <Slider label="input i" value={i} min={3} max={mode === 'conv' ? 9 : 6} onChange={setI} />
-        <Slider label="kernel k" value={k} min={2} max={5} onChange={setK} />
-        <Slider label="pad p" value={p} min={0} max={3} onChange={setP} />
-        <Slider label="stride s" value={s} min={1} max={3} onChange={setS} />
-        {mode === 'conv' && <Slider label="dilation d" value={d} min={1} max={3} onChange={setD} />}
+        <Slider label="input i" value={i} min={3} max={mode === 'conv' ? 14 : 9} onChange={setI} />
+        <Slider label="kernel k" value={k} min={2} max={6} onChange={setK} />
+        <Slider label="pad p" value={p} min={0} max={4} onChange={setP} />
+        <Slider label="stride s" value={s} min={1} max={4} onChange={setS} />
+        {mode === 'conv' && <Slider label="dilation d" value={d} min={1} max={4} onChange={setD} />}
       </div>
 
       <div className="mt-5 flex flex-col items-center justify-center gap-6 sm:flex-row sm:items-start">
@@ -174,6 +212,7 @@ export default function ConvArithmetic() {
         </div>
         {outputGrid}
       </div>
+      {!showNums && <p className="mt-2 text-center text-xs text-muted">(numbers hidden at this size — shrink the input to see per-cell values)</p>}
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <button type="button" className={btn} onClick={prev} disabled={index <= 0}>

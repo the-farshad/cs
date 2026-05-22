@@ -31,7 +31,7 @@ const lessons = (await getCollection('lessons'))
     <nav class="mb-6 flex items-center gap-2 text-sm text-muted">
       <a href="/" class="hover:text-fg">Home</a>
       <span>/</span>
-      <span class="text-fg">{track.title}</span>
+      <span class="flex items-center gap-1.5 text-fg"><Icon name={track.icon} size={14} /> {track.title}</span>
     </nav>
     <header class="mb-8 flex items-center gap-4">
       <span class="flex h-14 w-14 items-center justify-center rounded-xl border border-edge bg-surface text-accent">

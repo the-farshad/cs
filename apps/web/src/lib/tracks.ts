@@ -39,13 +39,13 @@ export const TRACKS: Track[] = [
   { slug: 'data-structures', title: 'Data Structures', icon: 'tree', category: 'Algorithms & Data Structures', summary: 'Arrays, lists, trees, heaps, graphs — every structure, animated.' },
   { slug: 'algorithms', title: 'Algorithms', icon: 'zap', category: 'Algorithms & Data Structures', summary: 'Sorting, searching, graphs, DP, and shortest paths.' },
 
-  { slug: 'systems', title: 'CS Systems', icon: 'cpu', category: 'Systems & Databases', summary: 'Big-O, operating systems, networking, database internals.' },
+  { slug: 'systems', title: 'Systems', icon: 'cpu', category: 'Systems & Databases', summary: 'Big-O, operating systems, networking, database internals.' },
   { slug: 'system-design', title: 'System Design', icon: 'layers', category: 'Systems & Databases', summary: 'Scaling, caching, consistency, consensus, case studies.' },
   { slug: 'sql', title: 'SQL', icon: 'database', category: 'Systems & Databases', summary: 'Queries, joins, indexes, transactions — with a live playground.' },
   { slug: 'security', title: 'Cryptography & Security', icon: 'shield', category: 'Systems & Databases', summary: 'Hashing, encryption, public-key, and common attacks.' },
 
   { slug: 'machine-learning', title: 'Machine Learning', icon: 'neural', category: 'AI, ML & Robotics', summary: 'Linear models, neural networks, clustering, and evaluation.' },
-  { slug: 'ml-rl', title: 'RL & Math', icon: 'sigma', category: 'AI, ML & Robotics', summary: 'Reinforcement learning, optimization, and the math behind it.' },
+  { slug: 'ml-rl', title: 'Reinforcement Learning', icon: 'sigma', category: 'AI, ML & Robotics', summary: 'Reinforcement learning, optimization, and the math behind it.' },
   { slug: 'robotics', title: 'Robotics', icon: 'bot', category: 'AI, ML & Robotics', summary: 'Kinematics, PID control, path planning, and perception.' },
 
   { slug: 'git', title: 'Git', icon: 'git-branch', category: 'Developer Tools', summary: 'The commit DAG and workflows, explored interactively.' },
