@@ -1,0 +1,67 @@
+---
+title: Natural Deduction
+track: formal-logic
+order: 4
+summary: Prove conclusions step by step with introduction/elimination rules and subderivations.
+difficulty: medium
+---
+
+import NaturalDeductionViz from '@/components/viz/NaturalDeductionViz.tsx';
+
+Truth tables tell you *that* an argument is valid; **natural deduction** shows
+*why*, by deriving the conclusion from the premises one justified step at a time.
+A derivation establishes $P_1, \dots, P_n \vdash C$ — "$C$ is **provable** from the
+premises." (Soundness and completeness guarantee $\vdash$ and $\models$ pick out
+exactly the same valid arguments.)
+
+Step through a proof below — each line is highlighted with the earlier lines it was
+derived from.
+
+<NaturalDeductionViz proof="conditional-proof" client:visible />
+
+## Rules of inference
+
+Each connective comes with an **introduction** rule (how to derive a formula with
+that main connective) and an **elimination** rule (how to use one). Modern names on
+the left; Teller's primer writes $\land$ as $\&$ and $\rightarrow$ as $\supset$.
+
+- **$\land$I / $\land$E** — from $X$ and $Y$ infer $X \land Y$; from $X \land Y$ infer either part.
+- **$\rightarrow$E** (modus ponens) — from $X \rightarrow Y$ and $X$ infer $Y$.
+- **$\lor$I** — from $X$ infer $X \lor Y$. **$\lor$E** (proof by cases) — see below.
+- **$\leftrightarrow$I / $\leftrightarrow$E** — build/break a biconditional via the two conditionals.
+- **Reiteration** — copy an earlier available line.
+
+## Subderivations
+
+The powerful rules open a **subderivation** — an indented box (the vertical bars in
+the visualizer) that begins with an **assumption** you are free to make
+*temporarily*. Two subderivation rules do most of the work:
+
+- **Conditional proof ($\rightarrow$I):** assume $X$; if you can derive $Y$ inside
+  the box, then $X \rightarrow Y$ holds *outside* it (the assumption is
+  **discharged**). The default proof above uses exactly this.
+- **Reductio / negation introduction ($\lnot$I):** assume $X$; if you derive a
+  contradiction ($\bot$), conclude $\lnot X$. Switch the visualizer to "Modus
+  tollens" to watch a reductio.
+
+The one rule: a line inside a box may use earlier lines from enclosing boxes, but
+once a box closes, its interior lines are **sealed** — you can only use what the
+subderivation rule hands back out.
+
+## Strategy
+
+Work **backwards from the goal**: to prove a conditional, plan a conditional proof;
+to prove a negation, plan a reductio; to prove a conjunction, prove each part. Then
+work **forwards** from the premises to meet in the middle. The "Proof by cases" and
+"De Morgan" examples in the visualizer show these patterns on longer derivations.
+
+## Takeaways
+
+- A derivation proves $P_1,\dots,P_n \vdash C$ with justified steps; $\vdash$ and $\models$ agree (soundness + completeness).
+- Each connective has an introduction and an elimination rule.
+- Subderivations make a temporary assumption that must be **discharged** — by conditional proof ($\rightarrow$I) or reductio ($\lnot$I).
+- Strategy: plan backwards from the goal, derive forwards from the premises.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/), which uses this Fitch-style rule set. Curriculum follows the primer; the proofs and explanations here are original.

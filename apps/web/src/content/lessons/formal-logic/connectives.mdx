@@ -1,0 +1,68 @@
+---
+title: Connectives & Well-Formed Formulas
+track: formal-logic
+order: 1
+summary: Atomic sentences, the five truth-functional connectives, and the rules for building formulas.
+difficulty: intro
+---
+
+import LogicTruthTable from '@/components/viz/LogicTruthTable.tsx';
+
+Formal logic starts by stripping arguments down to their **form**. We represent
+simple declarative sentences with capital letters — $P$, $Q$, $R$ — called
+**atomic sentences**, and we glue them together with a small set of
+**connectives**. Each connective is **truth-functional**: the truth value of the
+whole is fixed entirely by the truth values of its parts.
+
+Type a formula below (or use the symbol buttons) and read its truth value under
+every assignment.
+
+<LogicTruthTable initial="¬(P ∧ Q)" client:visible />
+
+## The five connectives
+
+| Connective | Here | Teller's primer | Read as | True exactly when |
+| --- | --- | --- | --- | --- |
+| Negation | $\lnot P$ | $\sim P$ | not $P$ | $P$ is false |
+| Conjunction | $P \land Q$ | $P \mathbin{\&} Q$ | $P$ and $Q$ | both are true |
+| Disjunction | $P \lor Q$ | $P \lor Q$ | $P$ or $Q$ | at least one is true |
+| Conditional | $P \rightarrow Q$ | $P \supset Q$ | if $P$ then $Q$ | $P$ is false **or** $Q$ is true |
+| Biconditional | $P \leftrightarrow Q$ | $P \equiv Q$ | $P$ if and only if $Q$ | both sides match |
+
+The disjunction is **inclusive** ($P \lor Q$ is true when both are true). The
+conditional is **material**: $P \rightarrow Q$ only fails in the single case where
+$P$ is true and $Q$ is false — so a false antecedent makes the whole conditional
+true ("vacuously true").
+
+## Well-formed formulas
+
+Not every string of symbols is legal. A **well-formed formula** (WFF) is built by
+these rules:
+
+- every atomic sentence ($P$, $Q$, …) is a WFF;
+- if $X$ is a WFF, so is $\lnot X$;
+- if $X$ and $Y$ are WFFs, so are $(X \land Y)$, $(X \lor Y)$, $(X \rightarrow Y)$, and $(X \leftrightarrow Y)$.
+
+Parentheses prevent ambiguity. To cut down on clutter we drop outer parentheses
+and use a **precedence** order — $\lnot$ binds tightest, then $\land$, then $\lor$,
+then $\rightarrow$, then $\leftrightarrow$ — so $\lnot P \land Q \rightarrow R$
+means $((\lnot P \land Q) \rightarrow R)$.
+
+## The main connective
+
+Every WFF has exactly one **main connective** — the last one applied as you build
+it up. It determines what *kind* of sentence you have: $\lnot(P \land Q)$ is a
+**negation**, while $\lnot P \land Q$ is a **conjunction**. Misreading the main
+connective is the most common beginner mistake, and the visualizer above makes the
+difference concrete — compare the two formulas and watch their columns differ.
+
+## Takeaways
+
+- Atomic sentences plus five truth-functional connectives ($\lnot, \land, \lor, \rightarrow, \leftrightarrow$) generate every formula of sentence logic.
+- A connective is truth-functional: the whole's value depends only on the parts' values.
+- The conditional $P \rightarrow Q$ is false only when $P$ is true and $Q$ is false.
+- Precedence and the **main connective** decide how a formula is read.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/). This track follows the primer's curriculum; the explanations, examples, and exercises here are original.

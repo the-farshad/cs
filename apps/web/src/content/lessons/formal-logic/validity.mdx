@@ -1,0 +1,62 @@
+---
+title: Validity & Counterexamples
+track: formal-logic
+order: 3
+summary: When premises guarantee a conclusion — semantic entailment, counterexamples, and soundness.
+difficulty: easy
+---
+
+import LogicTruthTable from '@/components/viz/LogicTruthTable.tsx';
+
+An argument is a set of **premises** offered in support of a **conclusion**. The
+central notion of logic is **validity**: an argument is valid when there is **no**
+assignment that makes every premise true and the conclusion false. Equivalently,
+*if* the premises are all true, the conclusion *must* be true — validity is about
+the form, not about whether the premises actually hold.
+
+Enter premises and a conclusion below. The tool checks every row; a row that makes
+all premises true but the conclusion false is a **counterexample**, highlighted in
+red.
+
+<LogicTruthTable mode="argument" client:visible />
+
+## Reading the verdict
+
+- **Valid:** no counterexample row exists. We write $P_1, \dots, P_n \models C$
+  (the premises **semantically entail** $C$).
+- **Invalid:** at least one counterexample row exists — that row *is* the proof of
+  invalidity.
+
+Two arguments worth comparing in the tool:
+
+- **Modus ponens** — premises $P \rightarrow Q$ and $P$, conclusion $Q$ — is
+  **valid**.
+- **Affirming the consequent** — premises $P \rightarrow Q$ and $Q$, conclusion
+  $P$ — is **invalid**: the row $P$ false, $Q$ true makes both premises true and
+  the conclusion false.
+
+## Validity vs. soundness
+
+Validity says nothing about whether the premises are *actually* true. An argument
+is **sound** when it is **valid and all its premises are in fact true** — only a
+sound argument's conclusion is guaranteed true in the real world. Logic certifies
+validity; checking the premises is someone else's job.
+
+## The link to tautologies
+
+There is a tight connection between validity and the conditional: the argument with
+premises $P_1, \dots, P_n$ and conclusion $C$ is valid **iff** the single formula
+$(P_1 \land \dots \land P_n) \rightarrow C$ is a **tautology**. So validity testing
+and tautology testing are two views of the same thing — both are settled by the
+truth table.
+
+## Takeaways
+
+- Valid = no assignment makes all premises true and the conclusion false ($\models$).
+- A single counterexample row proves invalidity.
+- **Sound** = valid **and** premises actually true.
+- An argument is valid iff (conjunction of premises) $\rightarrow$ conclusion is a tautology.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/). Curriculum follows the primer; explanations and examples here are original.

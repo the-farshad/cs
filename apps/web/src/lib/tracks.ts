@@ -31,6 +31,7 @@ export const CATEGORIES: Category[] = [
 export const TRACKS: Track[] = [
   { slug: 'math', title: 'Mathematics', icon: 'pi', category: 'Foundations', summary: 'Algebra, trigonometry, logarithms, and logic — the math under CS.' },
   { slug: 'theory-of-computation', title: 'Theory of Computation', icon: 'automaton', category: 'Foundations', summary: 'Automata, Turing machines, computability, and complexity.' },
+  { slug: 'formal-logic', title: 'Formal Logic', icon: 'turnstile', category: 'Foundations', summary: 'Connectives, truth tables, natural deduction, and predicate logic.' },
 
   { slug: 'python', title: 'Python', icon: 'python', category: 'Programming', summary: 'Syntax, collections, functions, OOP, and generators — runnable.' },
   { slug: 'cpp', title: 'C++', icon: 'braces', category: 'Programming', summary: 'Pointers and memory, RAII, templates, the STL, and modern C++.' },

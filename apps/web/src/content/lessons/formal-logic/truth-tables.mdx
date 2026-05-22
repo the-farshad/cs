@@ -1,0 +1,61 @@
+---
+title: Truth Tables
+track: formal-logic
+order: 2
+summary: Compute a formula under every assignment to classify it and test logical equivalence.
+difficulty: intro
+---
+
+import LogicTruthTable from '@/components/viz/LogicTruthTable.tsx';
+
+A **truth table** lists every possible assignment of true/false to the atomic
+sentences and computes the formula's value in each. With $n$ distinct atoms there
+are $2^n$ rows — two for one atom, four for two, eight for three.
+
+The tool below builds the full table for any formula and classifies it. Try
+$P \lor \lnot P$, then $P \land \lnot P$, then $(P \rightarrow Q) \leftrightarrow (\lnot P \lor Q)$.
+
+<LogicTruthTable initial="(P → Q) ↔ (¬P ∨ Q)" client:visible />
+
+## Three kinds of formula
+
+Reading the final column tells you which kind of formula you have:
+
+- A **tautology** is true in *every* row — a logical truth, e.g. $P \lor \lnot P$.
+- A **contradiction** is false in every row, e.g. $P \land \lnot P$.
+- A **contingent** formula is true in some rows and false in others — most
+  formulas are contingent.
+
+## Logical equivalence
+
+Two formulas are **logically equivalent** when they have the same truth value in
+every row. A clean test: $X$ and $Y$ are equivalent exactly when
+$X \leftrightarrow Y$ is a **tautology**. The default formula above shows one
+famous equivalence — $P \rightarrow Q$ is equivalent to $\lnot P \lor Q$, so the
+biconditional between them comes out true in every row.
+
+Some equivalences worth knowing (each is a tautology when written as a biconditional):
+
+- **Double negation:** $\lnot\lnot P \leftrightarrow P$
+- **De Morgan:** $\lnot(P \land Q) \leftrightarrow (\lnot P \lor \lnot Q)$ and $\lnot(P \lor Q) \leftrightarrow (\lnot P \land \lnot Q)$
+- **Contraposition:** $(P \rightarrow Q) \leftrightarrow (\lnot Q \rightarrow \lnot P)$
+
+Check any of these by typing it above — a true-in-every-row column confirms it.
+
+## Why this matters
+
+Truth tables are a **decision procedure**: a mechanical, always-terminating method
+that answers "is this a logical truth?" and "are these equivalent?" for sentence
+logic. That is exactly the kind of guarantee that makes a logic *formal* — no
+cleverness required, just fill in the table.
+
+## Takeaways
+
+- A formula over $n$ atoms has a $2^n$-row truth table.
+- Tautology (always true), contradiction (always false), contingent (mixed).
+- $X$ and $Y$ are logically equivalent iff $X \leftrightarrow Y$ is a tautology.
+- The table is a complete decision procedure for sentence logic.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/). Curriculum follows the primer; explanations and examples here are original.
