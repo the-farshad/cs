@@ -1,0 +1,72 @@
+---
+title: Finite Automata
+track: theory-of-computation
+order: 1
+summary: DFAs and NFAs — the simplest model of computation, with finite memory and no tape.
+difficulty: easy
+---
+
+import FiniteAutomatonVisualizer from '@/components/viz/FiniteAutomatonVisualizer.tsx';
+
+A **finite automaton** is the simplest machine in the theory of computation. It
+reads an input string one symbol at a time and, at every moment, sits in exactly
+one of a finite set of **states**. It has no scratch memory beyond that state, so
+its entire "knowledge" of the input seen so far is which state it is in. When the
+input runs out, the machine **accepts** if it landed in an accepting state and
+**rejects** otherwise.
+
+The machine below is a deterministic finite automaton (DFA) that accepts binary
+strings containing an even number of `1`s. Type a string and step through it.
+
+<FiniteAutomatonVisualizer client:visible />
+
+## Deterministic finite automata
+
+A DFA is a 5-tuple $(Q, \Sigma, \delta, q_0, F)$:
+
+- $Q$ — a finite set of states.
+- $\Sigma$ — the input alphabet (here, $\{0, 1\}$).
+- $\delta : Q \times \Sigma \to Q$ — the transition function, giving exactly one
+  next state for each (state, symbol) pair.
+- $q_0 \in Q$ — the start state.
+- $F \subseteq Q$ — the accepting (final) states, drawn as double circles.
+
+"Deterministic" means $\delta$ is a function: for any state and symbol there is
+**one** next state, so the run on a given input is fully determined. The set of
+strings a machine accepts is its **language**. Languages recognized by some finite
+automaton are called the **regular languages**.
+
+## Nondeterministic finite automata
+
+An NFA relaxes determinism. From a state, a symbol may lead to several states, to
+none, or the machine may follow an $\varepsilon$-transition that consumes no
+input. An NFA accepts a string if **some** sequence of choices ends in an
+accepting state — think of it as exploring all possibilities in parallel.
+
+Nondeterminism makes machines easier to design, but it does not add power. The
+**subset construction** converts any NFA with $n$ states into an equivalent DFA
+whose states are *sets* of NFA states (up to $2^n$ of them). Because every NFA has
+an equivalent DFA, both models recognize exactly the regular languages.
+
+## What finite automata cannot do
+
+Finite memory is a hard limit. The language $\{0^n 1^n : n \ge 0\}$ — equal
+numbers of `0`s then `1`s — is **not** regular, because no fixed number of states
+can count an unbounded $n$. The **pumping lemma** formalizes this: every regular
+language has a length beyond which any accepted string contains a sub-piece that
+can be repeated ("pumped") while staying in the language. Find a string that can't
+be pumped and you have proved the language is not regular.
+
+## Takeaways
+
+- A finite automaton tracks the input using only its current state — no extra
+  memory — and accepts when it ends in a final state.
+- DFAs are deterministic (one move per symbol); NFAs allow branching and
+  $\varepsilon$-moves but recognize the same class: the regular languages.
+- The subset construction turns any NFA into a DFA; the pumping lemma proves some
+  languages, like $0^n 1^n$, are beyond finite automata.
+
+## References
+
+- Michael Sipser, [*Introduction to the Theory of Computation*](https://math.mit.edu/~sipser/book.html), 3rd ed., Chapter 1 (Regular Languages).
+- Hopcroft, Motwani, Ullman, *Introduction to Automata Theory, Languages, and Computation*, 3rd ed., Chapters 2-4.

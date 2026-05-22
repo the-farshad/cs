@@ -1,0 +1,112 @@
+---
+title: Collections
+track: python
+order: 2
+summary: list, tuple, dict, and set — their operations, complexity, and when to reach for each.
+difficulty: easy
+---
+
+import PyListVisualizer from '@/components/viz/PyListVisualizer.tsx';
+import PyMembershipVisualizer from '@/components/viz/PyMembershipVisualizer.tsx';
+
+Python ships with four workhorse built-in collections. Picking the right one is
+often the difference between code that is `O(n)` and code that is `O(n^2)`. They
+split along two axes: **ordered vs. unordered** and **mutable vs. immutable**.
+
+| type | ordered | mutable | duplicates | typical lookup |
+| --- | --- | --- | --- | --- |
+| `list` | yes | yes | yes | `O(n)` by value, `O(1)` by index |
+| `tuple` | yes | no | yes | `O(n)` by value, `O(1)` by index |
+| `dict` | yes (insertion) | yes | keys unique | `O(1)` by key |
+| `set` | no | yes | no | `O(1)` membership |
+
+## list — the default sequence
+
+A `list` is a growable, ordered sequence backed by a dynamic array of object
+pointers. Indexing and appending are fast, but operations that touch the front are
+slow because every following element must shift. The visualizer shows append
+(amortized `O(1)`) versus `insert(0, x)` and `pop(0)` (both `O(n)`), plus the
+over-allocated capacity CPython keeps so most appends avoid a reallocation.
+
+<PyListVisualizer client:visible />
+
+```py
+xs = [3, 1, 2]
+xs.append(4)        # [3, 1, 2, 4]   O(1) amortized
+xs.insert(0, 9)     # [9, 3, 1, 2, 4] O(n) — shifts everything
+xs.sort()           # [1, 2, 3, 4, 9] O(n log n)
+print(xs[2])        # 3              O(1) random access
+print(xs[-1])       # 9             negative indexing from the end
+print(xs[1:3])      # [2, 3]        slicing returns a new list
+```
+
+If you need fast appends *and* pops at both ends, use `collections.deque`, which
+is `O(1)` on either side.
+
+## tuple — the immutable record
+
+A `tuple` is like a list you cannot change after creation. Immutability makes
+tuples **hashable**, so they can be dict keys or set members, and signals intent:
+"this group of values belongs together and won't be modified" — coordinates, a
+database row, a function returning several results.
+
+```py
+point = (3, 4)
+x, y = point                 # unpacking
+print(x, y)                  # 3 4
+grid = {(0, 0): "start", (1, 2): "goal"}   # tuple keys — only possible because tuples are hashable
+```
+
+## dict — keyed lookup
+
+A `dict` maps **keys to values** using a hash table, giving `O(1)` average insert,
+lookup, and delete. Since Python 3.7 dicts preserve insertion order. Keys must be
+hashable (immutable), values can be anything.
+
+```py
+ages = {"ada": 36, "alan": 41}
+ages["grace"] = 85          # insert  O(1)
+print(ages["ada"])          # 36      O(1)
+print(ages.get("nobody", 0))# 0       default instead of KeyError
+for name, age in ages.items():
+    print(name, age)
+```
+
+## set — membership and dedup
+
+A `set` is an unordered collection of unique, hashable elements — essentially a
+dict with keys but no values. Its superpower is `O(1)` average **membership
+testing**, plus mathematical operations like union and intersection. The
+side-by-side visualizer makes the cost difference vivid: `x in list` scans element
+by element, while `x in set` hashes straight to one bucket.
+
+<PyMembershipVisualizer client:visible />
+
+```py
+seen = {1, 2, 3}
+print(2 in seen)            # True   O(1) average
+seen.add(2)                 # no-op — already present
+a, b = {1, 2, 3}, {2, 3, 4}
+print(a & b)                # {2, 3}  intersection
+print(a | b)                # {1, 2, 3, 4} union
+print(a - b)                # {1}    difference
+unique = list(set([1, 1, 2, 2, 3]))   # quick dedup -> [1, 2, 3]
+```
+
+The rule of thumb: if your code does `if item in big_list:` inside a loop, convert
+`big_list` to a `set` first and the loop drops from `O(n^2)` to `O(n)`.
+
+## Takeaways
+
+- `list`: ordered, mutable, fast by index and at the end — your default sequence.
+- `tuple`: immutable and hashable — records, multiple return values, dict keys.
+- `dict`: `O(1)` average key lookup, insertion-ordered since 3.7.
+- `set`: unique elements with `O(1)` membership and set algebra; great for dedup.
+- Choosing the right collection is the cheapest way to change your program's Big-O.
+
+## References
+
+- [Python docs — Data Structures (lists, tuples, sets, dicts)](https://docs.python.org/3/tutorial/datastructures.html).
+- [TimeComplexity — CPython operation costs](https://wiki.python.org/moin/TimeComplexity) — the source for the complexities above.
+- [Luciano Ramalho, "Fluent Python" — Ch. 2-3: Sequences, Dicts and Sets](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).
+- [collections — deque and other containers](https://docs.python.org/3/library/collections.html).

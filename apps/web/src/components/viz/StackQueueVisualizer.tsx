@@ -36,7 +36,7 @@ export default function StackQueueVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops, mode), [ops, mode]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 12, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { arr: [] };
 
   const cls = (i: number) => {

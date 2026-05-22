@@ -1,0 +1,84 @@
+---
+title: Computability and the Halting Problem
+track: theory-of-computation
+order: 4
+summary: Some problems no algorithm can ever solve — proved by diagonalization and the halting problem.
+difficulty: hard
+---
+
+import DiagonalizationVisualizer from '@/components/viz/DiagonalizationVisualizer.tsx';
+
+[Turing machines](/learn/theory-of-computation/turing-machines) are the most
+powerful model of computation we know, yet there are precise, well-defined
+problems that **no** Turing machine — and so, by the Church-Turing thesis, no
+algorithm at all — can solve. Computability theory draws this line between what is
+**decidable** and what is not.
+
+The classic proof technique is **diagonalization**. The grid below imagines every
+program listed in a table, then builds a new behavior `D` by flipping the diagonal
+so that `D` cannot match any row. Step through it.
+
+<DiagonalizationVisualizer client:visible />
+
+## Counting argument
+
+There are only countably many programs: each is a finite string, and finite
+strings can be listed $M_0, M_1, M_2, \dots$. But there are **uncountably** many
+languages over $\{0,1\}$ — as many as there are subsets of the natural numbers.
+Since you cannot pair up a countable set with an uncountable one, **most languages
+have no program at all**. Undecidable problems are not exotic; they are the
+overwhelming majority. The work is exhibiting a *specific* natural one.
+
+## The halting problem
+
+The most famous undecidable problem is the **halting problem**: given a program
+$M$ and an input $w$, decide whether $M$ halts on $w$ (rather than looping
+forever).
+
+Suppose a decider $H$ existed, always halting with the correct yes/no answer.
+Build a new program $D$ that takes a program description $\langle M \rangle$, runs
+$H$ on $(\langle M \rangle, \langle M \rangle)$, and then does the opposite:
+
+- if $H$ says $M$ halts on its own description, $D$ **loops forever**;
+- if $H$ says $M$ loops, $D$ **halts**.
+
+Now feed $D$ its own description $\langle D \rangle$. If $D$ halts on
+$\langle D \rangle$, then by construction it must loop — and if it loops, it must
+halt. Both branches are contradictions, so $H$ cannot exist. This is exactly the
+diagonal flip applied to halting behavior.
+
+## Reductions spread undecidability
+
+Once one problem is known undecidable, we transfer the result by **reduction**: to
+show a problem $B$ is undecidable, show that a decider for $B$ could be used to
+decide a known-undecidable problem $A$. Since $A$ has no decider, neither does $B$.
+
+This makes a whole landscape of questions undecidable: does a program ever print a
+given output, do two programs compute the same function, is a given string ever
+produced? **Rice's theorem** generalizes the pattern: *every* nontrivial property
+of the language a program recognizes is undecidable. You cannot, in general,
+determine any interesting behavioral property of arbitrary code by analyzing the
+code.
+
+## Why it matters
+
+These limits are not about slow computers or clever-enough engineers; they are
+mathematical impossibilities. They explain why perfect static analyzers,
+universal bug detectors, and fully general optimizers cannot exist. Practical
+tools cope by being **sound but incomplete** (catching some cases, conservatively
+giving up on the rest) or by restricting attention to inputs where the question
+*is* decidable.
+
+## Takeaways
+
+- A counting argument shows there are far more languages than programs, so most
+  problems are undecidable; the challenge is naming a concrete one.
+- The halting problem is undecidable: assuming a halting-decider and feeding the
+  diagonal construction its own description forces a contradiction.
+- Reductions and Rice's theorem propagate undecidability to nearly every
+  nontrivial question about program behavior.
+
+## References
+
+- Michael Sipser, [*Introduction to the Theory of Computation*](https://math.mit.edu/~sipser/book.html), 3rd ed., Chapter 4 (Decidability) and Chapter 5 (Reducibility).
+- Hopcroft, Motwani, Ullman, *Introduction to Automata Theory, Languages, and Computation*, 3rd ed., Chapters 8-9.

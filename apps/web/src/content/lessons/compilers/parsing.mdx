@@ -1,0 +1,86 @@
+---
+title: Parsing
+track: compilers
+order: 2
+summary: Grammars and recursive-descent parsing — turning a flat token stream into a structured Abstract Syntax Tree.
+difficulty: easy
+---
+
+import ParserVisualizer from '@/components/viz/ParserVisualizer.tsx';
+
+The lexer hands us a flat list of tokens, but `2 + 3 * 4` is not really flat —
+it has structure. We must multiply before we add, so `3 * 4` belongs together
+*inside* the addition. **Parsing** is the stage that recovers this structure,
+producing an **Abstract Syntax Tree (AST)**: a tree whose shape encodes how the
+program nests.
+
+Watch the parser below build the tree for an arithmetic expression. Notice that
+`*` ends up *deeper* than `+`, which is exactly how precedence is captured.
+
+<ParserVisualizer client:visible />
+
+## Grammars
+
+A **grammar** is a set of rules describing which token sequences are valid and
+how they group. Here is a small grammar for arithmetic, written so that
+precedence is built into its layers:
+
+```text
+expr   := term (('+' | '-') term)*
+term   := factor (('*' | '/') factor)*
+factor := NUMBER | '(' expr ')'
+```
+
+Each rule references the one below it. Because `term` sits *under* `expr`,
+multiplication binds tighter than addition — the grammar's layering *is* the
+precedence table.
+
+## Recursive descent
+
+A **recursive-descent** parser turns each grammar rule directly into a function.
+`expr()` calls `term()`, which calls `factor()`. The call stack mirrors the rule
+hierarchy, and recursion handles nesting like parentheses naturally. It is the
+most direct way to write a parser by hand, and many production compilers use it.
+
+Roughly, `term()` looks like this:
+
+```js
+function term() {
+  let node = factor();              // parse the left operand
+  while (peek() === '*' || peek() === '/') {
+    const op = advance();           // consume the operator
+    const right = factor();         // parse the right operand
+    node = { op, left: node, right }; // grow the tree
+  }
+  return node;
+}
+```
+
+The loop keeps folding new operands into the left side, which makes operators
+**left-associative**: `10 - 4 - 2` parses as `(10 - 4) - 2`. Try that example in
+the visualizer.
+
+## Why a tree?
+
+The AST throws away noise — parentheses, whitespace, and exact token positions —
+and keeps only the essential structure. A node like `{ op: '+', left, right }`
+says "add these two subtrees," and nothing more. Every later stage (type
+checking, optimization, code generation) walks this tree instead of the text.
+
+Concrete syntax such as the `(` and `)` in `(2 + 3) * 4` does not appear as nodes;
+it only changes the *shape* of the tree by forcing the addition underneath the
+multiplication.
+
+## Takeaways
+
+- Parsing turns a token stream into an **AST** that captures program structure.
+- A **grammar** defines valid input; layering rules encodes operator precedence.
+- **Recursive descent** maps one function per rule; the call stack follows the
+  grammar, and recursion handles nesting.
+- The AST drops surface syntax and keeps meaning, so later stages work on the
+  tree, not the text.
+
+## References
+
+- Robert Nystrom, ["Crafting Interpreters" — Parsing Expressions](https://craftinginterpreters.com/parsing-expressions.html) (free online).
+- Aho, Lam, Sethi, and Ullman, ["Compilers: Principles, Techniques, and Tools"](https://suif.stanford.edu/dragonbook/) (the "Dragon Book"), Chapters 4-5: Syntax Analysis.

@@ -57,7 +57,7 @@ export default function HeapVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => replay(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 12, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { array: [] };
 
   const marks: Record<number, string> = {};

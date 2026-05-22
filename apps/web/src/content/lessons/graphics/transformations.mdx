@@ -1,0 +1,69 @@
+---
+title: 2D Transformations
+track: graphics
+order: 1
+summary: Translate, rotate, scale, and shear as matrices, plus homogeneous coordinates and why composition order matters.
+difficulty: easy
+---
+
+import AffineTransform2D from '@/components/viz/AffineTransform2D.tsx';
+
+Every shape you see on screen is positioned, rotated, and resized by **matrices**.
+Graphics encodes these moves as **affine transformations** — operations that map
+straight lines to straight lines and keep parallel lines parallel. Pick an operation
+below and drag the sliders; the dashed outline is the original shape and the filled
+shape is the transformed result.
+
+<AffineTransform2D client:visible />
+
+## The four basic transforms
+
+A point $\begin{bmatrix} x \\ y \end{bmatrix}$ becomes $\begin{bmatrix} x' \\ y' \end{bmatrix}$
+under a $2 \times 2$ matrix. The matrix's columns are where the basis vectors land:
+
+- **Scale:** $\begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix}$ stretches each axis independently.
+- **Rotation:** $\begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}$ spins about the origin.
+- **Shear:** $\begin{bmatrix} 1 & k \\ 0 & 1 \end{bmatrix}$ slides points sideways in proportion to their height.
+
+Scale, rotate, and shear all keep the origin fixed. **Translation** — sliding the
+whole shape — is the odd one out: it cannot be written as a $2 \times 2$ matrix
+multiply, because moving the origin is not linear.
+
+## Homogeneous coordinates
+
+The fix is to add a third coordinate that is always 1, turning a 2D point into
+$\begin{bmatrix} x \\ y \\ 1 \end{bmatrix}$ and every transform into a $3 \times 3$
+matrix:
+
+$$ \begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} a & c & t_x \\ b & d & t_y \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix} $$
+
+The extra $t_x, t_y$ column is the translation, and it only takes effect because the
+point carries that trailing 1. Now **every** affine move — including translation — is
+a single matrix multiply, which is exactly what GPUs are built to do fast.
+
+## Composition: order matters
+
+Chaining transforms is just multiplying matrices. To rotate a shape and *then*
+translate it, you apply $T \cdot R$ to each point — the rightmost matrix acts first.
+Because matrix multiplication is **not commutative**, $T \cdot R \neq R \cdot T$.
+Rotate-then-translate swings the shape into place; translate-then-rotate orbits it
+around the origin instead. Toggle the compose checkbox above to see a second rotation
+stack on top of your transform.
+
+Collapsing a long chain into one combined matrix is the standard trick: compute it
+once on the CPU, then apply that single matrix to thousands of vertices.
+
+## Takeaways
+
+- Scale, rotation, and shear are $2 \times 2$ matrices; their columns show where the
+  basis vectors $\hat{i}$ and $\hat{j}$ go.
+- Homogeneous coordinates add a constant 1 so translation becomes a $3 \times 3$
+  matrix multiply like everything else.
+- Transforms compose by matrix multiplication, and order matters: $T \cdot R$ differs
+  from $R \cdot T$.
+
+## References
+
+- [Scratchapixel — Geometry and Transformations](https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/transforming-points-and-vectors.html)
+- [Akenine-Moller et al., "Real-Time Rendering" — transforms chapter](https://www.realtimerendering.com/)
+- [Wikipedia — Transformation matrix and homogeneous coordinates](https://en.wikipedia.org/wiki/Transformation_matrix)

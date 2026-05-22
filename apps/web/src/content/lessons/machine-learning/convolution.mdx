@@ -13,7 +13,7 @@ a separate weight for every pixel and quickly drown. **Convolutional Neural
 Networks (CNNs)** solve this with one elegant operation — **convolution** — that
 scans the image with a tiny shared filter, the engine behind modern vision.
 
-A **kernel** is a small grid of weights (here `$3 \times 3$`). It slides across the
+A **kernel** is a small grid of weights (here $3 \times 3$). It slides across the
 input; at each stop it multiplies overlapping values and sums them into one output
 number. Pick a kernel below and step the window to fill the **feature map**.
 
@@ -26,8 +26,8 @@ At every position the kernel computes a weighted sum of the patch it covers:
 $$ \text{out}[r,c] = \sum_{i}\sum_{j} \text{img}[r+i,\,c+j]\;\cdot\;\text{kernel}[i,j] $$
 
 Slide one step right, repeat; reach the edge, drop down a row. The grid of results
-is the **feature map**. With a `$3 \times 3$` kernel and no padding, a `$6 \times 6$`
-input shrinks to `$4 \times 4$` because the window cannot hang off the edge (this is
+is the **feature map**. With a $3 \times 3$ kernel and no padding, a $6 \times 6$
+input shrinks to $4 \times 4$ because the window cannot hang off the edge (this is
 a *valid* convolution).
 
 ## What kernels detect
@@ -41,7 +41,7 @@ reduce its loss.
 
 ## Why convolution wins for images
 
-- **Parameter sharing** — the same `$3 \times 3$` kernel is reused at every
+- **Parameter sharing** — the same $3 \times 3$ kernel is reused at every
   position, so a layer has a few weights instead of one per pixel.
 - **Translation invariance** — a feature is detected wherever it appears, because
   the same filter sweeps the whole image.
@@ -51,10 +51,10 @@ reduce its loss.
 ## Stacking into a network
 
 One convolutional layer applies **many** kernels, producing a stack of feature
-maps. A **pooling** step (e.g. taking the max over each `$2 \times 2$` block) then
+maps. A **pooling** step (e.g. taking the max over each $2 \times 2$ block) then
 shrinks them, adding robustness and cutting computation. Stack these layers and the
 features compose into a hierarchy: early layers find edges, middle layers find
-textures and shapes, deep layers find objects — the same edges `$\to$` shapes `$\to$`
+textures and shapes, deep layers find objects — the same edges $\to$ shapes $\to$
 faces idea from the neural-networks lesson, now built directly into the
 architecture.
 

@@ -1,0 +1,84 @@
+---
+title: Digital Signatures & TLS
+track: security
+order: 4
+summary: Signatures, certificates and the chain of trust, and how the TLS handshake combines asymmetric and symmetric crypto into a secure channel.
+difficulty: hard
+---
+
+import TlsHandshakeVisualizer from '@/components/viz/TlsHandshakeVisualizer.tsx';
+
+Public-key crypto lets strangers share a secret, but two questions remain: how do
+you prove a message really came from someone, and how do you know a public key
+belongs to the right party? **Digital signatures** and **certificates** answer
+these, and **TLS** stitches everything together into the padlock in your browser.
+
+Step through a simplified TLS handshake. Watch the hellos, the signed
+certificate, the key exchange, and the switch to fast encrypted application data.
+
+<TlsHandshakeVisualizer client:visible />
+
+## Digital signatures
+
+A signature is the mirror image of public-key encryption. To **sign**, you hash
+the message and transform the digest with your **private** key. To **verify**,
+anyone uses your **public** key to check that the signature matches the message's
+hash:
+
+$$\text{sign}: s = \text{Sign}_{priv}\big(H(m)\big), \qquad \text{verify}: \text{Verify}_{pub}(m, s).$$
+
+This gives three guarantees: **authenticity** (only the private-key holder could
+produce it), **integrity** (any change to $m$ breaks the hash and fails
+verification), and **non-repudiation** (the signer cannot later deny it). Note the
+direction is reversed from encryption — you sign with the private key so the whole
+world can verify with the public one.
+
+## Certificates and the chain of trust
+
+A signature only helps if you trust the public key. A **certificate** binds an
+identity (like `example.com`) to a public key, and is itself **signed by a
+Certificate Authority (CA)**. Your browser ships with a list of trusted **root**
+CAs. A site's certificate is signed by an intermediate CA, which is signed by a
+root — a **chain of trust** the browser verifies link by link up to a root it
+already trusts. Tampering anywhere breaks a signature and the connection is
+refused.
+
+## The TLS handshake
+
+TLS combines the pieces:
+
+1. **Hellos** — client and server agree on a cipher suite and exchange random
+   nonces.
+2. **Certificate** — the server proves its identity with a CA-signed certificate;
+   the client verifies the chain.
+3. **Key exchange** — using the server's key (or, better, an **ephemeral**
+   Diffie-Hellman exchange), both sides derive the same **session key**.
+4. **Finished** — each side sends a message encrypted under the new key, proving
+   the handshake was not tampered with.
+5. **Application data** — all further traffic uses fast **symmetric** encryption
+   (AES) with the session key.
+
+Asymmetric crypto authenticates and establishes the key; symmetric crypto carries
+the data. Ephemeral key exchange adds **forward secrecy**: even if the server's
+long-term private key later leaks, past sessions stay safe because their session
+keys were never stored.
+
+## Takeaways
+
+- A signature is made with the **private** key and checked with the **public**
+  key, giving authenticity, integrity, and non-repudiation.
+- Certificates bind a key to an identity and are validated through a **chain of
+  trust** rooted in CAs your browser trusts.
+- TLS uses asymmetric crypto to authenticate and agree a key, then symmetric
+  crypto for the data; ephemeral key exchange provides forward secrecy.
+
+## References
+
+- ["Crypto 101" by Laurens Van Houtven](https://www.crypto101.io/) — free book;
+  chapters on digital signatures and TLS.
+- [Dan Boneh's Cryptography courses (Stanford)](https://crypto.stanford.edu/~dabo/courses/OnlineCrypto/)
+  — digital signatures and authenticated key exchange.
+- [Cloudflare: A detailed look at the TLS handshake](https://www.cloudflare.com/learning/ssl/what-happens-in-a-tls-handshake/)
+  — a step-by-step explanation of each message.
+- [OWASP Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)
+  — configuring TLS securely.

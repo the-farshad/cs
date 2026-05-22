@@ -1,0 +1,79 @@
+---
+title: Code Generation
+track: compilers
+order: 3
+summary: Walk the AST to emit stack-machine bytecode, then run it on a tiny virtual machine.
+difficulty: medium
+---
+
+import StackVMVisualizer from '@/components/viz/StackVMVisualizer.tsx';
+
+We have an AST. Now we must turn it into something a machine can run. A common,
+portable target is **bytecode** for a **stack machine**: a simple virtual
+machine with no registers, just a single **operand stack**. Instructions push
+values onto the stack or pop a couple, combine them, and push the result.
+
+The visualizer below compiles an expression's AST into bytecode and then runs
+it. Watch the operand stack grow and shrink until a single value — the answer —
+remains.
+
+<StackVMVisualizer client:visible />
+
+## Emitting code by walking the tree
+
+The generator does a **post-order traversal**: visit both children, then emit
+the instruction for the current node. This ordering is the whole trick — by the
+time an operator instruction runs, its operands are already sitting on top of
+the stack. For `2 + 3 * 4` the generator produces:
+
+```text
+PUSH 2
+PUSH 3
+PUSH 4
+MUL      # pops 3 and 4, pushes 12
+ADD      # pops 2 and 12, pushes 14
+```
+
+The tree structure dictates the order. Because `MUL` is deeper in the AST, its
+instructions come out first, so the multiplication happens before the addition —
+precedence preserved, for free, by the traversal.
+
+## The stack machine
+
+The VM is tiny. It keeps one stack and runs instructions top to bottom:
+
+- `PUSH n` puts the constant `n` on top of the stack.
+- A binary op like `ADD` pops the top two values, computes a result, and pushes
+  it back.
+
+That is nearly the entire instruction set you need for arithmetic. Real
+bytecode VMs — the JVM, CPython, Lua, and the one in *Crafting Interpreters* —
+add instructions for variables, jumps, and function calls, but the stack-based
+core looks just like this.
+
+## Why a stack machine?
+
+Stack machines are popular targets because they are **easy to generate code for**
+and **easy to implement**. There are no registers to allocate; operands always
+live in a known place (the top of the stack). The trade-off is that they execute
+more instructions than a register machine would, which is one reason optimizing
+backends later lower bytecode to real CPU registers.
+
+When the program finishes, exactly one value is left on the stack: the result.
+If more than one remained, or the stack underflowed, the bytecode would be
+malformed — a useful invariant the generator is responsible for maintaining.
+
+## Takeaways
+
+- Code generation walks the AST in **post-order**, emitting operands before the
+  operator that consumes them.
+- A **stack machine** needs only push and pop-combine instructions to evaluate
+  arithmetic.
+- The traversal order automatically preserves precedence and associativity from
+  the tree.
+- A well-formed program leaves exactly one value — the result — on the stack.
+
+## References
+
+- Robert Nystrom, ["Crafting Interpreters" — A Virtual Machine](https://craftinginterpreters.com/a-virtual-machine.html) and ["Compiling Expressions"](https://craftinginterpreters.com/compiling-expressions.html) (free online).
+- Aho, Lam, Sethi, and Ullman, ["Compilers: Principles, Techniques, and Tools"](https://suif.stanford.edu/dragonbook/) (the "Dragon Book"), Chapter 6: Intermediate-Code Generation.

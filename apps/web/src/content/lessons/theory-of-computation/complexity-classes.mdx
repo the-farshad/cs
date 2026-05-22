@@ -1,0 +1,81 @@
+---
+title: Complexity Classes — P, NP, and NP-Completeness
+track: theory-of-computation
+order: 5
+summary: Among the decidable problems, which are tractable? Verifying versus solving, and the P vs NP question.
+difficulty: hard
+---
+
+import NpVerifierVisualizer from '@/components/viz/NpVerifierVisualizer.tsx';
+
+[Computability](/learn/theory-of-computation/computability) asks what can be solved
+*at all*; **complexity theory** asks what can be solved *efficiently*. Among the
+decidable problems, we sort them by the resources — usually time — a Turing machine
+needs as the input grows. The dividing line most people care about is between
+problems solvable in **polynomial time** and those that seem to require
+exponential time.
+
+The visualizer shows the key asymmetry of NP. Graph 3-coloring is hard to *solve*,
+but a proposed coloring (a **certificate**) can be *verified* fast — just scan each
+edge. Try a valid and a flawed certificate.
+
+<NpVerifierVisualizer client:visible />
+
+## P: efficiently solvable
+
+**P** is the class of decision problems a deterministic Turing machine can decide
+in time bounded by a polynomial $n^k$ in the input size $n$. These are the problems
+we consider tractable: sorting, shortest paths, primality testing, linear
+programming. Polynomial time is robust — it survives reasonable changes in the
+machine model — which is why it serves as the formal stand-in for "feasible".
+
+## NP: efficiently verifiable
+
+**NP** is the class of problems whose *yes*-answers have a short **certificate**
+that can be **checked** in polynomial time. For 3-coloring the certificate is a
+color per vertex; the checker confirms every edge joins two different colors in
+$O(E)$ time. Equivalently, NP is what a *nondeterministic* machine can decide in
+polynomial time: it guesses a certificate, then verifies it.
+
+Crucially, verifying is not solving. There are $3^V$ possible colorings; the
+verifier checks **one**, while brute-force search may try them all. Every problem
+in P is also in NP (if you can solve it fast, you can ignore the certificate and
+just solve it), so $\text{P} \subseteq \text{NP}$.
+
+## The P versus NP question
+
+Is every efficiently *verifiable* problem also efficiently *solvable*? That is the
+$\text{P} \stackrel{?}{=} \text{NP}$ question — the central open problem of the
+field and one of the Clay Millennium Prize Problems. Almost everyone believes
+$\text{P} \ne \text{NP}$ (verifying really is easier than finding), but no proof
+exists either way.
+
+## NP-completeness and reductions
+
+A **polynomial-time reduction** transforms instances of problem $A$ into instances
+of problem $B$ such that the answer is preserved, using only polynomial work. If
+$A$ reduces to $B$ and $B \in \text{P}$, then $A \in \text{P}$ — so $B$ is "at
+least as hard" as $A$.
+
+A problem is **NP-complete** if it is in NP *and* every problem in NP reduces to
+it. These are the hardest problems in NP: a polynomial algorithm for any one of
+them would put **all** of NP into P. The **Cook-Levin theorem** established that
+Boolean satisfiability (**SAT**) is NP-complete, and thousands of problems — graph
+coloring, the traveling salesman decision problem, subset-sum, clique — have since
+been shown NP-complete by reduction. They all stand or fall together.
+
+## Takeaways
+
+- P is what a deterministic machine solves in polynomial time; NP is what can be
+  verified in polynomial time given a certificate, with $\text{P} \subseteq
+  \text{NP}$.
+- Verifying a certificate is far cheaper than searching for one; whether the two
+  are equally hard is the open P vs NP question.
+- Polynomial reductions rank problems by difficulty; NP-complete problems (SAT
+  first, via Cook-Levin) are the hardest in NP and a fast algorithm for one solves
+  them all.
+
+## References
+
+- Michael Sipser, [*Introduction to the Theory of Computation*](https://math.mit.edu/~sipser/book.html), 3rd ed., Chapter 7 (Time Complexity).
+- Stephen Cook, [*The P versus NP Problem*](https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf), Clay Mathematics Institute.

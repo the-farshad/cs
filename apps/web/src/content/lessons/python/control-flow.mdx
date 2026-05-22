@@ -1,0 +1,120 @@
+---
+title: Control Flow & Comprehensions
+track: python
+order: 3
+summary: if/elif/else, for and while loops, range, and the comprehensions that make Python concise.
+difficulty: easy
+---
+
+import PyComprehensionVisualizer from '@/components/viz/PyComprehensionVisualizer.tsx';
+
+Control flow decides *which* statements run and *how often*. Python keeps the set
+small and readable: conditionals, two kinds of loops, and a uniquely powerful tool
+called the comprehension.
+
+## if / elif / else
+
+A conditional runs the first branch whose test is truthy. Note the colon and the
+indented block — there are no parentheses around the condition and no braces.
+
+```py
+score = 82
+if score >= 90:
+    grade = "A"
+elif score >= 80:
+    grade = "B"
+else:
+    grade = "C"
+```
+
+Python treats many values as **falsy**: `0`, `0.0`, `""`, `[]`, `{}`, `None`, and
+`False`. Everything else is truthy. This lets you write `if items:` instead of
+`if len(items) > 0:`. The boolean operators `and`/`or` **short-circuit** and
+return one of their operands, not always a strict bool:
+
+```py
+name = user_name or "anonymous"   # falls back if user_name is empty
+```
+
+## for loops and range
+
+A Python `for` loop iterates over the items of any **iterable** — a list, string,
+dict, file, or generator — rather than counting an index. When you do need
+numbers, `range(start, stop, step)` produces them lazily (it does not build a
+list):
+
+```py
+for ch in "abc":
+    print(ch)               # a b c
+
+for i in range(3):
+    print(i)                # 0 1 2
+
+for i, color in enumerate(["red", "green"]):
+    print(i, color)         # 0 red / 1 green
+
+for a, b in zip([1, 2], ["x", "y"]):
+    print(a, b)             # 1 x / 2 y
+```
+
+`enumerate` and `zip` are idiomatic — reach for them instead of manual index
+bookkeeping.
+
+## while loops, break, continue
+
+A `while` loop repeats as long as its condition holds. `break` exits the loop
+early; `continue` skips to the next iteration. Python also allows an `else` clause
+on loops that runs only if the loop finished *without* hitting `break`:
+
+```py
+n = 17
+for d in range(2, n):
+    if n % d == 0:
+        print("composite")
+        break
+else:
+    print("prime")          # runs only if no divisor was found
+```
+
+## Comprehensions
+
+A **comprehension** builds a collection from an iterable in a single expression. It
+replaces the common pattern of "create an empty list, loop, conditionally append."
+The visualizer below runs a comprehension and its equivalent for-loop in lockstep
+so you can see the filter test, the map expression, and each append happen
+element-by-element.
+
+<PyComprehensionVisualizer client:visible />
+
+The general shape is `[expression for item in iterable if condition]`. The same
+syntax produces sets and dicts:
+
+```py
+squares  = [n * n for n in range(6)]            # [0, 1, 4, 9, 16, 25]
+evens    = [n for n in range(10) if n % 2 == 0] # [0, 2, 4, 6, 8]
+lengths  = {w: len(w) for w in ["hi", "bye"]}   # {'hi': 2, 'bye': 3}  (dict)
+unique   = {c for c in "mississippi"}           # {'m','i','s','p'}    (set)
+grid     = [(x, y) for x in range(2) for y in range(2)]  # nested loops
+```
+
+Comprehensions are usually faster than the equivalent loop because the iteration
+runs in C, and they read as a description of *what* you want rather than *how* to
+build it. Keep them to one or two clauses, though — past that, a plain loop is
+clearer. For very large or infinite sequences, use a **generator expression** with
+parentheses instead of brackets so values are produced lazily: `sum(n * n for n in
+range(1_000_000))` never builds the list.
+
+## Takeaways
+
+- `if/elif/else` use indentation and truthiness; `and`/`or` short-circuit.
+- `for` iterates over items of any iterable; pair it with `enumerate`/`zip`/`range`.
+- `break`, `continue`, and the loop `else` clause control iteration precisely.
+- Comprehensions build lists, sets, and dicts in one readable, fast expression.
+- Use a generator expression `(...)` instead of `[...]` when the sequence is huge.
+
+## References
+
+- [Python docs — More Control Flow Tools](https://docs.python.org/3/tutorial/controlflow.html).
+- [Python docs — List Comprehensions](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
+- [PEP 289 — Generator Expressions](https://peps.python.org/pep-0289/).
+- [Luciano Ramalho, "Fluent Python" — Ch. 2: An Array of Sequences (listcomps and genexps)](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).

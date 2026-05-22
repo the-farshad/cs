@@ -1,0 +1,75 @@
+---
+title: Cryptographic Hash Functions
+track: security
+order: 1
+summary: One-way fingerprints for data — deterministic, collision-resistant, and the avalanche effect that powers integrity checks and password storage.
+difficulty: medium
+---
+
+import HashAvalancheVisualizer from '@/components/viz/HashAvalancheVisualizer.tsx';
+
+A **cryptographic hash function** takes any input and produces a fixed-size
+**digest** — a short fingerprint of the data. The same input always yields the
+same digest, but you cannot run the function backwards to recover the input, and
+no one can feasibly find two inputs with the same digest.
+
+Type a message below, then change a single character. Watch how the digest
+transforms completely — that sensitivity is the **avalanche effect**.
+
+<HashAvalancheVisualizer client:visible />
+
+The hash above is a deliberately simple **toy** so the avalanche is easy to see.
+Real functions like **SHA-256** produce 256-bit digests and have withstood years
+of cryptanalysis.
+
+## The four properties
+
+A good cryptographic hash $H$ is:
+
+- **Deterministic** — $H(x)$ is always the same for the same $x$.
+- **One-way (preimage resistant)** — given a digest $d$, finding any $x$ with
+  $H(x) = d$ is infeasible.
+- **Collision resistant** — finding two different inputs $x \neq y$ with
+  $H(x) = H(y)$ is infeasible.
+- **Avalanche** — flipping one input bit flips about half the output bits, so
+  digests reveal nothing about how similar two inputs were.
+
+## Integrity: detecting tampering
+
+Publish a file alongside its SHA-256 digest. After downloading, you re-hash the
+file and compare. If even one byte changed in transit, the digests differ — the
+avalanche effect guarantees a mismatch. This is how package managers, Git commit
+IDs, and software releases verify they got exactly the intended bytes.
+
+## Password storage: never store the password
+
+Servers must never store raw passwords. Instead they store $H(\text{password})$.
+At login, the server hashes what you typed and compares digests. A breach then
+leaks only digests, not passwords.
+
+But plain hashing is not enough. Attackers precompute digests of common passwords
+(rainbow tables). The fix is a **salt**: a unique random value stored per user and
+mixed in, so you store $H(\text{salt} \mathbin{\|} \text{password})$. Identical
+passwords now get different digests, defeating precomputation.
+
+Crucially, password hashing should be **slow**. Functions like **bcrypt**,
+**scrypt**, and **Argon2** are deliberately expensive (and memory-hard), so an
+attacker testing billions of guesses is throttled. Fast hashes like SHA-256 are
+right for integrity but wrong for passwords.
+
+## Takeaways
+
+- A cryptographic hash is a deterministic, one-way, collision-resistant
+  fingerprint with a strong avalanche effect.
+- Use hashes to verify **integrity** — re-hash and compare digests.
+- Store passwords as **salted** hashes using a **slow** algorithm (bcrypt,
+  scrypt, Argon2), never in plaintext and never with a fast hash alone.
+
+## References
+
+- ["Crypto 101" by Laurens Van Houtven](https://www.crypto101.io/) — free
+  introductory book; see the chapters on hash functions and password storage.
+- [Dan Boneh's Cryptography I course (Coursera)](https://www.coursera.org/learn/crypto)
+  — collision resistance and the Merkle-Damgard construction.
+- [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+  — salting and choosing a slow hash.

@@ -2,7 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import SortVisualizer from '@/components/viz/SortVisualizer.tsx';
 import Icon from '@/components/ui/Icon.astro';
-import { TRACKS } from '@/lib/tracks';
+import { TRACKS, CATEGORIES } from '@/lib/tracks';
 ---
 
 <Layout>
@@ -36,22 +36,24 @@ import { TRACKS } from '@/lib/tracks';
 
   <section id="tracks" class="mx-auto max-w-6xl px-4 pt-16">
     <h2 class="font-display text-3xl text-fg">Tracks</h2>
-    <p class="mt-1 text-muted">The full map. Lessons, visualizers, and problems land here track by track.</p>
-    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {
-        TRACKS.map((t) => (
-          <a
-            href={`/learn/${t.slug}`}
-            class="group rounded-xl border border-edge bg-surface p-5 transition hover:border-accent"
-          >
-            <span class="flex h-11 w-11 items-center justify-center rounded-lg border border-edge text-accent">
-              <Icon name={t.icon} size={22} />
-            </span>
-            <h3 class="mt-3 font-display text-xl text-fg transition group-hover:text-accent">{t.title}</h3>
-            <p class="mt-1 text-sm text-muted">{t.summary}</p>
-          </a>
-        ))
-      }
-    </div>
+    <p class="mt-1 text-muted">Browse by area — each track has lessons, visualizers, and problems.</p>
+    {
+      CATEGORIES.map((cat) => (
+        <div class="mt-10">
+          <h3 class="mb-4 font-display text-sm tracking-wide text-muted uppercase">{cat}</h3>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {TRACKS.filter((t) => t.category === cat).map((t) => (
+              <a href={`/learn/${t.slug}`} class="group rounded-xl border border-edge bg-surface p-5 transition hover:border-accent">
+                <span class="flex h-11 w-11 items-center justify-center rounded-lg border border-edge text-accent">
+                  <Icon name={t.icon} size={22} />
+                </span>
+                <h4 class="mt-3 font-display text-xl text-fg transition group-hover:text-accent">{t.title}</h4>
+                <p class="mt-1 text-sm text-muted">{t.summary}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))
+    }
   </section>
 </Layout>

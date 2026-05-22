@@ -9,7 +9,7 @@ difficulty: medium
 import DecisionTreeVisualizer from '@/components/viz/DecisionTreeVisualizer.tsx';
 
 A **decision tree** classifies by asking a sequence of simple questions, each of
-the form "is feature `$x_j$` below some threshold?". Every question is an
+the form "is feature $x_j$ below some threshold?". Every question is an
 **axis-aligned split** that cuts the feature space with a horizontal or vertical
 line, and the answers route a point down to a **leaf** that holds the prediction.
 
@@ -26,11 +26,11 @@ every candidate threshold, then keeps the split that makes the two resulting gro
 as **pure** as possible — ideally each side ending up all one class.
 
 Purity is measured by **impurity**, which the split tries to lower. Two common
-measures, for class probabilities `$p_k$` in a node:
+measures, for class probabilities $p_k$ in a node:
 
 $$ \text{Gini} = 1 - \sum_k p_k^2 \qquad \text{Entropy} = -\sum_k p_k \log_2 p_k $$
 
-Both are `$0$` when a node is pure (one class) and largest when classes are evenly
+Both are $0$ when a node is pure (one class) and largest when classes are evenly
 mixed. The node greedily picks the split with the lowest *weighted* child impurity;
 the drop is the **information gain**. The visualizer reports the root's Gini so you
 can see how mixed the full dataset starts.

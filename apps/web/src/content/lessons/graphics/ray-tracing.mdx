@@ -1,0 +1,78 @@
+---
+title: Ray Tracing
+track: graphics
+order: 4
+summary: Casting rays from the camera through pixels, intersecting them with a sphere, and shading by the angle to the light.
+difficulty: medium
+---
+
+import RayTraceSphere from '@/components/viz/RayTraceSphere.tsx';
+
+Rasterization asks "for each triangle, which pixels does it cover?" **Ray tracing**
+flips the question: "for each pixel, what does the camera see through it?" It traces a
+ray from the eye out into the scene and reports what it hits. Render the image below
+row by row, or all at once, and move the light to relight the sphere.
+
+<RayTraceSphere client:visible />
+
+## Casting a ray per pixel
+
+Picture the image as a window floating in front of the camera. For every pixel we
+build a **ray** — a starting point (the camera) and a direction pointing through that
+pixel into the scene. A point along the ray is
+
+$$ \mathbf{p}(t) = \mathbf{o} + t\,\mathbf{d} $$
+
+where $\mathbf{o}$ is the origin, $\mathbf{d}$ the direction, and $t$ the distance
+travelled. Finding what the pixel sees means finding the smallest positive $t$ where
+the ray meets an object.
+
+## Ray-sphere intersection
+
+A sphere is every point at distance $r$ from its center $\mathbf{c}$. Substituting the
+ray into that condition gives a **quadratic** in $t$:
+
+$$ t^2 + 2\,(\mathbf{d}\cdot(\mathbf{o}-\mathbf{c}))\,t + |\mathbf{o}-\mathbf{c}|^2 - r^2 = 0 $$
+
+The **discriminant** decides everything: negative means the ray misses the sphere
+entirely (those pixels stay background); zero grazes the edge; positive gives two
+hits, and we keep the nearer one — the front of the sphere. This closed-form solve is
+why spheres are the traditional first object in every ray tracer.
+
+## Diffuse shading
+
+A hit point alone is just a silhouette; **shading** gives it form. At the hit we
+compute the **surface normal** $\mathbf{n}$, the unit vector pointing straight out of
+the sphere, which is simply $(\mathbf{p}-\mathbf{c})/r$. **Lambert's cosine law** says
+a matte surface looks brightest when it faces the light head-on and fades as it turns
+away. That cosine is exactly a dot product of unit vectors:
+
+$$ \text{brightness} = \max(0,\ \mathbf{n}\cdot\mathbf{l}) $$
+
+where $\mathbf{l}$ points toward the light. Facing the light gives 1 (bright), a right
+angle gives 0 (dark), and the $\max$ clamps away the back side. That single dot
+product per pixel produces the smooth rounded gradient you see — move the light and the
+bright spot follows.
+
+## Beyond one bounce
+
+Real ray tracers do not stop at the first hit. They spawn new rays from it: toward
+lights to test for **shadows**, and in mirror or refracted directions for reflections
+and glass. Following light across many bounces is what makes ray tracing produce such
+realistic images — at the cost of casting far more rays.
+
+## Takeaways
+
+- Ray tracing casts a ray from the camera through each pixel and finds the nearest hit.
+- Ray-sphere intersection is a quadratic; its discriminant tells you miss, graze, or
+  hit, and you keep the nearest positive $t$.
+- Diffuse brightness is $\max(0, \mathbf{n}\cdot\mathbf{l})$ — the cosine of the angle
+  between the surface normal and the light.
+- Secondary rays for shadows, reflections, and refraction extend the same idea to
+  photorealistic images.
+
+## References
+
+- [Scratchapixel — A minimal ray tracer](https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html)
+- [Peter Shirley — Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+- [Akenine-Moller et al., "Real-Time Rendering" — ray tracing chapter](https://www.realtimerendering.com/)

@@ -15,17 +15,17 @@ in between and fail on anything new. That is **overfitting**, and
 complexity so the model prefers a simpler explanation.
 
 Below, a polynomial is fit to noisy points. Crank the **degree** up with
-`$\lambda = 0$` and the curve whips around to hit every dot. Now raise `$\lambda$`
+$\lambda = 0$ and the curve whips around to hit every dot. Now raise $\lambda$
 and watch it relax into a smooth trend.
 
 <RegularizationVisualizer client:visible />
 
 ## The complexity trap
 
-A degree-`$d$` polynomial has `$d+1$` weights. With high `$d$` the model has more
+A degree-$d$ polynomial has $d+1$ weights. With high $d$ the model has more
 freedom than the data deserves, so it spends that freedom modeling **noise**. The
-giveaway is large, alternating weights: tiny shifts in `$x$` produce huge swings in
-the prediction. The readout under the plot shows the "wiggle", `$\sum_j w_j^2$`,
+giveaway is large, alternating weights: tiny shifts in $x$ produce huge swings in
+the prediction. The readout under the plot shows the "wiggle", $\sum_j w_j^2$,
 exploding as the fit overfits.
 
 ## Adding a penalty
@@ -37,18 +37,18 @@ penalizes their squared magnitude:
 $$ J(w) = \underbrace{\sum_i (y_i - \hat y_i)^2}_{\text{fit the data}} + \lambda \sum_j w_j^2 $$
 
 Now the optimizer must balance two goals: fit the points **and** keep the weights
-small. The strength `$\lambda$` is the dial:
+small. The strength $\lambda$ is the dial:
 
-- **`$\lambda = 0$`** — no penalty; pure least squares, free to overfit.
-- **`$\lambda$` too large** — weights are crushed toward zero and the model
+- **$\lambda = 0$** — no penalty; pure least squares, free to overfit.
+- **$\lambda$ too large** — weights are crushed toward zero and the model
   **underfits**, flattening into a near-straight line.
 - **Just right** — the wiggle is suppressed but the real trend survives. You choose
-  `$\lambda$` with a validation set or cross-validation.
+  $\lambda$ with a validation set or cross-validation.
 
 ## L1 vs L2
 
 The other common choice, **L1 regularization** (lasso), penalizes the *absolute*
-value `$\lambda \sum_j |w_j|$`. L1 tends to drive some weights all the way to zero,
+value $\lambda \sum_j |w_j|$. L1 tends to drive some weights all the way to zero,
 performing automatic **feature selection**, while L2 shrinks weights smoothly
 without eliminating them. Both push the model toward simplicity; they differ in the
 shape of the penalty.
@@ -63,7 +63,7 @@ Further reading: [scikit-learn — Ridge regression](https://scikit-learn.org/st
 
 - Overly flexible models overfit by modeling noise, signaled by large, swinging
   weights.
-- **L2 regularization** adds `$\lambda \sum_j w_j^2$` to the loss, trading exact fit
+- **L2 regularization** adds $\lambda \sum_j w_j^2$ to the loss, trading exact fit
   for smaller, smoother weights.
-- `$\lambda$` controls the balance; L1 (lasso) instead zeroes weights for feature
+- $\lambda$ controls the balance; L1 (lasso) instead zeroes weights for feature
   selection.

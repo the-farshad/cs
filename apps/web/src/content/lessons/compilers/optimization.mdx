@@ -1,0 +1,75 @@
+---
+title: Optimization
+track: compilers
+order: 4
+summary: Make code faster and smaller without changing its meaning — constant folding and dead-code elimination on an IR.
+difficulty: medium
+---
+
+import OptimizationVisualizer from '@/components/viz/OptimizationVisualizer.tsx';
+
+A correct compiler can stop after code generation. An *optimizing* compiler adds
+passes that rewrite the program to be faster or smaller while computing exactly
+the same result. These passes usually run on an **intermediate representation
+(IR)** — a simple, regular form that sits between the AST and the final code and
+is easy for a machine to analyze and transform.
+
+The visualizer shows a small IR before and after two classic passes. Green marks
+constants the compiler folded away; red marks dead code it removed.
+
+<OptimizationVisualizer client:visible />
+
+## Three-address code
+
+The IR here is **three-address code**: every line does at most one operation and
+names its result, like `t1 = 3 + 4`. This uniformity is the point — passes do
+not have to untangle nested expressions, because each step is already broken out
+into its own line with explicit temporaries.
+
+## Constant folding
+
+If both operands of an operation are known constants, the compiler can compute
+the result *at compile time* and replace the operation with the literal. The
+line `t1 = 3 + 4` becomes `t1 = 7`. Once `t1` is known to be `7`, that value can
+be **propagated** into later lines that use it, which often exposes more folding.
+The program does less work at run time because the answer was baked in early.
+
+## Dead-code elimination
+
+Some computed values are never used. If a temporary is assigned but its result
+never reaches the program's output, the assignment is **dead** and can be
+deleted. The analysis works backward: start from what the program actually needs
+(its outputs), mark every line that feeds into a needed value as **live**, and
+remove the rest.
+
+In the `all dead but one` example, several lines compute values that nothing
+consumes; only the line feeding `out` survives.
+
+## Meaning must be preserved
+
+The golden rule of optimization is that the observable behavior cannot change.
+Folding `3 + 4` to `7` is safe because addition of constants is deterministic.
+Removing a dead assignment is safe *only* if it has no side effects and its
+result truly is unused. Getting these conditions right is what separates a real
+optimizer from one that quietly breaks programs.
+
+Real compilers chain dozens of such passes — common-subexpression elimination,
+inlining, loop transformations — often repeating them, since each pass can
+expose opportunities for the others. The two here are the simplest members of
+that family, and they already shrink the example noticeably.
+
+## Takeaways
+
+- Optimization rewrites code to be faster or smaller while preserving its
+  observable behavior.
+- A regular **IR** like three-address code makes analysis and rewriting
+  tractable.
+- **Constant folding** evaluates known expressions at compile time; propagation
+  spreads those constants forward.
+- **Dead-code elimination** removes assignments whose results never reach an
+  output, found by a backward liveness analysis.
+
+## References
+
+- Robert Nystrom, ["Crafting Interpreters" — Optimization (Design Note)](https://craftinginterpreters.com/optimization.html) (free online).
+- Aho, Lam, Sethi, and Ullman, ["Compilers: Principles, Techniques, and Tools"](https://suif.stanford.edu/dragonbook/) (the "Dragon Book"), Chapters 8-9: Code Generation and Machine-Independent Optimization.

@@ -1,0 +1,64 @@
+---
+title: 3D Projection
+track: graphics
+order: 3
+summary: How 3D points become 2D screen positions through a camera and the perspective divide that creates foreshortening.
+difficulty: medium
+---
+
+import PerspectiveCube from '@/components/viz/PerspectiveCube.tsx';
+
+A scene lives in three dimensions, but a screen is flat. **Projection** is the math
+that flattens 3D points onto the 2D image plane the way a camera or your eye does.
+The cube below is a set of eight 3D points spinning in space, projected to the screen
+each frame. Drag the field-of-view and distance sliders to see perspective change.
+
+<PerspectiveCube client:visible />
+
+## From world space to the camera
+
+A point starts in **world space**, the shared coordinate system of the scene. The
+**view transform** moves everything so the camera sits at the origin looking down one
+axis — it is just another matrix multiply, the inverse of the camera's own position
+and orientation. After this step a vertex has coordinates $(x, y, z)$ measured
+relative to the camera, where $z$ is its depth straight ahead.
+
+## The perspective divide
+
+Perspective is the rule that distant things look smaller. It comes from one operation:
+**dividing by depth**. With a focal length $f$, a camera-space point projects to the
+image plane as
+
+$$ x' = \frac{f \, x}{z}, \qquad y' = \frac{f \, y}{z} $$
+
+Double the depth $z$ and the projected size halves. That single division produces
+**foreshortening** — parallel rails appearing to meet at a horizon, near faces of the
+cube looming larger than far ones. The focal length ties directly to the **field of
+view**: $f = 1 / \tan(\text{fov}/2)$, so a wide field of view means a short focal
+length and exaggerated, almost fisheye depth, while a narrow one flattens the scene
+toward an **orthographic** look where depth no longer changes size.
+
+## Why a 4x4 matrix
+
+Just like translation in 2D needed homogeneous coordinates, 3D graphics carries points
+as four numbers $\begin{bmatrix} x & y & z & w \end{bmatrix}$ and uses $4 \times 4$
+matrices. The projection matrix is cleverly arranged to copy $z$ into the $w$ slot;
+the hardware then divides $x$, $y$, and $z$ by $w$ in a final step called the
+**perspective divide**. Packing the divide into $w$ lets one matrix chain — model, view,
+and projection multiplied together — handle the entire transform from a model's local
+space all the way to the screen.
+
+## Takeaways
+
+- Projection flattens 3D points onto a 2D image plane via the camera.
+- The view transform repositions the world so the camera is at the origin.
+- Dividing screen position by depth $z$ creates perspective foreshortening; focal length
+  $f = 1/\tan(\text{fov}/2)$ controls how strong it is.
+- Homogeneous $4 \times 4$ matrices store depth in $w$ so the perspective divide is a
+  single uniform step at the end of the pipeline.
+
+## References
+
+- [Scratchapixel — The perspective and orthographic projection matrix](https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix.html)
+- [Akenine-Moller et al., "Real-Time Rendering" — projection chapter](https://www.realtimerendering.com/)
+- [LearnOpenGL — Coordinate Systems](https://learnopengl.com/Getting-started/Coordinate-Systems)

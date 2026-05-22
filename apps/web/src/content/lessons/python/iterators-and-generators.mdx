@@ -1,0 +1,143 @@
+---
+title: Iterators & Generators
+track: python
+order: 6
+summary: Iterables vs iterators, the iterator protocol, yield, lazy evaluation, and generator pipelines.
+difficulty: hard
+---
+
+import PyGeneratorVisualizer from '@/components/viz/PyGeneratorVisualizer.tsx';
+
+Every `for` loop in Python, every comprehension, and every `in` test rests on one
+small contract: the **iterator protocol**. Understanding it unlocks lazy,
+memory-efficient code that can even model infinite sequences.
+
+## Iterables vs. iterators
+
+These two words sound alike but mean different things:
+
+- An **iterable** is anything you can loop over — a `list`, `str`, `dict`, file.
+  It implements `__iter__`, which returns a fresh iterator.
+- An **iterator** is the object that actually produces values one at a time. It
+  implements `__next__`, returning the next value or raising `StopIteration` when
+  exhausted. (An iterator's `__iter__` returns itself.)
+
+A `for` loop is just sugar for this dance:
+
+```py
+nums = [10, 20, 30]
+it = iter(nums)         # __iter__  -> a list_iterator
+print(next(it))         # 10        __next__
+print(next(it))         # 20
+print(next(it))         # 30
+next(it)                # raises StopIteration -> the loop would stop here
+```
+
+The distinction matters: a list is an iterable you can loop over many times, but a
+single iterator is consumed once and then empty.
+
+## Writing an iterator by hand
+
+You can implement the protocol directly, but it is verbose — you must track state
+between calls yourself:
+
+```py
+class Countdown:
+    def __init__(self, n):
+        self.n = n
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self.n <= 0:
+            raise StopIteration
+        self.n -= 1
+        return self.n + 1
+
+print(list(Countdown(3)))   # [3, 2, 1]
+```
+
+## Generators with `yield`
+
+A **generator** is the easy way to build an iterator. Write an ordinary function
+but use `yield` instead of `return`. Calling it does **not** run the body — it
+returns a generator object. Each `next()` resumes the function, runs until the next
+`yield`, hands back that value, and then **suspends**, freezing all local state
+until the following pull. This is **lazy evaluation**: values are computed only
+when demanded. Step through the visualizer to watch a generator wake on each
+`next()`, produce one value, and sleep again — then compare it to the eager `list`
+that computes everything up front.
+
+<PyGeneratorVisualizer client:visible />
+
+```py
+def squares(n):
+    total = 0
+    for i in range(n):
+        total += i * i
+        yield total          # pause here, resume on the next next()
+
+g = squares(4)
+print(next(g))               # 0
+print(next(g))               # 1
+print(list(g))               # [5, 14]  (continues where it left off)
+```
+
+The same logic as a `Countdown` class collapses to a few lines, and the suspended
+local variables replace all the manual state bookkeeping.
+
+## Why laziness matters
+
+Because a generator holds only its current state — not the whole sequence — it uses
+**constant memory** regardless of length, and can represent streams too large or
+even infinite to materialize:
+
+```py
+def naturals():             # an infinite sequence
+    n = 1
+    while True:
+        yield n
+        n += 1
+
+import itertools
+first5 = list(itertools.islice(naturals(), 5))   # [1, 2, 3, 4, 5]
+```
+
+## Generator pipelines
+
+Generators compose into **pipelines** where each stage pulls from the previous one,
+processing a single item at a time end-to-end — no intermediate lists. This is both
+fast and memory-light, ideal for streaming large files or data:
+
+```py
+def read_lines(path):
+    with open(path) as f:
+        for line in f:
+            yield line.rstrip()
+
+def only_errors(lines):
+    for line in lines:
+        if "ERROR" in line:
+            yield line
+
+# Nothing is read until we iterate the final generator:
+for line in only_errors(read_lines("app.log")):
+    print(line)
+```
+
+A generator **expression** — `(x * x for x in data)` — is the inline form, perfect
+as an argument to `sum`, `any`, `max`, or another stage of a pipeline.
+
+## Takeaways
+
+- An **iterable** yields a fresh **iterator** via `__iter__`; the iterator produces values via `__next__`.
+- `for`, comprehensions, and `in` all run on this protocol.
+- `yield` turns a function into a generator that suspends and resumes, computing values lazily.
+- Generators use constant memory and can model infinite or streaming sequences.
+- Compose generators into pipelines to process data one item at a time without intermediate lists.
+
+## References
+
+- [Python docs — Iterators](https://docs.python.org/3/tutorial/classes.html#iterators) and [Generators](https://docs.python.org/3/tutorial/classes.html#generators).
+- [Python docs — itertools (building blocks for iterators)](https://docs.python.org/3/library/itertools.html).
+- [PEP 255 — Simple Generators](https://peps.python.org/pep-0255/).
+- [Luciano Ramalho, "Fluent Python" — Ch. 17: Iterators, Generators, and Classic Coroutines](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).

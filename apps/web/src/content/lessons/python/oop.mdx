@@ -1,0 +1,124 @@
+---
+title: Object-Oriented Python
+track: python
+order: 5
+summary: Classes, __init__, instances and methods, inheritance, dunder methods, and the method resolution order.
+difficulty: medium
+---
+
+import PyMroVisualizer from '@/components/viz/PyMroVisualizer.tsx';
+
+A **class** is a blueprint that bundles data (attributes) with behavior (methods).
+An **instance** is a concrete object built from that blueprint. Python's object
+model is small but consistent: almost everything — even an `int` or a function — is
+an object with a class.
+
+```py
+class Dog:
+    species = "Canis familiaris"   # class attribute — shared by all instances
+
+    def __init__(self, name, age): # the initializer, runs on construction
+        self.name = name           # instance attributes — unique per object
+        self.age = age
+
+    def bark(self):                # a method; `self` is the instance
+        return f"{self.name} says woof"
+
+d = Dog("Rex", 3)
+print(d.bark())                    # Rex says woof
+print(d.species)                  # Canis familiaris
+```
+
+## `__init__`, `self`, and attributes
+
+`__init__` is not a constructor that *creates* the object — Python already created
+it and passes it in as `self`. `__init__` only *initializes* it. Every method
+receives the instance as its explicit first parameter, by convention named `self`.
+**Instance attributes** (set via `self.x = ...`) belong to one object;
+**class attributes** are defined in the class body and shared by all instances
+until shadowed.
+
+## Inheritance
+
+A subclass inherits the attributes and methods of its base class and can add or
+**override** them. Call the parent's version with `super()`:
+
+```py
+class Puppy(Dog):
+    def __init__(self, name):
+        super().__init__(name, age=0)   # reuse Dog's setup
+    def bark(self):                      # override
+        return f"{self.name} yips"
+
+p = Puppy("Bit")
+print(p.bark())                          # Bit yips
+print(isinstance(p, Dog))               # True — a Puppy is-a Dog
+```
+
+## Dunder methods
+
+**Dunder** ("double underscore") methods let your objects plug into Python's
+syntax. Define `__repr__` for a debugging string, `__eq__` for `==`, `__len__` for
+`len()`, `__add__` for `+`, and so on. This is how Python achieves uniform
+behavior across built-in and user-defined types.
+
+```py
+class Vector:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+    def __repr__(self):
+        return f"Vector({self.x}, {self.y})"
+    def __add__(self, other):
+        return Vector(self.x + other.x, self.y + other.y)
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
+print(Vector(1, 2) + Vector(3, 4))   # Vector(4, 6)
+print(Vector(1, 2) == Vector(1, 2))  # True
+```
+
+Always provide a `__repr__` — it makes debugging and logging far easier.
+
+## Method Resolution Order
+
+When you access `obj.attr`, Python checks the instance dictionary first, then walks
+the class's **MRO** — the linearized list of classes to search. With single
+inheritance this is just the chain up to `object`. With multiple inheritance Python
+uses the **C3 linearization** algorithm to produce one consistent order, which is
+what makes the diamond problem well-defined. Pick an attribute below and watch the
+lookup walk `D -> B -> C -> A -> object`, stopping at the first class that defines it.
+
+<PyMroVisualizer client:visible />
+
+```py
+class A:
+    def greet(self): return "A"
+class B(A):
+    def greet(self): return "B"
+class C(A):
+    def ping(self):  return "C"
+class D(B, C):
+    pass
+
+print(D.__mro__)        # (D, B, C, A, object)
+print(D().greet())      # 'B' — first match in the MRO
+print(D().ping())       # 'C' — inherited from C
+```
+
+You can always inspect the order with `D.__mro__` or `D.mro()`.
+
+## Takeaways
+
+- A class bundles attributes and methods; instances are built from it.
+- `__init__` initializes the already-created object passed in as `self`.
+- Class attributes are shared; instance attributes (`self.x`) are per-object.
+- Subclasses inherit and override; use `super()` to extend the parent.
+- Dunder methods integrate objects with Python's operators and built-ins.
+- Attribute lookup follows the MRO, computed by C3 linearization for multiple inheritance.
+
+## References
+
+- [Python docs — Classes](https://docs.python.org/3/tutorial/classes.html).
+- [Python docs — Data model (dunder/special methods)](https://docs.python.org/3/reference/datamodel.html#special-method-names).
+- [The Python 2.3 Method Resolution Order (C3)](https://docs.python.org/3/howto/mro.html).
+- [Luciano Ramalho, "Fluent Python" — Ch. 1, 11-14: The Python Data Model and OO Idioms](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).

@@ -1,0 +1,137 @@
+---
+title: Functions, Scope & Closures
+track: python
+order: 4
+summary: def, positional/keyword/default arguments, *args and **kwargs, lambdas, closures, and the LEGB scope rule.
+difficulty: medium
+---
+
+import PyScopeVisualizer from '@/components/viz/PyScopeVisualizer.tsx';
+
+A function packages a reusable piece of behavior. In Python, functions are
+**first-class objects**: you can pass them as arguments, return them from other
+functions, and store them in data structures. That flexibility is what makes
+closures, decorators, and functional-style code possible.
+
+```py
+def greet(name):
+    """Return a greeting (this line is the docstring)."""
+    return f"Hello, {name}!"
+
+print(greet("Ada"))     # Hello, Ada!
+f = greet               # the function object itself, not a call
+print(f("Alan"))        # Hello, Alan!
+```
+
+## Arguments: positional, keyword, default
+
+Arguments can be passed by **position** or by **keyword**, and parameters can
+declare **defaults**. Keyword arguments make calls self-documenting and let you
+skip middle defaults.
+
+```py
+def connect(host, port=5432, *, timeout=30):
+    return f"{host}:{port} (t={timeout})"
+
+connect("db")                       # db:5432 (t=30)
+connect("db", 6543)                 # positional port
+connect("db", timeout=5)            # skip port, set timeout by keyword
+```
+
+The bare `*` marks every following parameter as **keyword-only**, so callers must
+write `timeout=5`. One sharp edge: never use a **mutable default** like `def
+f(items=[])`. That list is created once and shared across calls. Use `None` as the
+sentinel and build the real default inside:
+
+```py
+def add(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+```
+
+## *args and **kwargs
+
+To accept any number of extra arguments, use `*args` (a tuple of leftover
+positionals) and `**kwargs` (a dict of leftover keywords). The same `*` and `**`
+also **unpack** a sequence or mapping at the call site.
+
+```py
+def report(*args, **kwargs):
+    print("positional:", args)      # a tuple
+    print("keyword:", kwargs)       # a dict
+
+report(1, 2, mode="fast")
+# positional: (1, 2)
+# keyword: {'mode': 'fast'}
+
+nums = [3, 1, 2]
+print(max(*nums))                   # unpack -> max(3, 1, 2) -> 3
+```
+
+## Lambdas
+
+A `lambda` is a small anonymous function limited to a single expression. They shine
+as throwaway arguments to functions like `sorted`, `map`, and `filter`:
+
+```py
+pairs = [("ada", 36), ("alan", 41), ("grace", 85)]
+oldest = sorted(pairs, key=lambda p: p[1], reverse=True)
+# [('grace', 85), ('alan', 41), ('ada', 36)]
+```
+
+If a lambda grows beyond one clear expression, write a named `def` instead.
+
+## Scope and the LEGB rule
+
+When you use a name, Python searches four scopes in order — **L**ocal,
+**E**nclosing, **G**lobal, **B**uilt-in — and uses the first binding it finds. The
+visualizer traces a nested call: as functions are called their frames are pushed on
+the stack, and each name lookup walks the LEGB ladder until it hits a match.
+
+<PyScopeVisualizer client:visible />
+
+By default, assigning to a name inside a function creates a *new local*. To rebind
+a name in an outer scope you must say so explicitly with `global` or `nonlocal`:
+
+```py
+count = 0
+def bump():
+    global count        # without this, count = ... would make a local
+    count += 1
+```
+
+## Closures
+
+A **closure** is a function that remembers variables from the enclosing scope where
+it was defined, even after that scope has returned. The inner function "closes
+over" those names. This is how you build function factories and stateful callbacks
+without classes:
+
+```py
+def multiplier(factor):
+    def multiply(x):
+        return x * factor    # factor is captured from the enclosing scope
+    return multiply
+
+triple = multiplier(3)
+print(triple(10))            # 30 — `factor` (3) lives on inside `triple`
+```
+
+Closures are the foundation of decorators and much of Python's functional toolkit.
+
+## Takeaways
+
+- Functions are first-class objects — pass, return, and store them freely.
+- Mix positional, keyword, and default args; never use a mutable default value.
+- `*args`/`**kwargs` collect extra arguments; `*`/`**` unpack them at call sites.
+- Name lookup follows **LEGB**; use `global`/`nonlocal` to rebind outer names.
+- A closure captures enclosing variables, letting inner functions carry state.
+
+## References
+
+- [Python docs — Defining Functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions).
+- [Python docs — Naming and Binding (the scope rules)](https://docs.python.org/3/reference/executionmodel.html#naming-and-binding).
+- [PEP 3102 — Keyword-Only Arguments](https://peps.python.org/pep-3102/).
+- [Luciano Ramalho, "Fluent Python" — Ch. 7-9: Functions, Closures, and Decorators](https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/).

@@ -1,0 +1,112 @@
+---
+title: Getting Started
+track: python
+order: 1
+summary: Python syntax, dynamic typing, variables as names, the REPL, indentation, and f-strings.
+difficulty: intro
+---
+
+import PyValueModel from '@/components/viz/PyValueModel.tsx';
+import PyFStringVisualizer from '@/components/viz/PyFStringVisualizer.tsx';
+
+Python is a high-level, dynamically typed language designed for readability. There
+are no semicolons to end statements and no braces to group code — instead, Python
+uses **line breaks** and **indentation** as real syntax. The result reads almost
+like pseudocode, which is a big part of why it is the most popular first language.
+
+```py
+greeting = "hello"
+for letter in greeting:
+    print(letter.upper())   # this block is "inside" the loop
+print("done")               # this is not — it ran once
+```
+
+## The REPL
+
+The fastest way to learn Python is the **REPL** (Read-Eval-Print Loop). Type
+`python` (or `python3`) in a terminal and you get a `>>>` prompt that evaluates
+each expression and immediately prints its value:
+
+```py
+>>> 2 + 3 * 4
+14
+>>> "ab" * 3
+'ababab'
+>>> import math; math.sqrt(2)
+1.4142135623730951
+```
+
+The REPL is your laboratory: try a function, inspect a value, read a docstring with
+`help(str.split)`. Nothing is compiled ahead of time — Python reads a statement,
+runs it, and shows you the result.
+
+## Variables are names, not boxes
+
+A common mental model is that a variable is a labeled box holding a value. In
+Python that model is misleading. A variable is a **name** that is *bound* to an
+**object**. Assignment never copies a value into a box; it points a name at an
+object that lives in memory. The same name can later point at a completely
+different object, even one of a different type. Step through this below — watch the
+namespace table update as each statement runs.
+
+<PyValueModel client:visible />
+
+Because types live on objects (not on names), Python is **dynamically typed**: you
+never declare a type, and a name like `x` can hold an `int` now and a `str` later.
+You can always ask an object what it is:
+
+```py
+x = 42
+print(type(x))        # <class 'int'>
+x = "now a string"
+print(type(x))        # <class 'str'>
+print(isinstance(x, str))   # True
+```
+
+Dynamic typing is convenient but puts the burden of correctness on you and your
+tests. Modern Python lets you add optional **type hints** (`x: int = 42`) that
+tools like `mypy` check statically, while the interpreter itself ignores them at
+runtime.
+
+## Indentation is syntax
+
+Whitespace is not cosmetic. A consistent indent (PEP 8 recommends **4 spaces**,
+never tabs mixed with spaces) defines a block. Get it wrong and Python raises an
+`IndentationError` before your code even runs. This forces every Python program to
+be visually structured the same way.
+
+## f-strings
+
+The modern way to build strings is the **f-string** (formatted string literal),
+added in Python 3.6. Prefix a string with `f` and any `{expression}` inside is
+evaluated and inserted. You can call functions, do arithmetic, and apply a
+**format spec** after a colon (for padding, precision, etc.). Step through the
+substitution below.
+
+<PyFStringVisualizer client:visible />
+
+```py
+name, count = "Ada", 7
+print(f"{name} sent {count} notes")        # Ada sent 7 notes
+print(f"{count:03}")                        # 007  (zero-padded width 3)
+print(f"pi is about {3.14159:.2f}")        # pi is about 3.14
+print(f"{name=}")                           # name='Ada'  (debug form)
+```
+
+f-strings are evaluated at runtime and are both faster and clearer than older
+`%`-formatting or `str.format()`.
+
+## Takeaways
+
+- Python uses indentation and newlines as syntax — no braces, no semicolons.
+- A variable is a **name bound to an object**; assignment rebinds, it does not copy.
+- Types belong to objects, so Python is dynamically typed; check with `type()`/`isinstance()`.
+- The REPL gives instant feedback — use it constantly while learning.
+- f-strings (`f"...{expr}..."`) are the modern, readable way to format text.
+
+## References
+
+- [The Python Tutorial — An Informal Introduction](https://docs.python.org/3/tutorial/introduction.html) — official walkthrough of values, variables, and strings.
+- [PEP 8 — Style Guide for Python Code](https://peps.python.org/pep-0008/) — indentation and naming conventions.
+- [PEP 498 — Literal String Interpolation](https://peps.python.org/pep-0498/) — the f-string specification.
+- [Al Sweigart, "Automate the Boring Stuff with Python" — Ch. 1: Python Basics](https://automatetheboringstuff.com/2e/chapter1/).

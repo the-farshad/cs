@@ -15,17 +15,17 @@ visualize, faster to model, and less prone to the *curse of dimensionality*.
 
 The workhorse is **Principal Component Analysis (PCA)**. It finds new axes, the
 **principal components**, pointing along the directions where the data varies most.
-Below, a tilted 2D cloud gets its `$PC1$` and `$PC2$` axes; toggle the projection to
-collapse every point onto `$PC1$`.
+Below, a tilted 2D cloud gets its $PC1$ and $PC2$ axes; toggle the projection to
+collapse every point onto $PC1$.
 
 <PCAVisualizer client:visible />
 
 ## Variance is information
 
 PCA's core assumption is that **directions of high variance carry the signal** and
-low-variance directions are mostly noise. `$PC1$` is the single line along which the
-points are most spread out. `$PC2$` is the next most-spread direction that is
-**orthogonal** (perpendicular) to `$PC1$`, and so on. Each component is a
+low-variance directions are mostly noise. $PC1$ is the single line along which the
+points are most spread out. $PC2$ is the next most-spread direction that is
+**orthogonal** (perpendicular) to $PC1$, and so on. Each component is a
 combination of the original features pointing a new way through the space.
 
 ## How it works
@@ -33,7 +33,7 @@ combination of the original features pointing a new way through the space.
 1. **Center** the data by subtracting the mean of each feature.
 2. Compute the **covariance matrix**, which records how features vary together.
 3. Take its **eigenvectors** and **eigenvalues**. The eigenvectors are the
-   principal-component directions; each eigenvalue `$\lambda_k$` is the variance
+   principal-component directions; each eigenvalue $\lambda_k$ is the variance
    captured along that direction.
 4. Sort by eigenvalue and keep the top few. **Project** the data onto them — drop a
    perpendicular from each point onto the chosen axis (the dashed lines in the
@@ -41,12 +41,12 @@ combination of the original features pointing a new way through the space.
 
 ## Variance explained
 
-Because eigenvalues *are* variances, the fraction kept by component `$k$` is
+Because eigenvalues *are* variances, the fraction kept by component $k$ is
 
 $$ \text{explained}_k = \frac{\lambda_k}{\sum_j \lambda_j} $$
 
-The plot reports these percentages. If `$PC1$` explains, say, 95% of the variance,
-you can throw away `$PC2$` and represent each 2D point with **one** number, losing
+The plot reports these percentages. If $PC1$ explains, say, 95% of the variance,
+you can throw away $PC2$ and represent each 2D point with **one** number, losing
 almost nothing. With high-dimensional data you keep just enough components to reach
 a target like 95% cumulative variance — often a huge reduction.
 

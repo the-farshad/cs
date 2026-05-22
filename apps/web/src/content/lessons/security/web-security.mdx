@@ -1,0 +1,93 @@
+---
+title: Common Web Vulnerabilities
+track: security
+order: 5
+summary: How injection, XSS, and CSRF work at a conceptual level — and the standard defenses that stop them.
+difficulty: medium
+---
+
+import InjectionDefenseVisualizer from '@/components/viz/InjectionDefenseVisualizer.tsx';
+
+Most web vulnerabilities share one root cause: **mixing untrusted input with
+trusted code or commands**. When data the user controls is interpreted as
+instructions, things break. This lesson is **defensive** — it explains how three
+classic flaws work so you can recognize and prevent them.
+
+Toggle between the unsafe and safe versions below to see how a parameterized query
+neutralizes a malicious-looking input. The unsafe side is illustrative only — it
+does not run any database.
+
+<InjectionDefenseVisualizer client:visible />
+
+## Injection (e.g. SQL injection)
+
+**Injection** happens when input is concatenated into a command that an
+interpreter then executes. With SQL, gluing a raw form field into a query string
+lets a crafted value like `' OR 1=1 --` close the string early and change the
+query's logic, exposing or destroying data.
+
+The fix is to **never build commands by string concatenation**. Use
+**parameterized queries** (also called prepared statements): the query structure
+is fixed and sent first, and inputs travel separately as bound parameters that the
+database always treats as data, never code. This single habit eliminates SQL
+injection. The same idea applies beyond SQL — use safe APIs instead of building OS
+commands or template strings from user input.
+
+## Cross-site scripting (XSS)
+
+**XSS** is injection into a web page. If a site echoes user input into HTML
+without sanitizing it, an attacker can submit content containing a script tag
+(literally `<script>...`), and the victim's browser will run it in the site's
+context — stealing cookies or acting as the user.
+
+Defenses:
+
+- **Contextual output encoding** — escape user data for the context it lands in.
+  In HTML, render `<` as `&lt;` and `>` as `&gt;` so it displays as text, never
+  executes. Modern frameworks (React, Angular) escape by default.
+- **Content Security Policy (CSP)** — an HTTP header that restricts which scripts
+  may run, blocking injected inline scripts as defense in depth.
+- Avoid sinks like `innerHTML` and `eval` with untrusted data.
+
+## Cross-site request forgery (CSRF)
+
+**CSRF** tricks a logged-in user's browser into sending an unwanted request to a
+site where they are authenticated. Because the browser automatically attaches
+cookies, a hidden form on a malicious page can trigger a state-changing action
+(like a transfer) using the victim's session.
+
+Defenses:
+
+- **Anti-CSRF tokens** — the server embeds a secret, unpredictable token in each
+  form and rejects requests without the matching token. A third-party page cannot
+  read or guess it.
+- **SameSite cookies** — mark session cookies `SameSite=Lax` or `Strict` so the
+  browser will not send them on cross-site requests.
+- Require re-authentication or confirmation for sensitive actions.
+
+## The common thread
+
+Treat all input as untrusted, **separate data from code** (parameterize), and
+**encode output** for its destination. Validate on the server (never trust the
+client), apply least privilege, and add layered defenses like CSP and SameSite.
+The [OWASP Top Ten](https://owasp.org/www-project-top-ten/) catalogs these and
+more.
+
+## Takeaways
+
+- Most web flaws come from untrusted input being treated as code — separate the
+  two.
+- **Injection**: use parameterized queries, never string concatenation.
+- **XSS**: encode output for its context and use CSP; **CSRF**: use anti-CSRF
+  tokens and SameSite cookies.
+
+## References
+
+- [OWASP Top Ten](https://owasp.org/www-project-top-ten/) — the canonical list of
+  web application security risks.
+- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/) — concrete
+  defenses for [SQL injection](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html),
+  [XSS](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html),
+  and [CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
+- [MDN: Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+  — configuring CSP headers.

@@ -1,0 +1,81 @@
+---
+title: Turing Machines
+track: theory-of-computation
+order: 3
+summary: An unbounded tape, a movable head, and a transition function — the model of all computation.
+difficulty: medium
+---
+
+import TuringMachineVisualizer from '@/components/viz/TuringMachineVisualizer.tsx';
+
+A **Turing machine** is what you get when you give a finite automaton an unlimited
+scratchpad. Instead of only reading a fixed input left to right, the machine has a
+two-way infinite **tape** of cells and a **head** that can read, overwrite, and
+move one cell left or right. That single addition — rewritable, unbounded memory —
+turns the weakest model into the most powerful one we know.
+
+The machine below increments a binary number. Enter a binary string and watch the
+head seek the right end, then ripple a carry leftward until it halts.
+
+<TuringMachineVisualizer client:visible />
+
+## The formal model
+
+A (deterministic) Turing machine is a 7-tuple
+$(Q, \Sigma, \Gamma, \delta, q_0, q_{\text{accept}}, q_{\text{reject}})$:
+
+- $Q$ — finite set of states, including the two halting states.
+- $\Sigma$ — the input alphabet.
+- $\Gamma \supseteq \Sigma$ — the tape alphabet, which also contains a blank
+  symbol for the infinitely many unused cells.
+- $\delta : Q \times \Gamma \to Q \times \Gamma \times \{L, R\}$ — the transition
+  function. Reading a symbol in a state, it writes a symbol, moves the head left or
+  right, and changes state.
+- $q_0$ — start state; $q_{\text{accept}}, q_{\text{reject}}$ — halting states.
+
+A **configuration** is the whole snapshot: tape contents, head position, and
+current state. The machine runs by applying $\delta$ to the symbol under the head,
+step after step, until it enters a halting state — or runs forever.
+
+## Recognizing versus deciding
+
+On an input, a Turing machine can **accept**, **reject**, or **loop forever**. This
+gives two notions of solving a problem:
+
+- A language is **Turing-recognizable** (recursively enumerable) if some machine
+  accepts exactly its strings — but may loop on strings not in the language.
+- A language is **decidable** (recursive) if some machine **halts on every
+  input**, accepting or rejecting accordingly.
+
+Deciders are the formal model of an algorithm: they always give an answer. The gap
+between recognizable and decidable is exactly where uncomputability lives, which
+the next lesson explores.
+
+## Robustness and the Church-Turing thesis
+
+The model is astonishingly robust. Adding multiple tapes, a two-dimensional tape,
+or nondeterminism lets a machine compute the **same** set of functions — each
+variant can be simulated by a single-tape machine (sometimes with a polynomial
+slowdown). A **universal Turing machine** can even read another machine's
+description and simulate it, the theoretical ancestor of the stored-program
+computer.
+
+The **Church-Turing thesis** is the claim that every function "effectively
+computable" by any mechanical procedure is computable by a Turing machine. It is
+not a theorem but a definition of what computation means, and decades of
+equivalent models — lambda calculus, recursive functions, register machines — have
+left it unchallenged.
+
+## Takeaways
+
+- A Turing machine adds a rewritable, unbounded tape to a finite control; the
+  transition function writes, moves, and changes state each step.
+- Machines may accept, reject, or loop; decidable languages have a machine that
+  always halts, while recognizable ones may loop on non-members.
+- The model is robust across many variants, and the Church-Turing thesis equates
+  Turing-computability with effective computability itself.
+
+## References
+
+- Michael Sipser, [*Introduction to the Theory of Computation*](https://math.mit.edu/~sipser/book.html), 3rd ed., Chapter 3 (The Church-Turing Thesis).
+- Alan Turing, [*On Computable Numbers, with an Application to the Entscheidungsproblem*](https://www.cs.virginia.edu/~robins/Turing_Paper_1936.pdf) (1936).

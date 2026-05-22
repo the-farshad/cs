@@ -1,0 +1,74 @@
+---
+title: Lexing
+track: compilers
+order: 1
+summary: How a scanner turns raw source text into a stream of tokens — the first stage of every compiler.
+difficulty: intro
+---
+
+import LexerVisualizer from '@/components/viz/LexerVisualizer.tsx';
+
+A compiler never sees your program as the meaningful thing you typed. It sees a
+flat string of characters: `l`, `e`, `t`, ` `, `x`, `=`, `4`, `2`. The first job
+is to group those characters into **tokens** — the smallest units that carry
+meaning, like a keyword, a name, a number, or an operator. This stage is called
+**lexing** (or **scanning**), and the component that does it is the **lexer**.
+
+Step through the scanner below. The highlighted character is the read head; each
+token pops out as soon as the lexer recognizes a complete lexeme.
+
+<LexerVisualizer client:visible />
+
+## One character at a time
+
+A lexer reads left to right and uses the current character to decide what kind
+of token is starting:
+
+- A **digit** begins a number, so it keeps consuming digits.
+- A **letter** or underscore begins an identifier, so it consumes letters and
+  digits until something else appears.
+- A symbol like `+` or `(` is an operator or piece of punctuation.
+- **Whitespace** separates tokens but usually produces none of its own, so it is
+  skipped.
+
+This is a tiny **state machine**: the type of token you are building depends on
+what you have read so far. Real lexers are often expressed as regular
+expressions, because each token class is a **regular language** — exactly the
+patterns a finite automaton can recognize.
+
+## Lexeme vs. token
+
+The **lexeme** is the literal text that matched, like `42` or `count`. The
+**token** is the classified result: a type (NUMBER, IDENT, OP) plus that lexeme,
+and usually a source position for error messages. Downstream stages care about
+the type; they rarely look at the raw characters again.
+
+## Maximal munch
+
+When two rules could match, lexers take the **longest** one. Reading `>=`, the
+scanner does not stop at `>` and call it done — it grabs both characters to form
+the single `>=` operator. This "maximal munch" rule is why `<=`, `==`, and `!=`
+come out as one token rather than two. The same rule keeps `count1` as a single
+identifier instead of `count` followed by `1`.
+
+## Keywords
+
+Keywords like `if` and `return` look exactly like identifiers to the scanner.
+The simplest approach is to scan an identifier normally, then check it against a
+small set of reserved words and relabel it if it matches. Try the `if` and `fn`
+examples above to see this.
+
+## Takeaways
+
+- Lexing converts a character stream into a token stream — the input to the
+  parser.
+- Each token bundles a **type** with its **lexeme** (and a position).
+- A lexer is essentially a finite state machine; token classes are regular
+  languages, which is why regexes fit so well.
+- **Maximal munch** resolves overlaps by always matching the longest valid
+  lexeme.
+
+## References
+
+- Robert Nystrom, ["Crafting Interpreters" — Scanning](https://craftinginterpreters.com/scanning.html) (free online).
+- Aho, Lam, Sethi, and Ullman, ["Compilers: Principles, Techniques, and Tools"](https://suif.stanford.edu/dragonbook/) (the "Dragon Book"), Chapter 3: Lexical Analysis.

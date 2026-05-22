@@ -1,0 +1,68 @@
+---
+title: Rasterization
+track: graphics
+order: 2
+summary: Turning lines and triangles into pixels with Bresenham's algorithm and triangle scanline fill, using only integer arithmetic.
+difficulty: medium
+---
+
+import RasterizeGrid from '@/components/viz/RasterizeGrid.tsx';
+
+A screen is a grid of pixels, but the shapes we describe — lines, triangles — live in
+continuous coordinates. **Rasterization** is the step that decides which pixels best
+approximate each shape. Step through the grid below to watch a line, then a triangle,
+get filled in one pixel at a time. The dashed green outline is the ideal geometry.
+
+<RasterizeGrid client:visible />
+
+## Drawing a line without floats
+
+The naive approach computes $y = m x + b$ for every column, but floating-point
+multiplication per pixel was once far too slow. **Bresenham's line algorithm** draws
+the same line using only integer addition and comparison. It tracks an **error term**
+that measures how far the true line has drifted from the pixel grid:
+
+- Start at the first endpoint and plot it.
+- Keep a running error from the line's slope.
+- At each step, the sign of $2 \cdot \text{err}$ compared against $dx$ and $dy$ decides
+  whether to advance in x, in y, or both — then update the error.
+
+Because every operation is integer arithmetic, the inner loop is tiny and exact: no
+rounding, no accumulated float drift. The visualizer prints the error value as each
+pixel is chosen.
+
+## Filling a triangle
+
+Triangles are the universal primitive — every mesh is made of them — so filling them
+fast matters enormously. The classic method is the **scanline fill**: process the
+triangle row by row, and for each row determine the horizontal span between its edges,
+then fill every pixel in that span.
+
+A modern GPU instead uses the **edge-function** test, which the visualizer follows: a
+pixel center lies inside the triangle when it sits on the same side of all three edges.
+Each edge function is a signed value from a cross product; if the sign agrees for all
+three, the pixel is covered. This form is trivially parallel — every pixel can be
+tested independently across thousands of GPU cores.
+
+## Aliasing: the staircase
+
+Look closely at the rendered line and triangle edges and you will see jagged steps.
+Because a pixel is either fully on or fully off, a smooth diagonal becomes a
+**staircase** — this is **aliasing**. **Antialiasing** softens it by shading edge
+pixels in proportion to how much of the pixel the shape actually covers, trading a
+hard binary decision for a fractional one.
+
+## Takeaways
+
+- Rasterization picks the pixels that best approximate continuous lines and triangles.
+- Bresenham draws lines with integer-only error tracking — fast and exact, no floats.
+- Triangles are filled by scanlines or by per-pixel edge-function tests, the latter
+  mapping naturally onto parallel GPU hardware.
+- Hard on/off pixel coverage causes aliasing (the staircase); antialiasing shades edges
+  by partial coverage.
+
+## References
+
+- [Wikipedia — Bresenham's line algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
+- [Scratchapixel — Rasterization: a practical implementation](https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/overview-rasterization-algorithm.html)
+- [Akenine-Moller et al., "Real-Time Rendering"](https://www.realtimerendering.com/)

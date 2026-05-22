@@ -14,8 +14,8 @@ discover groups that sit close together. It is how you segment customers, compre
 colors, or find topics in documents without anyone telling you the answer.
 
 The most popular clustering algorithm is **k-means**. Pick the number of groups
-`$k$`, then repeat two steps until nothing changes. Press Run below and watch the
-`$\times$` centroids chase the data; change `$k$` to see how the carving shifts.
+$k$, then repeat two steps until nothing changes. Press Run below and watch the
+$\times$ centroids chase the data; change $k$ to see how the carving shifts.
 
 <KMeansVisualizer client:visible />
 
@@ -25,7 +25,7 @@ k-means alternates between a guess about labels and a guess about centers, each
 improving the other (this is **Lloyd's algorithm**):
 
 1. **Assign** — give every point to its nearest centroid (here, by squared
-   Euclidean distance). Each point picks the closest `$\times$`.
+   Euclidean distance). Each point picks the closest $\times$.
 2. **Move** — slide every centroid to the **mean** of the points just assigned to
    it. That is where the "means" in the name comes from.
 
@@ -39,13 +39,13 @@ k-means greedily reduces the **within-cluster sum of squares** (also called
 
 $$ J = \sum_{i=1}^{n} \lVert x_i - \mu_{c(i)} \rVert^2 $$
 
-where `$\mu_{c(i)}$` is the centroid of the cluster point `$x_i$` belongs to. The
+where $\mu_{c(i)}$ is the centroid of the cluster point $x_i$ belongs to. The
 inertia readout under the plot ticks down every step and flattens at convergence.
 
 ## The catches
 
-- **You must choose `$k$`.** Too few merges distinct groups; too many splits real
-  ones. The **elbow method** plots inertia versus `$k$` and looks for the bend.
+- **You must choose $k$.** Too few merges distinct groups; too many splits real
+  ones. The **elbow method** plots inertia versus $k$ and looks for the bend.
 - **It only finds a local minimum.** The result depends on where the centroids
   start. In practice you run it several times from different seeds (k-means++ picks
   smart starts) and keep the lowest inertia.
@@ -62,5 +62,5 @@ Further reading: [scikit-learn — Clustering](https://scikit-learn.org/stable/m
 - Clustering is unsupervised: it groups unlabeled points by similarity.
 - k-means alternates **assign-to-nearest** and **move-to-mean** until convergence,
   minimizing within-cluster squared distance.
-- You must pick `$k$`, restarts help escape bad local minima, and it favors round
+- You must pick $k$, restarts help escape bad local minima, and it favors round
   blobs.

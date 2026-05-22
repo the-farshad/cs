@@ -1,0 +1,79 @@
+---
+title: Symmetric Encryption
+track: security
+order: 2
+summary: Shared-key encryption from the XOR one-time pad to block ciphers like AES — and why a key must never be reused.
+difficulty: medium
+---
+
+import XorCipherVisualizer from '@/components/viz/XorCipherVisualizer.tsx';
+
+In **symmetric encryption**, the same secret **key** both encrypts and decrypts.
+If Alice and Bob share a key, Alice scrambles a message into **ciphertext** and
+Bob unscrambles it back to **plaintext**. Anyone without the key sees only noise.
+
+Step through the demo to watch each byte of plaintext combine with the key via
+**XOR** to form ciphertext, then decrypt back. Then tick the box to see why
+reusing one key is dangerous.
+
+<XorCipherVisualizer client:visible />
+
+## XOR and the one-time pad
+
+The exclusive-or operation $\oplus$ is the simplest cipher. Encryption is
+$C = P \oplus K$ and decryption is $P = C \oplus K$, because XOR is its own
+inverse: $C \oplus K = (P \oplus K) \oplus K = P$.
+
+If the key $K$ is truly random, as long as the message, and used **only once**,
+this is the **one-time pad** — provably unbreakable. Every plaintext is equally
+likely given the ciphertext, so the ciphertext leaks nothing.
+
+## Why key reuse breaks everything
+
+The one-time pad's guarantee evaporates the instant you reuse a key. With two
+messages under the same key, an eavesdropper computes:
+
+$$C_1 \oplus C_2 = (P_1 \oplus K) \oplus (P_2 \oplus K) = P_1 \oplus P_2.$$
+
+The key cancels out, leaking the relationship between the two plaintexts — often
+enough to recover both. The pad must be one-*time*, which is why true one-time
+pads are impractical: you would need to securely share as much key material as
+data.
+
+## Block ciphers: AES
+
+Real systems use a **block cipher** such as **AES**, which encrypts fixed-size
+blocks (128 bits) under a short reusable key (128 or 256 bits) by scrambling them
+through many rounds of substitution and permutation. AES is fast (often
+hardware-accelerated) and has no known practical break.
+
+To encrypt data longer than one block, you choose a **mode of operation**:
+
+- **ECB** (electronic codebook) encrypts each block independently — **avoid it**.
+  Identical plaintext blocks produce identical ciphertext blocks, leaking
+  patterns (the infamous "ECB penguin").
+- **CBC** chains each block into the next using a random **initialization vector
+  (IV)**, so repeats vanish.
+- **CTR / GCM** turn the cipher into a keystream. **GCM** also adds an
+  authentication tag, giving **authenticated encryption** that detects tampering.
+
+The lesson of key reuse generalizes: never reuse an IV or nonce with the same
+key, or the keystream repeats and the same XOR leak returns.
+
+## Takeaways
+
+- Symmetric encryption uses one shared key; XOR with a random one-time key is the
+  unbreakable one-time pad.
+- Reusing a key (or IV/nonce) cancels it out and leaks $P_1 \oplus P_2$ — never
+  reuse keystream material.
+- Practical systems use AES with a safe mode; prefer authenticated modes like
+  **GCM** and avoid ECB.
+
+## References
+
+- ["Crypto 101" by Laurens Van Houtven](https://www.crypto101.io/) — free book;
+  chapters on stream ciphers, block ciphers, and modes of operation.
+- [Dan Boneh's Cryptography I course (Coursera)](https://www.coursera.org/learn/crypto)
+  — the one-time pad, semantic security, and AES.
+- [NIST SP 800-38A: Block Cipher Modes of Operation](https://csrc.nist.gov/pubs/sp/800/38/a/final)
+  — the official definitions of ECB, CBC, CTR, and friends.

@@ -1,0 +1,80 @@
+---
+title: Public-Key Cryptography
+track: security
+order: 3
+summary: Asymmetric crypto, Diffie-Hellman key exchange, and the RSA idea — how strangers agree on a secret over an open channel.
+difficulty: hard
+---
+
+import DiffieHellmanVisualizer from '@/components/viz/DiffieHellmanVisualizer.tsx';
+
+Symmetric encryption has a chicken-and-egg problem: both parties need the same
+key, but how do you share a key over an insecure network without an eavesdropper
+catching it? **Public-key (asymmetric) cryptography** solves this with a **pair**
+of keys — a **public key** anyone can see and a **private key** kept secret.
+
+Step through **Diffie-Hellman** below with small numbers. Alice and Bob exchange
+only public values yet end up with the same shared secret, while Eve, who sees
+everything sent, cannot derive it.
+
+<DiffieHellmanVisualizer client:visible />
+
+## The trapdoor idea
+
+Asymmetric crypto rests on **one-way functions with a trapdoor**: easy to compute
+forwards, infeasible to reverse — unless you hold a secret. Some operations are
+cheap one way and brutally expensive the other:
+
+- **Multiplying** two large primes is easy; **factoring** the product is hard.
+- **Modular exponentiation** $g^a \bmod p$ is easy; the **discrete logarithm**
+  (recovering $a$) is hard.
+
+## Diffie-Hellman key exchange
+
+Alice and Bob publicly agree on a prime $p$ and a generator $g$. Then:
+
+- Alice picks secret $a$ and sends $A = g^a \bmod p$.
+- Bob picks secret $b$ and sends $B = g^b \bmod p$.
+- Alice computes $B^a \bmod p$; Bob computes $A^b \bmod p$.
+
+Both land on the same value because exponents commute:
+
+$$(g^a)^b \equiv g^{ab} \equiv (g^b)^a \pmod{p}.$$
+
+Eve sees $p$, $g$, $A$, and $B$ but would need to solve the discrete logarithm to
+recover a secret — infeasible when $p$ is hundreds of digits long. The catch:
+plain Diffie-Hellman authenticates no one, so it must be combined with signatures
+to stop a **man-in-the-middle** from impersonating each side (the next lesson).
+
+## The RSA idea
+
+**RSA** builds keys from two large secret primes whose product $n$ is public.
+Encryption raises a message to a public exponent $e$ modulo $n$; decryption uses
+the private exponent $d$, which only someone who knows the prime factors can
+compute. The security rests on factoring $n$ being hard. RSA can both **encrypt**
+(anyone encrypts with your public key; only you decrypt) and **sign** (you sign
+with your private key; anyone verifies with your public key).
+
+## Slow but only at the start
+
+Asymmetric crypto is far slower than symmetric. So protocols use it briefly — to
+**exchange or wrap a key** — then switch to fast symmetric encryption (AES) for
+the bulk data. That hybrid is exactly what TLS does.
+
+## Takeaways
+
+- Public-key crypto uses a public/private key pair built on trapdoor one-way
+  functions (factoring, discrete log).
+- Diffie-Hellman lets two parties derive a shared secret over an open channel
+  because $(g^a)^b \equiv (g^b)^a \pmod{p}$.
+- It is slow, so it bootstraps a symmetric key; plain DH needs authentication to
+  resist man-in-the-middle.
+
+## References
+
+- ["Crypto 101" by Laurens Van Houtven](https://www.crypto101.io/) — free book;
+  chapters on Diffie-Hellman and RSA.
+- [Dan Boneh's Cryptography courses (Stanford / Coursera)](https://crypto.stanford.edu/~dabo/courses/OnlineCrypto/)
+  — public-key encryption and trapdoor functions.
+- [Khan Academy: Public key cryptography](https://www.khanacademy.org/computing/computer-science/cryptography/modern-crypt/v/diffie-hellman-key-exchange-part-1)
+  — a gentle visual walkthrough of the key exchange.

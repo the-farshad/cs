@@ -1,0 +1,78 @@
+---
+title: Regular Expressions
+track: theory-of-computation
+order: 2
+summary: A pattern algebra for the regular languages — provably equivalent to finite automata.
+difficulty: easy
+---
+
+import RegexMatchVisualizer from '@/components/viz/RegexMatchVisualizer.tsx';
+
+A **regular expression** is a compact algebraic way to describe a set of strings.
+The remarkable theorem of this topic, due to Kleene, is that regular expressions
+describe **exactly** the languages recognized by [finite
+automata](/learn/theory-of-computation/finite-automata) — the regular languages.
+A pattern and a machine are two views of the same object.
+
+The visualizer matches input against the pattern `a(b|c)*d` by simulating its
+equivalent NFA: every live state advances on each symbol at once, with no
+backtracking. Type a string over `{a,b,c,d}` and step through the match.
+
+<RegexMatchVisualizer client:visible />
+
+## The operators
+
+Regular expressions are built from three operations over an alphabet $\Sigma$,
+plus the base cases $\varnothing$, $\varepsilon$ (the empty string), and single
+symbols:
+
+- **Union** (alternation) $R \mid S$ — a string matching $R$ *or* $S$.
+- **Concatenation** $RS$ — something matching $R$ followed by something matching
+  $S$.
+- **Kleene star** $R^*$ — zero or more copies of $R$ concatenated.
+
+So `a(b|c)*d` means: an `a`, then any number of `b`s and `c`s in any order, then a
+`d`. Precedence runs star, then concatenation, then union, which is why the
+parentheses around `b|c` matter.
+
+## Equivalence with finite automata
+
+The equivalence is constructive in both directions.
+
+**Regex to NFA (Thompson's construction).** Build a small NFA for each base case,
+then glue them with $\varepsilon$-transitions: union puts two machines in
+parallel, concatenation chains them end to start, and star wires the end back to
+the start through $\varepsilon$. The result has size linear in the expression.
+
+**NFA to regex (state elimination).** Repeatedly delete states from an automaton,
+relabeling the remaining transitions with regular expressions that summarize the
+deleted paths, until a single expression remains.
+
+Because each direction always succeeds, the three classes — regular expressions,
+NFAs, and DFAs — describe the very same languages.
+
+## How engines actually match
+
+The NFA simulation in the visualizer is the heart of efficient matching: track the
+**set** of states the machine could be in, and update the whole set per input
+character. This runs in time $O(\text{pattern} \times \text{text})$ with no
+exponential blowup. Many production regex libraries (such as RE2) use exactly this
+approach to guarantee linear-time matching.
+
+Note that real-world "regex" dialects often add features like backreferences that
+go **beyond** the regular languages; those extensions are no longer describable by
+a finite automaton and can match in exponential time.
+
+## Takeaways
+
+- Regular expressions describe languages with union, concatenation, and Kleene
+  star over an alphabet.
+- Kleene's theorem: regular expressions, NFAs, and DFAs all recognize exactly the
+  regular languages, with explicit conversions in both directions.
+- Simulating the NFA's set of live states matches in linear time; backreference
+  extensions leave the regular world behind.
+
+## References
+
+- Michael Sipser, [*Introduction to the Theory of Computation*](https://math.mit.edu/~sipser/book.html), 3rd ed., Section 1.3 (Regular Expressions).
+- Russ Cox, [*Regular Expression Matching Can Be Simple And Fast*](https://swtch.com/~rsc/regexp/regexp1.html).

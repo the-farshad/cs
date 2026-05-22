@@ -2,16 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 
 /** Drives playback over a fixed number of frames: play / pause / step / scrub.
  *  Renderer-agnostic — pair it with any array of frame snapshots. */
-export function useStepper(frameCount: number, initialFps = 12) {
-  const [index, setIndex] = useState(0);
+export function useStepper(frameCount: number, initialFps = 12, startAtEnd = false) {
+  const atEnd = () => (startAtEnd ? Math.max(frameCount - 1, 0) : 0);
+  const [index, setIndex] = useState(atEnd);
   const [playing, setPlaying] = useState(false);
   const [fps, setFps] = useState(initialFps);
 
-  // New timeline (algorithm/data changed) → rewind.
+  // New timeline (algorithm/data changed) → reset to the configured starting frame.
   useEffect(() => {
-    setIndex(0);
+    setIndex(startAtEnd ? Math.max(frameCount - 1, 0) : 0);
     setPlaying(false);
-  }, [frameCount]);
+  }, [frameCount, startAtEnd]);
 
   useEffect(() => {
     if (!playing) return;
