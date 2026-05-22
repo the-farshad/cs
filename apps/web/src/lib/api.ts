@@ -16,6 +16,8 @@ export type User = {
   id: string;
   email: string;
   handle: string;
+  /** ISO timestamp the account was created (present from GET /me). */
+  createdAt?: string;
 };
 
 export type RequestMagicLinkResult = {

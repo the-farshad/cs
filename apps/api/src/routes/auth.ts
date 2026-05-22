@@ -102,8 +102,8 @@ export const meHandlers: RequestHandler[] = [
   requireAuth,
   async (req, res) => {
     const userId = req.user!.id;
-    const { rows } = await pool.query<UserRow>(
-      `select id, email, handle from users where id = $1`,
+    const { rows } = await pool.query<UserRow & { created_at: Date }>(
+      `select id, email, handle, created_at from users where id = $1`,
       [userId],
     );
     const user = rows[0];
@@ -111,7 +111,7 @@ export const meHandlers: RequestHandler[] = [
       res.status(401).json({ error: 'user not found' });
       return;
     }
-    res.json({ id: user.id, email: user.email, handle: user.handle });
+    res.json({ id: user.id, email: user.email, handle: user.handle, createdAt: user.created_at });
   },
 ];
 

@@ -1,14 +1,24 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '@/layouts/Layout.astro';
 import Settings from '@/components/ui/Settings.tsx';
+import { TRACKS } from '@/lib/tracks';
+
+const lessons = (await getCollection('lessons')).filter((e) => !e.data.draft);
+const tracks = TRACKS.map((t) => ({
+  slug: t.slug,
+  title: t.title,
+  total: lessons.filter((e) => e.data.track === t.slug).length,
+})).filter((t) => t.total > 0);
+const totalLessons = tracks.reduce((sum, t) => sum + t.total, 0);
 ---
 
-<Layout title="Settings — cs.thefarshad" description="Manage your cs.thefarshad account.">
+<Layout title="Settings — cs.thefarshad" description="Your progress and account settings.">
   <section class="mx-auto max-w-2xl px-4 py-12">
     <h1 class="font-display text-3xl text-fg">Settings</h1>
-    <p class="mt-1 text-muted">Manage your account.</p>
+    <p class="mt-1 text-muted">Your progress and account.</p>
     <div class="mt-8">
-      <Settings client:load />
+      <Settings tracks={tracks} totalLessons={totalLessons} client:load />
     </div>
   </section>
 </Layout>
