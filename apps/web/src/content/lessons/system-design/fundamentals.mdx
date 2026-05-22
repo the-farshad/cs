@@ -6,9 +6,17 @@ summary: Handle more load with scaling, load balancing, caching, and CDNs — th
 difficulty: medium
 ---
 
+import LoadBalancerVisualizer from '@/components/viz/LoadBalancerVisualizer.tsx';
+
 System design is about meeting **scale, reliability, and latency** goals as traffic
 grows. You rarely invent new algorithms; you arrange known components to handle
 more load without falling over.
+
+A **load balancer** is the first piece. Send a stream of requests across a pool of
+servers, switch between routing strategies, and mark a server unhealthy to watch
+traffic reroute around it.
+
+<LoadBalancerVisualizer client:visible />
 
 ## Vertical vs horizontal scaling
 

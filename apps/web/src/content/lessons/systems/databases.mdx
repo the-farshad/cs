@@ -6,9 +6,17 @@ summary: How databases store data on disk, find rows fast with indexes, and keep
 difficulty: medium
 ---
 
+import BTreeVisualizer from '@/components/viz/BTreeVisualizer.tsx';
+
 A database has to do two hard things well: **find data fast** even with billions
 of rows, and **stay correct** even with many writers and sudden crashes. Indexes
 solve the first; transactions solve the second.
+
+The index is almost always a **B-tree**. Insert keys below and watch nodes fill,
+split, and push a median upward — keeping every leaf at the same depth so lookups
+stay shallow. Then search for a key to trace the path the database walks.
+
+<BTreeVisualizer client:visible />
 
 ## Indexes: finding rows fast
 

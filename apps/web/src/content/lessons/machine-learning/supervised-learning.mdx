@@ -6,10 +6,18 @@ summary: Learn a mapping from labeled examples — features, training, and the o
 difficulty: easy
 ---
 
+import KNNClassifier from '@/components/viz/KNNClassifier.tsx';
+
 **Supervised learning** is the most common kind of machine learning: you have
 **labeled examples** (inputs paired with correct outputs) and learn a function that
 maps new inputs to outputs. "Supervised" because the correct answers supervise the
 training.
+
+Drag the query point and change `k` below. A **k-Nearest-Neighbors** classifier
+labels the new point by majority vote of its `k` closest training examples — no
+training step, just a lookup.
+
+<KNNClassifier client:visible />
 
 ## The setup
 

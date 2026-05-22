@@ -6,10 +6,18 @@ summary: Protect your services from abuse — design a scalable rate limiter usi
 difficulty: medium
 ---
 
+import TokenBucketVisualizer from '@/components/viz/TokenBucketVisualizer.tsx';
+
 A **Rate Limiter** is a defense mechanism for your API. It ensures that no single
 user or service can overwhelm your system by making too many requests in a short
 period. It prevents DDoS attacks, accidental loops, and ensures fair usage of
 resources.
+
+Here is a **token bucket** in action: tokens refill at a fixed rate up to a
+capacity, each request spends one token, and requests are rejected when the bucket
+is empty. Drag the sliders so demand outpaces the refill and watch rejections climb.
+
+<TokenBucketVisualizer client:visible />
 
 ## 1. Token Bucket Algorithm
 

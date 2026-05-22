@@ -6,10 +6,19 @@ summary: The memory hierarchy, CPU caches, and why data locality is the secret t
 difficulty: medium
 ---
 
+import CacheHierarchyVisualizer from '@/components/viz/CacheHierarchyVisualizer.tsx';
+
 To write truly fast code, you must understand that not all memory is created
 equal. While we often think of "RAM" as a single pool of storage, the physical
-reality is a complex **hierarchy** designed to hide the massive speed gap between
+reality is a layered **hierarchy** designed to hide the massive speed gap between
 the CPU and your main memory.
+
+Watch the CPU request a stream of addresses against a small cache below. Each
+access is a hit or a miss; when the cache fills, the least-recently-used line is
+evicted. The bars on the right show how much slower each level of the hierarchy
+is than the last.
+
+<CacheHierarchyVisualizer client:visible />
 
 ## The Memory Hierarchy
 

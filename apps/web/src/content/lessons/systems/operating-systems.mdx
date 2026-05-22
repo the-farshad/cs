@@ -6,9 +6,17 @@ summary: How the OS shares one machine among many programs — processes, thread
 difficulty: medium
 ---
 
+import CpuSchedulerVisualizer from '@/components/viz/CpuSchedulerVisualizer.tsx';
+
 An **operating system** is the layer between your programs and the hardware. It
 creates the illusion that each program has the CPU and memory to itself, while
 actually juggling dozens at once and keeping them isolated and safe.
+
+The scheduler is where this illusion is most visible. Give a few processes an
+arrival time and a burst length, then watch how different policies fill the
+timeline — and how the average waiting time changes.
+
+<CpuSchedulerVisualizer client:visible />
 
 ## Processes and threads
 

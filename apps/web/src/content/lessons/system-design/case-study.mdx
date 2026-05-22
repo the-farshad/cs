@@ -6,9 +6,17 @@ summary: Put the pieces together — design a URL shortener from requirements to
 difficulty: medium
 ---
 
+import RequestFlowVisualizer from '@/components/viz/RequestFlowVisualizer.tsx';
+
 Design interviews and real projects both start the same way: clarify
 **requirements**, sketch the **API and data**, then make it **scale and stay up**.
 Let's design a URL shortener — a service that turns a long URL into a short code.
+
+Before the details, trace one request through the system below. Toggle between a
+**cache hit** (the CDN answers at the edge) and a **cache miss** (the request runs
+the full path: client → CDN → load balancer → app → database and back).
+
+<RequestFlowVisualizer client:visible />
 
 ## 1. Requirements
 

@@ -6,9 +6,17 @@ summary: How data crosses the internet — layers, packets, addresses, and the p
 difficulty: medium
 ---
 
+import TcpHandshakeVisualizer from '@/components/viz/TcpHandshakeVisualizer.tsx';
+
 When you load a page, your data is broken into **packets**, routed across many
 machines, and reassembled at the other end. Networking is organized in **layers**,
 each handling one concern and building on the one below.
+
+Before any data flows, TCP opens a connection with a three-way handshake. Step
+through it below — SYN, SYN-ACK, ACK — then a couple of data segments. Drop a
+packet to see how a missing acknowledgement triggers a retransmit.
+
+<TcpHandshakeVisualizer client:visible />
 
 ## The layered model (TCP/IP)
 

@@ -6,10 +6,18 @@ summary: Layers of artificial neurons that learn complex patterns from data — 
 difficulty: medium
 ---
 
+import ForwardPassNetwork from '@/components/viz/ForwardPassNetwork.tsx';
+
 If linear regression is a single line, a **Neural Network** is a massive web of
 interconnected lines. Inspired by the human brain, they are capable of learning
 highly non-linear and complex patterns, from recognizing faces to translating
 languages.
+
+Step through a **forward pass** of a tiny 2-3-1 network below: inputs flow along
+weighted edges, each neuron computes $\sigma(\sum w\,x + b)$, and activations light
+up layer by layer until the output appears.
+
+<ForwardPassNetwork client:visible />
 
 ## The Artificial Neuron
 

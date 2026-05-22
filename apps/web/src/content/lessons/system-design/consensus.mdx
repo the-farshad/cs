@@ -6,9 +6,17 @@ summary: How a cluster agrees on one truth despite failures — replicated logs,
 difficulty: hard
 ---
 
+import RaftReplicationVisualizer from '@/components/viz/RaftReplicationVisualizer.tsx';
+
 Replicated systems need every copy to agree on **what happened and in what order**,
 even when machines crash or messages are delayed. That agreement problem is
 **consensus**, and it underpins databases, queues, and schedulers.
+
+Step through a small five-node cluster below: one **leader** appends client
+commands to its log, replicates each entry to the **followers**, and commits an
+entry only once a **majority** has acknowledged it.
+
+<RaftReplicationVisualizer client:visible />
 
 ## The replicated log
 

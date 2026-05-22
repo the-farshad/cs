@@ -6,9 +6,17 @@ summary: Replication, sharding, the CAP theorem, and choosing consistency vs ava
 difficulty: hard
 ---
 
+import ConsistentHashingVisualizer from '@/components/viz/ConsistentHashingVisualizer.tsx';
+
 Once one database can't keep up — too many reads, too many writes, or too much
 data — you spread data across machines. That buys capacity but forces hard
 trade-offs about correctness.
+
+When you shard across nodes, *how* you map keys to nodes matters enormously. Add or
+remove a node below and compare a **consistent hashing ring** (only ~1/N of keys
+move) against **naive modulo** (almost everything remaps, wrecking cache locality).
+
+<ConsistentHashingVisualizer client:visible />
 
 ## Replication (more reads, more safety)
 

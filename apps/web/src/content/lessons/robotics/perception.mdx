@@ -6,9 +6,18 @@ summary: Sensors are noisy — how robots estimate where they are and build a ma
 difficulty: hard
 ---
 
+import KalmanFilter1D from '@/components/viz/KalmanFilter1D.tsx';
+
 A robot only knows the world through **sensors**, and every sensor is **noisy** and
 incomplete. **Perception** is turning those imperfect readings into a usable
 estimate of the world and the robot's place in it.
+
+Here a **1D Kalman filter** tracks an object sliding along a line. The dashed green
+curve is the true position, the red dots are noisy measurements, and the solid line
+is the filter's estimate inside a violet `±2σ` uncertainty band. Step through time
+and drag the noise slider to see the band tighten or widen.
+
+<KalmanFilter1D client:visible />
 
 ## Sensors
 

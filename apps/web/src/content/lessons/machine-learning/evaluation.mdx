@@ -6,10 +6,18 @@ summary: Beyond accuracy — precision, recall, F1-score, and how to tell if you
 difficulty: easy
 ---
 
+import ThresholdExplorer from '@/components/viz/ThresholdExplorer.tsx';
+
 If a model predicts that 99% of people do *not* have a rare disease, and it's
 right 99% of the time, is it a good model? **No.** If it misses the 1% who actually
 have the disease, it's useless. In machine learning, **Accuracy** is often a
 lying metric.
+
+Most classifiers output a **score**, not a hard label — you pick a **threshold** to
+turn scores into Yes/No. Slide the threshold below and watch the confusion matrix
+and the accuracy / precision / recall metrics update live.
+
+<ThresholdExplorer client:visible />
 
 ## The Confusion Matrix
 

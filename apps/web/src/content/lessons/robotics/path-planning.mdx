@@ -6,9 +6,17 @@ summary: Find a collision-free route from A to B — grids, configuration space,
 difficulty: medium
 ---
 
+import RRTVisualizer from '@/components/viz/RRTVisualizer.tsx';
+
 A robot needs to get somewhere **without hitting anything**. **Path planning** finds
 a collision-free route from start to goal. The search algorithms are the same ones
 from the Algorithms track — the art is in how you model the space.
+
+Watch a **Rapidly-exploring Random Tree** grow from the start (the dot) toward the
+goal, sampling random points and steering around the obstacles. Step through it, or
+draw fresh samples to see a different tree each run.
+
+<RRTVisualizer client:visible />
 
 > The grid search behind this lives in the [Pathfinding on a Grid](/learn/algorithms/pathfinding)
 > lesson — BFS, Dijkstra, and A\* on a grid. Open it to watch them run.
