@@ -7,6 +7,7 @@ difficulty: medium
 ---
 
 import ConvolutionVisualizer from '@/components/viz/ConvolutionVisualizer.tsx';
+import ConvArithmetic from '@/components/viz/ConvArithmetic.tsx';
 
 A small image already has thousands of pixels; a fully connected network would need
 a separate weight for every pixel and quickly drown. **Convolutional Neural
@@ -29,6 +30,45 @@ Slide one step right, repeat; reach the edge, drop down a row. The grid of resul
 is the **feature map**. With a $3 \times 3$ kernel and no padding, a $6 \times 6$
 input shrinks to $4 \times 4$ because the window cannot hang off the edge (this is
 a *valid* convolution).
+
+## Convolution arithmetic
+
+How big is the output? For a square input of size $i$, kernel $k$, padding $p$, and
+stride $s$, each output side is
+
+$$ o = \left\lfloor \frac{i + 2p - k}{s} \right\rfloor + 1 $$
+
+Change the padding, stride, and dilation below and watch the output grid — and the
+formula — update as the kernel sweeps the padded input.
+
+<ConvArithmetic client:visible />
+
+**Padding** adds a border of zeros so the kernel can reach the edges:
+
+- **Valid** ($p = 0$): no padding; the output shrinks by $k - 1$ each side.
+- **Same** ($p = \lfloor (k-1)/2 \rfloor$ with $s = 1$, odd $k$): output matches the input.
+- **Full** ($p = k - 1$): every possible overlap is used and the output grows.
+
+**Stride** $s$ is how far the kernel jumps each step; a stride of 2 roughly halves each
+dimension — a cheap way to downsample instead of pooling. **Dilation** $d$ spreads the
+kernel's taps apart with gaps, enlarging the receptive field without adding weights.
+The effective kernel size becomes $k_{\text{eff}} = k + (k-1)(d-1)$, so
+
+$$ o = \left\lfloor \frac{i + 2p - k - (k-1)(d-1)}{s} \right\rfloor + 1 $$
+
+## Transposed convolution (upsampling)
+
+Encoders shrink images, but decoders, segmentation heads, and generative models must
+go the other way — to **larger** outputs. A **transposed convolution** (also called
+fractionally-strided, or loosely "deconvolution") does this: conceptually it spaces
+the input out by the stride and then convolves, so each input cell paints a
+kernel-sized patch onto a bigger canvas. Switch the visualizer above to **Transposed**
+to watch one small grid grow, with output side
+
+$$ o = s\,(i - 1) + k - 2p $$
+
+It is the mirror of the forward pass — the same connectivity, run backward — which is
+why it appears wherever a network reconstructs spatial detail.
 
 ## What kernels detect
 
@@ -58,7 +98,10 @@ textures and shapes, deep layers find objects — the same edges $\to$ shapes $\
 faces idea from the neural-networks lesson, now built directly into the
 architecture.
 
-Further reading: [CS231n — Convolutional Networks](https://cs231n.github.io/convolutional-networks/).
+## References
+
+- Dumoulin, V. & Visin, F. (2016). *A guide to convolution arithmetic for deep learning.* [arXiv:1603.07285](https://arxiv.org/abs/1603.07285) — the definitive convolution-arithmetic animations and formulas ([figures & code](https://github.com/vdumoulin/conv_arithmetic), free to use with attribution).
+- [CS231n — Convolutional Networks](https://cs231n.github.io/convolutional-networks/), Stanford.
 
 ## Takeaways
 
@@ -68,3 +111,6 @@ Further reading: [CS231n — Convolutional Networks](https://cs231n.github.io/co
   **learned**, not hand-set.
 - Parameter sharing, locality, and pooling let stacked conv layers learn a hierarchy
   of visual features efficiently.
+- Output size is $o = \lfloor (i + 2p - k)/s \rfloor + 1$; padding, stride, and dilation
+  trade off resolution, cost, and receptive field, while **transposed** convolution
+  upsamples ($o = s(i-1) + k - 2p$).
