@@ -47,10 +47,18 @@ export default function AuthButton() {
   // --- Signed in -----------------------------------------------------------
   if (user) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-md border border-edge p-0.5 pl-2">
-        <span className="text-xs text-fg" title={user.email}>
+      <div className="inline-flex items-center gap-1 rounded-md border border-edge p-0.5 pl-2">
+        <a href="/settings" className="text-xs text-fg transition hover:text-accent" title={`${user.email} — settings`}>
           @{user.handle}
-        </span>
+        </a>
+        <a
+          href="/settings"
+          title="Settings"
+          aria-label="Settings"
+          className="flex items-center rounded px-1.5 py-1 text-xs text-muted transition hover:text-fg"
+        >
+          <Icon name="cog" size={14} />
+        </a>
         <button
           type="button"
           onClick={signOut}

@@ -2,7 +2,7 @@
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { migrate, pool } from './db.js';
-import { authRouter, meHandlers } from './routes/auth.js';
+import { authRouter, deleteMeHandlers, meHandlers, updateMeHandlers } from './routes/auth.js';
 import { oauthRouter } from './routes/oauth.js';
 import { progressRouter } from './routes/progress.js';
 
@@ -25,7 +25,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
   if (req.method === 'OPTIONS') {
@@ -46,6 +46,8 @@ app.use('/auth', authRouter);
 app.use('/auth', oauthRouter);
 // /me lives at the root per the API contract (Bearer JWT).
 app.get('/me', ...meHandlers);
+app.patch('/me', ...updateMeHandlers);
+app.delete('/me', ...deleteMeHandlers);
 // /progress (GET + POST) lives at the root.
 app.use('/progress', progressRouter);
 

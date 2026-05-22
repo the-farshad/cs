@@ -114,6 +114,23 @@ export async function getMe(): Promise<User | null> {
   return fetchJson<User>('/me', { headers: authHeaders() });
 }
 
+/** Update the signed-in user's username (handle). Returns the updated user or null. */
+export async function updateMe(handle: string): Promise<User | null> {
+  if (!isLoggedIn()) return null;
+  return fetchJson<User>('/me', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ handle }),
+  });
+}
+
+/** Delete the signed-in account (and its server-side progress). Returns true on success. */
+export async function deleteMe(): Promise<boolean> {
+  if (!isLoggedIn()) return false;
+  const data = await fetchJson<{ ok: boolean }>('/me', { method: 'DELETE', headers: authHeaders() });
+  return Boolean(data?.ok);
+}
+
 // ---------------------------------------------------------------------------
 // Progress
 // ---------------------------------------------------------------------------

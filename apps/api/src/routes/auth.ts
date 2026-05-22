@@ -114,3 +114,45 @@ export const meHandlers: RequestHandler[] = [
     res.json({ id: user.id, email: user.email, handle: user.handle });
   },
 ];
+
+/** A username is 3–20 chars: letters, numbers, underscore, or hyphen. */
+function isValidHandle(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{3,20}$/.test(value);
+}
+
+/**
+ * PATCH /me  (Bearer) — update the signed-in user's username (handle).
+ * Body: { handle }. Mounted at the app root in index.ts.
+ */
+export const updateMeHandlers: RequestHandler[] = [
+  requireAuth,
+  async (req, res) => {
+    const handle = (req.body as { handle?: unknown } | undefined)?.handle;
+    if (!isValidHandle(handle)) {
+      res.status(400).json({ error: 'username must be 3–20 characters: letters, numbers, _ or -' });
+      return;
+    }
+    const { rows } = await pool.query<UserRow>(
+      `update users set handle = $1 where id = $2 returning id, email, handle`,
+      [handle, req.user!.id],
+    );
+    const user = rows[0];
+    if (!user) {
+      res.status(404).json({ error: 'user not found' });
+      return;
+    }
+    res.json({ id: user.id, email: user.email, handle: user.handle });
+  },
+];
+
+/**
+ * DELETE /me  (Bearer) — delete the signed-in account and its progress
+ * (progress rows cascade via the foreign key). Mounted at the app root.
+ */
+export const deleteMeHandlers: RequestHandler[] = [
+  requireAuth,
+  async (req, res) => {
+    await pool.query(`delete from users where id = $1`, [req.user!.id]);
+    res.json({ ok: true });
+  },
+];
