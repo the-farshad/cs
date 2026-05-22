@@ -1,0 +1,56 @@
+---
+title: Derived Rules & Strategy
+track: formal-logic
+order: 5
+summary: Shortcut rules — modus tollens, disjunctive syllogism, De Morgan — and how to plan a proof.
+difficulty: medium
+---
+
+import NaturalDeductionViz from '@/components/viz/NaturalDeductionViz.tsx';
+
+The introduction/elimination rules are enough to prove everything valid, but bare
+derivations get long. **Derived rules** are shortcuts: each is *justified once* by a
+little derivation from the primitive rules, and thereafter used as a single step.
+They add no power — anything provable with them is provable without — only
+convenience.
+
+The proof player below shows the derivations that *license* several derived rules.
+Switch examples to see each one built from primitives.
+
+<NaturalDeductionViz proof="modus-tollens" client:visible />
+
+## Common derived rules
+
+| Rule | From | Infer | Built from |
+| --- | --- | --- | --- |
+| Modus tollens (MT) | $P \rightarrow Q,\ \lnot Q$ | $\lnot P$ | reductio ($\lnot$I) |
+| Disjunctive syllogism (DS) | $P \lor Q,\ \lnot P$ | $Q$ | $\lor$E |
+| Hypothetical syllogism | $P \rightarrow Q,\ Q \rightarrow R$ | $P \rightarrow R$ | $\rightarrow$I |
+| Double negation (DN) | $\lnot\lnot P$ | $P$ | $\lnot$E |
+| Contraposition (CP) | $P \rightarrow Q$ | $\lnot Q \rightarrow \lnot P$ | $\rightarrow$I + reductio |
+| De Morgan (DM) | $\lnot(P \lor Q)$ | $\lnot P \land \lnot Q$ | $\lnot$I twice |
+| Argument by cases (AC) | $P \lor Q,\ P\rightarrow R,\ Q\rightarrow R$ | $R$ | $\lor$E |
+
+The "De Morgan" and "Proof by cases" examples in the player are full primitive
+derivations of two of these.
+
+## How to plan a derivation
+
+Proof search has a reliable shape — let the **goal's main connective** pick the
+strategy:
+
+- Goal $X \rightarrow Y$ → start a subderivation assuming $X$, aim for $Y$, close with $\rightarrow$I.
+- Goal $\lnot X$ → assume $X$, aim for a contradiction, close with $\lnot$I.
+- Goal $X \land Y$ → prove $X$ and $Y$ separately, combine with $\land$I.
+- Goal $X \lor Y$ → often easiest by reductio, or by $\lor$I if you can prove a disjunct.
+- Stuck? Work **forwards** from the premises (eliminate connectives) until the two ends meet.
+
+## Takeaways
+
+- Derived rules are convenience shortcuts justified by primitive derivations; they add no logical power.
+- Know MT, DS, hypothetical syllogism, double negation, contraposition, De Morgan, argument by cases.
+- Strategy: let the goal's main connective choose the rule, plan backwards, derive forwards.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/), which introduces these derived rules (MT, DS, AC, DM, CP). Explanations and proofs here are original.

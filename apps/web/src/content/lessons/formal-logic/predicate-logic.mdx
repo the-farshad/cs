@@ -1,0 +1,61 @@
+---
+title: Predicate Logic
+track: formal-logic
+order: 6
+summary: Predicates, names, variables, and the quantifiers ∀ and ∃ — capturing "all" and "some".
+difficulty: medium
+---
+
+import QuantifierModel from '@/components/viz/QuantifierModel.tsx';
+
+Sentence logic can't see inside a sentence. "All circles are blue" and "Some circle
+is blue" both become single atoms — yet one entails the other, which sentence logic
+can't explain. **Predicate logic** adds the missing structure.
+
+- **Names** ($a, b, c$) denote particular objects; **variables** ($x, y, z$) are placeholders.
+- **Predicates** ($Px$, $Bx$, $Rxy$) express properties and relations: $Bx$ = "x is blue", $Rxy$ = "x relates to y".
+- **Quantifiers** bind variables: $\forall x$ ("for all x") and $\exists x$ ("there exists an x"). Teller writes these $(x)$ and $(\exists x)$.
+
+A statement is evaluated in a **model**: a domain of objects plus an interpretation
+of each predicate. Pick predicates below and watch the universal and existential
+claims come out true or false over a fixed domain.
+
+<QuantifierModel client:visible />
+
+## The two translation patterns
+
+The single most important habit in predicate logic — and the easiest thing to get
+wrong:
+
+- **"Every K is C"** is $\forall x\,(Kx \rightarrow Cx)$ — universal with a
+  **conditional**. (Writing $\forall x\,(Kx \land Cx)$ would say "*everything* is a
+  K and is C", which is far stronger.)
+- **"Some K is C"** is $\exists x\,(Kx \land Cx)$ — existential with a
+  **conjunction**. (Writing $\exists x\,(Kx \rightarrow Cx)$ is almost always wrong:
+  it is satisfied by any non-K.)
+
+A universal is falsified by a single **counterexample** (a K that is not C); an
+existential is verified by a single **witness** (a K that is C) — exactly the
+rings the visualizer draws.
+
+## Multiple quantifiers and order
+
+Relations need several quantifiers, and **order matters**:
+
+- $\forall x\,\exists y\,Lxy$ — "everyone loves someone (possibly different people)".
+- $\exists y\,\forall x\,Lxy$ — "there is someone whom everyone loves (one person)".
+
+The second implies the first, but not the reverse. Swapping two quantifiers of the
+same type ($\forall x\forall y$ vs $\forall y\forall x$) is harmless; swapping
+$\forall$ with $\exists$ changes the meaning.
+
+## Takeaways
+
+- Predicate logic adds names, variables, predicates/relations, and the quantifiers $\forall$, $\exists$.
+- Truth is relative to a **model** (domain + interpretation).
+- "Every K is C" = $\forall x(Kx \rightarrow Cx)$; "Some K is C" = $\exists x(Kx \land Cx)$.
+- A universal falls to one counterexample; an existential needs one witness; quantifier **order** matters.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/). Curriculum follows the primer; explanations and examples here are original.

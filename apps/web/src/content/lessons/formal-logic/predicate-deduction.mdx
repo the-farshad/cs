@@ -1,0 +1,64 @@
+---
+title: Quantifier Rules & Identity
+track: formal-logic
+order: 7
+summary: Natural deduction for predicate logic — the four quantifier rules, their restrictions, and identity.
+difficulty: hard
+---
+
+import NaturalDeductionViz from '@/components/viz/NaturalDeductionViz.tsx';
+
+Natural deduction extends to predicate logic with four quantifier rules — an
+introduction and elimination for each of $\forall$ and $\exists$. The proof player
+below runs two predicate derivations step by step (choose "Universal instantiation"
+and "Existential reasoning").
+
+<NaturalDeductionViz proof="pred-instantiate" client:visible />
+
+## The four quantifier rules
+
+- **$\forall$E (universal instantiation).** From $\forall x\,Px$ infer $Pa$ for
+  **any** name $a$. If it holds of everything, it holds of each thing.
+- **$\exists$I (existential generalization).** From $Pa$ infer $\exists x\,Px$.
+  If some particular thing is $P$, then something is $P$.
+- **$\forall$I (universal generalization).** From $Pa$ — where $a$ is
+  **arbitrary** — infer $\forall x\,Px$. The catch (the rule's restriction): $a$
+  must not appear in any premise or undischarged assumption, so nothing special was
+  assumed about it.
+- **$\exists$E (existential instantiation).** From $\exists x\,Px$, open a
+  subderivation assuming $Pa$ for a **fresh** name $a$ (one used nowhere else);
+  whatever you derive that does **not** mention $a$ can be exported. This is how you
+  reason from "something is P" without knowing *which* thing.
+
+The "Existential reasoning" example — $\forall x(Px\rightarrow Qx),\ \exists x\,Px
+\vdash \exists x\,Qx$ — combines $\exists$E, $\forall$E, and $\exists$I in one
+proof.
+
+## Why the restrictions matter
+
+The restrictions are not bureaucracy — drop them and you can "prove" false things.
+Without the freshness condition on $\exists$E you could move from "someone is a
+spy" to a claim about a *named* person; without the arbitrariness condition on
+$\forall$I you could generalize a property of one specific object to everything.
+The conditions keep $\vdash$ matching $\models$.
+
+## Identity
+
+Add the predicate $=$ for "is the same object as", with two rules:
+
+- **$=$I (reflexivity):** $a = a$ may be asserted on any line.
+- **$=$E (substitution):** from $a = b$ and a statement about $a$, infer the same
+  statement with $b$ put for $a$ (equals may replace equals).
+
+Identity lets predicate logic express counting and uniqueness — "there is exactly
+one $P$" is $\exists x\,(Px \land \forall y\,(Py \rightarrow y = x))$.
+
+## Takeaways
+
+- Four rules: $\forall$E (any name), $\exists$I (generalize), $\forall$I (arbitrary name), $\exists$E (fresh-name subderivation).
+- The arbitrariness ($\forall$I) and freshness ($\exists$E) restrictions keep the system sound.
+- Identity adds $=$I (reflexivity) and $=$E (substitution), enabling uniqueness/counting claims.
+
+## References
+
+- Paul Teller, *A Modern Formal Logic Primer*, Prentice Hall (1989) — free at [tellerprimer.ucdavis.edu](https://tellerprimer.ucdavis.edu/), whose predicate rules and restrictions this follows. Proofs and explanations here are original.
