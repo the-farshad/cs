@@ -30,10 +30,11 @@ const btn =
   'inline-flex items-center gap-1.5 rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
 
 export default function BinarySearchVisualizer() {
-  const [{ data, target }, setState] = useState(() => {
-    const d = sortedArray(15);
-    return { data: d, target: d[Math.floor(Math.random() * d.length)] };
-  });
+  // Fixed initial array + target so SSR and client match (no hydration mismatch); New array randomizes.
+  const [{ data, target }, setState] = useState(() => ({
+    data: [4, 11, 18, 23, 29, 34, 42, 51, 57, 63, 70, 78, 85, 92, 97],
+    target: 51,
+  }));
 
   const frames = useMemo<BSFrame[]>(() => Array.from(search(data, target)), [data, target]);
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);

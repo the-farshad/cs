@@ -87,7 +87,10 @@ const COLOR: Record<Status, string> = {
 };
 
 export default function GreedyScheduleVisualizer() {
-  const [intervals, setIntervals] = useState<Interval[]>(() => randomIntervals(7));
+  const [intervals, setIntervals] = useState<Interval[]>(() => [
+    { id: 0, start: 1, end: 4 }, { id: 1, start: 3, end: 5 }, { id: 2, start: 0, end: 6 },
+    { id: 3, start: 5, end: 7 }, { id: 4, start: 8, end: 11 }, { id: 5, start: 8, end: 9 }, { id: 6, start: 12, end: 14 },
+  ]);
   const { frames } = useMemo(() => scheduleFrames(intervals), [intervals]);
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
   const frame = frames[Math.min(index, frames.length - 1)] ?? frames[0];

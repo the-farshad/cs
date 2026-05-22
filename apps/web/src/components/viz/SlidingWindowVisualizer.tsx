@@ -121,7 +121,7 @@ function pairFrames(arr: number[], target: number): Frame[] {
 
 export default function SlidingWindowVisualizer() {
   const [mode, setMode] = useState<Mode>('window');
-  const [data, setData] = useState<number[]>(() => randomArray(11));
+  const [data, setData] = useState<number[]>(() => [2, 5, 1, 8, 3, 9, 4, 6, 2, 7, 5]);
   const [k, setK] = useState(3);
   const target = useMemo(() => {
     // pick a target that is usually reachable for the pair demo

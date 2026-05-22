@@ -21,7 +21,8 @@ const btn =
 export default function SortVisualizer() {
   const [algo, setAlgo] = useState<SortKey>('quick');
   const [size, setSize] = useState(28);
-  const [data, setData] = useState<number[]>(() => randomArray(28));
+  // Fixed initial array so server and client render identically (no hydration mismatch); Shuffle randomizes.
+  const [data, setData] = useState<number[]>(() => [42, 17, 88, 5, 63, 29, 74, 11, 50, 96, 38, 21, 67, 9, 81, 34, 58, 14, 90, 47, 25, 71, 6, 53, 84, 19, 60, 31]);
 
   const frames = useMemo<SortFrame[]>(() => Array.from(SORTS[algo].gen(data)), [algo, data]);
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);

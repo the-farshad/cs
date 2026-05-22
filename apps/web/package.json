@@ -25,5 +25,8 @@
     "remark-math": "^6.0.0",
     "sql.js": "^1.14.1",
     "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.0.4"
   }
 }
