@@ -1,0 +1,97 @@
+---
+title: Window Functions
+track: sql
+order: 6
+summary: Compute rankings, running totals, and row-to-row deltas without collapsing rows, using OVER (PARTITION BY ... ORDER BY ...).
+difficulty: medium
+---
+
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+`GROUP BY` answers "what is the average per department?" but throws the
+individual rows away. A **window function** computes across a set of related
+rows — the *window* — yet keeps every row in the output. That is what lets you
+ask "what is each person's rank within their department, and how do they compare
+to the department average?" in a single pass.
+
+Run these against the seed tables.
+
+<SqlPlayground client:visible />
+
+## The OVER clause
+
+Any aggregate becomes a window function when you add `OVER (...)`. With an empty
+window it spans the whole result; the original rows survive:
+
+```sql
+SELECT name, salary,
+       AVG(salary) OVER () AS company_avg,
+       salary - AVG(salary) OVER () AS diff
+FROM employees;
+```
+
+Compare that to `GROUP BY`, which would return one row, not eight.
+
+## PARTITION BY
+
+`PARTITION BY` splits the rows into independent groups, and the function restarts
+in each one — like `GROUP BY`, but without folding the rows away:
+
+```sql
+SELECT name, dept_id, salary,
+       AVG(salary)   OVER (PARTITION BY dept_id) AS dept_avg,
+       COUNT(*)      OVER (PARTITION BY dept_id) AS dept_size
+FROM employees
+ORDER BY dept_id, salary DESC;
+```
+
+Every Engineering row shows the same `dept_avg`; Design rows show their own.
+
+## Ranking with ORDER BY
+
+Add `ORDER BY` inside the window to rank within each partition. Three functions
+differ only in how they handle ties:
+
+- `ROW_NUMBER()` — always distinct: 1, 2, 3, 4.
+- `RANK()` — ties share a rank, then it skips: 1, 1, 3.
+- `DENSE_RANK()` — ties share a rank, no gap: 1, 1, 2.
+
+```sql
+SELECT name, dept_id, salary,
+       ROW_NUMBER() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rn,
+       RANK()       OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+FROM employees;
+```
+
+To get the top earner per department, wrap this in a CTE and keep `rn = 1`.
+
+## Running totals and frames
+
+Once a window is ordered, an aggregate runs cumulatively over the rows up to the
+current one — a **running total** or moving sum:
+
+```sql
+SELECT name, hire_year, salary,
+       SUM(salary) OVER (ORDER BY hire_year, id
+                         ROWS BETWEEN UNBOUNDED PRECEDING
+                                  AND CURRENT ROW) AS running_payroll
+FROM employees;
+```
+
+The `ROWS BETWEEN ...` part is the **frame** — which rows around the current one
+count. Default to the running total above; widen it for moving averages.
+
+The `LAG` and `LEAD` functions peek at neighbouring rows, perfect for deltas:
+
+```sql
+SELECT name, hire_year, salary,
+       salary - LAG(salary) OVER (ORDER BY hire_year, id) AS vs_prev_hire
+FROM employees;
+```
+
+## Takeaways
+
+- A window function computes over related rows but keeps every input row.
+- `PARTITION BY` groups; `ORDER BY` inside `OVER` ranks and enables running totals.
+- `ROW_NUMBER`/`RANK`/`DENSE_RANK` differ only in how they treat ties.
+- The frame (`ROWS BETWEEN ...`) controls which neighbouring rows are summed; `LAG`/`LEAD` read adjacent rows.

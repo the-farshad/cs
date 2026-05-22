@@ -1,0 +1,101 @@
+---
+title: Subqueries & CTEs
+track: sql
+order: 5
+summary: Nest a query inside another, then refactor it into readable named steps with WITH common table expressions.
+difficulty: medium
+---
+
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+A **subquery** is a `SELECT` wrapped in parentheses and used inside another
+statement. It lets one query answer a question that depends on the result of a
+second one — "who earns more than the company average?" needs the average first.
+A **CTE** (common table expression, the `WITH` clause) is the same idea given a
+name so the outer query reads top to bottom instead of inside out.
+
+Run these against the seed tables and edit the thresholds.
+
+<SqlPlayground client:visible />
+
+## Scalar subqueries
+
+A subquery that returns exactly one row and one column can stand in for a single
+value, including in `WHERE`:
+
+```sql
+SELECT name, salary
+FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees)
+ORDER BY salary DESC;
+```
+
+The inner query runs once, yields the average, and the outer query compares each
+row against it.
+
+## IN, EXISTS, and correlation
+
+A subquery returning a column of values pairs with `IN`:
+
+```sql
+SELECT name FROM departments
+WHERE id IN (SELECT dept_id FROM employees WHERE salary > 125000);
+```
+
+A **correlated** subquery references the outer row, so it re-runs per row. Here
+`EXISTS` is true for any department that has at least one employee — it stops at
+the first match, which is often cheaper than counting:
+
+```sql
+SELECT d.name
+FROM departments d
+WHERE EXISTS (
+  SELECT 1 FROM employees e WHERE e.dept_id = d.id
+);
+```
+
+## Subqueries in FROM (derived tables)
+
+A subquery can also be a table you select from. Compute per-department averages,
+then join back to compare each person to their own team:
+
+```sql
+SELECT e.name, e.salary, t.avg_salary
+FROM employees e
+JOIN (
+  SELECT dept_id, AVG(salary) AS avg_salary
+  FROM employees
+  GROUP BY dept_id
+) t ON t.dept_id = e.dept_id
+WHERE e.salary > t.avg_salary;
+```
+
+## The same thing, as a CTE
+
+`WITH` hoists that derived table out front and names it. Nothing changes in the
+result — but the logic now reads as labelled steps, and you can reference the
+name more than once:
+
+```sql
+WITH dept_avg AS (
+  SELECT dept_id, AVG(salary) AS avg_salary
+  FROM employees
+  GROUP BY dept_id
+)
+SELECT e.name, e.salary, da.avg_salary
+FROM employees e
+JOIN dept_avg da ON da.dept_id = e.dept_id
+WHERE e.salary > da.avg_salary
+ORDER BY e.salary DESC;
+```
+
+You can chain several CTEs with commas, each building on the last — a clean way
+to break a gnarly report into a pipeline. CTEs can even be recursive, which is
+how you walk hierarchies and graphs in pure SQL.
+
+## Takeaways
+
+- A scalar subquery stands in for one value; a column subquery feeds `IN`/`EXISTS`.
+- Correlated subqueries reference the outer row and re-run per row.
+- A subquery in `FROM` is a derived table you can join against.
+- A `WITH` CTE is a named, reusable derived table that makes complex queries readable.

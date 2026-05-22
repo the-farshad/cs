@@ -1,0 +1,87 @@
+---
+title: Bloom Filters
+track: data-structures
+order: 14
+summary: A space-efficient probabilistic set that answers membership with no false negatives — but the occasional false positive.
+difficulty: medium
+---
+
+import BloomFilterVisualizer from '@/components/viz/BloomFilterVisualizer.tsx';
+
+A **Bloom filter** is a compact, probabilistic way to test set membership. It
+tells you an element is **possibly in the set** or **definitely not in the set**,
+using a tiny fraction of the memory a real set would need. The catch: it can
+report a **false positive**, but it will *never* report a false negative.
+
+Add a few words below, then query for ones you added and ones you didn't. Watch a
+query fail the moment it finds a `0` bit.
+
+<BloomFilterVisualizer client:visible />
+
+## Bits and hashes
+
+A Bloom filter is just two things:
+
+- A **bit array** of $m$ bits, all starting at `0`.
+- A set of $k$ independent **hash functions**, each mapping an element to a bit
+  position in $[0, m)$.
+
+It stores no keys — only bits — which is why it is so small.
+
+## Add and query
+
+**`add(x)`** runs all $k$ hash functions on `x` and sets those $k$ bits to `1`.
+Bits may already be set from earlier elements; that's fine, they just stay `1`.
+
+**`query(x)`** hashes `x` the same way and checks those $k$ bits. If **all** are
+`1`, the element is *possibly* present. If **any** is `0`, the element is
+*definitely* absent.
+
+```
+add(x):
+    for i in 1..k:
+        bits[ h_i(x) ] = 1
+
+contains(x):
+    for i in 1..k:
+        if bits[ h_i(x) ] == 0:
+            return DEFINITELY_NOT
+    return PROBABLY_YES
+```
+
+## Why no false negatives, but some false positives
+
+If you added `x`, every one of its $k$ bits was set, and bits are never cleared —
+so a later `query(x)` must see all `1`s. That guarantees **no false negatives**.
+
+A **false positive** happens when an element you never added just happens to have
+all $k$ of its bits already set by *other* elements. The more elements you add,
+the more bits flip to `1`, and the likelier this collision becomes. For $n$
+inserted elements, the false-positive rate is approximately
+
+$$\left(1 - e^{-kn/m}\right)^{k}.$$
+
+You tune it by choosing $m$ (more bits) and the optimal $k \approx (m/n)\ln 2$.
+
+## Where they shine
+
+Bloom filters guard expensive lookups: a database checks the filter before
+touching disk, a cache checks it before a network call, a crawler checks it before
+re-fetching a URL. A "definitely not" answer skips the costly work entirely; a
+"probably yes" falls through to the real, authoritative check.
+
+You cannot delete from a standard Bloom filter (clearing a bit could break another
+element's membership). A **counting Bloom filter** replaces each bit with a small
+counter to support removal.
+
+## Further reading
+
+- [Bloom filter on Wikipedia](https://en.wikipedia.org/wiki/Bloom_filter)
+
+## Takeaways
+
+- A Bloom filter is a bit array plus $k$ hash functions — tiny, and it stores no
+  keys.
+- Querying never yields a false negative, but can yield a false positive whose rate
+  grows as the filter fills.
+- Use it as a fast pre-filter in front of an expensive, authoritative lookup.

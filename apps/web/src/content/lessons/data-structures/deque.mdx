@@ -1,0 +1,73 @@
+---
+title: Deques and Ring Buffers
+track: data-structures
+order: 16
+summary: A double-ended queue backed by a circular buffer — O(1) push and pop at both ends, with head and tail pointers that wrap around.
+difficulty: easy
+---
+
+import DequeVisualizer from '@/components/viz/DequeVisualizer.tsx';
+
+A **deque** (double-ended queue, said "deck") lets you add and remove from
+*both* ends in $O(1)$. It generalizes the stack and the queue: use one end and
+it's a stack, use opposite ends and it's a queue. A clean way to implement one is a
+**circular buffer**, a fixed array where the indices wrap around.
+
+Push and pop at the front and back below. Watch the `head` and `tail` pointers
+move around the ring and wrap past the end back to slot 0.
+
+<DequeVisualizer client:visible />
+
+## The ring idea
+
+Imagine a fixed array bent into a circle. Two indices track the live region:
+
+- `head` points at the **front** element.
+- `tail` points at the slot **one past** the back element.
+
+When an index runs off the end of the array, it wraps back to the start. That wrap
+is just modular arithmetic — `(i + 1) % capacity` to advance, and
+`(i - 1 + capacity) % capacity` to go back (the `+ capacity` keeps it non-negative).
+The number of stored elements is tracked in a separate `size` counter.
+
+## Four O(1) operations
+
+```
+pushBack(x):   buf[tail] = x;  tail = (tail + 1) % cap;  size++
+popFront():    x = buf[head];  head = (head + 1) % cap;  size--;  return x
+
+pushFront(x):  head = (head - 1 + cap) % cap;  buf[head] = x;  size++
+popBack():     tail = (tail - 1 + cap) % cap;  x = buf[tail];  size--;  return x
+```
+
+Each one touches a single slot and nudges a pointer — no shifting of elements like
+a plain array would need to insert at the front. That's the whole appeal: both ends
+are cheap.
+
+## Empty vs. full
+
+When the buffer holds elements, `head` and `tail` chase each other around the ring.
+The awkward case is that `head == tail` could mean *empty* or *completely full* —
+the indices look identical either way. The simplest fix, used here, is to keep an
+explicit `size` count and check it: refuse to push when `size == capacity`, refuse
+to pop when `size == 0`. (An alternative is to leave one slot always empty so the
+two states never collide.)
+
+## Resizing and uses
+
+A fixed ring can fill up. A growable deque allocates a larger array and copies the
+elements in logical order, which costs $O(n)$ occasionally but stays $O(1)$
+*amortized* per push — the same trick a dynamic array uses.
+
+Ring buffers and deques are everywhere: the **sliding-window maximum** algorithm
+keeps candidates in a deque; operating systems use ring buffers for keyboard and
+network I/O; audio and streaming pipelines use them as bounded producer/consumer
+queues.
+
+## Takeaways
+
+- A deque supports $O(1)$ insertion and removal at *both* ends.
+- A circular buffer implements it with a fixed array plus `head`/`tail` indices that
+  wrap with modular arithmetic.
+- Track `size` (or leave one slot empty) to distinguish the empty state from the
+  full state.

@@ -1,0 +1,89 @@
+---
+title: Move Semantics
+track: cpp
+order: 8
+summary: Steal resources instead of copying them — lvalues, rvalues, and why moves make modern C++ fast.
+difficulty: hard
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppMoveSemantics from '@/components/viz/CppMoveSemantics.tsx';
+
+When you assign one object to another, C++ traditionally makes a **deep copy** —
+duplicating any heap buffer the object owns. For a big `std::vector` or `std::string`,
+that is expensive. **Move semantics** offer a cheaper path: when the source is
+about to disappear anyway, just **steal** its buffer instead of copying it.
+
+The difference comes down to **lvalues** vs **rvalues**. An lvalue has a name and
+persists (`x`); an rvalue is a temporary with no lasting identity (the result of
+`x + y`, or anything you wrap in `std::move`). Copies happen for lvalues; moves
+happen for rvalues. Toggle the modes below to compare duplicating a buffer against
+simply handing over the pointer.
+
+<CppMoveSemantics client:visible />
+
+## Copy vs move
+
+A copy allocates a new buffer and duplicates every element — `O(n)`. A move copies
+just the pointer and nulls out the source — `O(1)`, no matter how large the data.
+
+```cpp
+#include <string>
+#include <utility>
+
+std::string a = "a very long string ...";
+
+std::string b = a;             // COPY: b gets its own duplicate buffer
+                               // a is still valid and unchanged
+
+std::string c = std::move(a);  // MOVE: c steals a's buffer (no allocation)
+                               // a is now a valid but empty/unspecified state
+```
+
+After a move, the source object is still **valid** — you can assign to it or let
+it be destroyed — but you should not rely on its value.
+
+## How a type opts in
+
+A class supports moving by defining a **move constructor** and **move assignment
+operator**. They take an rvalue reference (`T&&`), grab the source's resources,
+and leave the source empty so its destructor does no harm.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `class Buffer {
+    int* data_;
+    size_t n_;
+public:
+    // Move constructor: steal, do not copy.
+    Buffer(Buffer&& other) noexcept
+        : data_(other.data_), n_(other.n_) {
+        other.data_ = nullptr;   // leave source empty & safe
+        other.n_ = 0;
+    }
+    ~Buffer() { delete[] data_; }  // deleting nullptr is fine
+};`
+  },
+  {
+    language: 'cpp',
+    code: `// Where moves happen automatically
+std::vector<Buffer> v;
+Buffer big = makeBuffer(1'000'000);
+
+v.push_back(big);             // COPY: big is an lvalue
+v.push_back(std::move(big));  // MOVE: cast to rvalue, steal the buffer
+v.push_back(makeBuffer(100)); // MOVE: the temporary is already an rvalue`
+  }
+]} client:visible />
+
+Mark move operations `noexcept` — containers like `std::vector` only move elements
+during reallocation if doing so cannot throw; otherwise they fall back to copying.
+
+## Takeaways
+
+- Lvalues (named, persistent) are copied; rvalues (temporaries) can be moved.
+- A copy duplicates the owned buffer (`O(n)`); a move transfers the pointer and empties the source (`O(1)`).
+- `std::move` does not move anything itself — it casts an lvalue to an rvalue so a move can be selected.
+- A moved-from object is valid but unspecified; only destroy it or assign to it.
+- Define move operations as `noexcept` so containers can use them.

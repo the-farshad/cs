@@ -1,0 +1,92 @@
+---
+title: Aggregation & GROUP BY
+track: sql
+order: 4
+summary: Collapse many rows into per-group summaries with COUNT, SUM, AVG, MIN, MAX — then filter the groups with HAVING.
+difficulty: easy
+---
+
+import SqlPlayground from '@/components/viz/SqlPlayground.tsx';
+
+A plain `SELECT` returns one output row per input row. **Aggregation** does the
+opposite: it folds a whole set of rows into a single value. `GROUP BY` runs that
+fold once per group, turning a long table into a compact summary — headcount per
+department, average salary per team, the earliest hire each year.
+
+Run the queries below against the seed tables. The aggregate functions are
+`COUNT`, `SUM`, `AVG`, `MIN`, and `MAX`.
+
+<SqlPlayground client:visible />
+
+## Aggregating the whole table
+
+With no `GROUP BY`, an aggregate treats every row as one group and returns a
+single row:
+
+```sql
+SELECT COUNT(*)     AS people,
+       AVG(salary)  AS avg_salary,
+       MAX(salary)  AS top_salary
+FROM employees;
+```
+
+`COUNT(*)` counts rows; `COUNT(col)` counts only rows where `col` is not `NULL`.
+That distinction matters once `LEFT JOIN` starts producing `NULL`s.
+
+## One row per group
+
+`GROUP BY` splits the rows into buckets that share a value, then computes each
+aggregate within a bucket:
+
+```sql
+SELECT dept_id,
+       COUNT(*)    AS headcount,
+       AVG(salary) AS avg_salary,
+       MIN(salary) AS lowest
+FROM employees
+GROUP BY dept_id;
+```
+
+The rule of thumb: every column in the `SELECT` list must either appear in the
+`GROUP BY` or sit inside an aggregate. A bare `name` here would be ambiguous —
+which of the three Engineering names should the database pick?
+
+Join first if you want readable labels instead of `dept_id`:
+
+```sql
+SELECT d.name AS dept,
+       COUNT(*)            AS headcount,
+       ROUND(AVG(e.salary)) AS avg_salary
+FROM employees e
+JOIN departments d ON e.dept_id = d.id
+GROUP BY d.name
+ORDER BY avg_salary DESC;
+```
+
+## WHERE vs HAVING
+
+This trips up almost everyone. `WHERE` filters **rows before** grouping;
+`HAVING` filters **groups after** aggregation. You cannot put an aggregate in
+`WHERE` because the groups do not exist yet.
+
+```sql
+SELECT dept_id,
+       COUNT(*)    AS headcount,
+       AVG(salary) AS avg_salary
+FROM employees
+WHERE hire_year >= 2016      -- drop rows first
+GROUP BY dept_id
+HAVING COUNT(*) >= 2         -- then keep only larger teams
+ORDER BY avg_salary DESC;
+```
+
+The logical order is `FROM` → `WHERE` → `GROUP BY` → `HAVING` → `SELECT` →
+`ORDER BY`. Knowing that order explains most "column not found" surprises: an
+alias defined in `SELECT` is not visible back in `WHERE`.
+
+## Takeaways
+
+- Aggregates (`COUNT/SUM/AVG/MIN/MAX`) collapse rows; `GROUP BY` does it per group.
+- Every selected column must be grouped or wrapped in an aggregate.
+- `WHERE` filters rows before grouping; `HAVING` filters groups after it.
+- `COUNT(*)` counts rows; `COUNT(col)` ignores `NULL`s.

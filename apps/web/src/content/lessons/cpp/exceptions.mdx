@@ -1,0 +1,103 @@
+---
+title: Exceptions & Stack Unwinding
+track: cpp
+order: 9
+summary: Signal errors with throw/try/catch, and rely on RAII so resources still clean up as the stack unwinds.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppStackUnwinding from '@/components/viz/CppStackUnwinding.tsx';
+
+When a function hits an error it cannot handle, it can `throw` an exception. Normal
+execution stops, and the runtime walks **up the call stack** looking for a matching
+`catch`. This walk is called **stack unwinding** — and as each function's frame is
+discarded, the destructors of its local objects run.
+
+That last detail is why RAII and exceptions are such a good pair. Because cleanup
+rides along with unwinding, any resource held by a local object — a lock, a file, a
+heap allocation in a smart pointer — is released automatically, with no `finally`
+block needed. Step through the program below to watch frames pop and destructors
+fire on the way to the handler.
+
+<CppStackUnwinding client:visible />
+
+## throw, try, and catch
+
+You `throw` an exception object, wrap risky code in `try`, and handle it in a
+`catch`. Catching by `const` reference to a base class (like `std::exception`)
+handles a whole family of error types.
+
+```cpp
+#include <stdexcept>
+#include <iostream>
+
+double divide(int a, int b) {
+    if (b == 0)
+        throw std::runtime_error("division by zero");
+    return static_cast<double>(a) / b;
+}
+
+void run() {
+    try {
+        std::cout << divide(10, 0) << "\\n";   // throws
+    } catch (const std::exception& e) {        // caught by reference
+        std::cerr << "error: " << e.what() << "\\n";
+    }
+}
+```
+
+## RAII makes code exception-safe
+
+Compare manual cleanup with RAII. If anything between `acquire` and `release`
+throws, the manual version leaks; the RAII version cannot, because the destructor
+runs during unwinding.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `// RAII: safe no matter what throws
+#include <mutex>
+#include <memory>
+
+void process(std::mutex& m) {
+    std::lock_guard<std::mutex> lk(m);  // acquires the lock
+    auto data = std::make_unique<Widget>();
+
+    risky();   // if this throws, lk and data are
+               // still cleaned up during unwinding.
+}              // lock released + Widget freed, always`
+  },
+  {
+    language: 'cpp',
+    code: `// Manual: leaks if risky() throws
+void process(std::mutex& m) {
+    m.lock();
+    Widget* data = new Widget();
+
+    risky();   // throws -> the two lines below are skipped!
+
+    delete data;   // LEAK: never reached
+    m.unlock();    // DEADLOCK: lock never released
+}`
+  }
+]} client:visible />
+
+## Guidelines
+
+Throw exceptions for genuinely *exceptional* failures, not ordinary control flow.
+Catch by `const` reference to avoid slicing and copying. Above all, lean on RAII so
+your code stays correct during unwinding — this is the foundation of the **strong
+exception guarantee**, where an operation either fully succeeds or leaves state
+unchanged.
+
+## Further reading
+
+- [cppreference: Exceptions](https://en.cppreference.com/w/cpp/language/exceptions)
+
+## Takeaways
+
+- `throw` raises an exception; `try` guards code; `catch` handles a matching type (catch by `const` reference).
+- Stack unwinding pops frames up to the matching handler, running local destructors along the way.
+- RAII makes code exception-safe: resources release automatically during unwinding — no `finally` needed.
+- Reserve exceptions for exceptional errors, and rely on RAII to uphold the strong exception guarantee.

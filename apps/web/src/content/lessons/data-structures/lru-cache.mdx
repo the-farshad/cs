@@ -1,0 +1,78 @@
+---
+title: LRU Cache
+track: data-structures
+order: 13
+summary: A fixed-size cache that evicts the least-recently-used entry, built from a hash map plus a doubly linked list for O(1) operations.
+difficulty: medium
+---
+
+import LruCacheVisualizer from '@/components/viz/LruCacheVisualizer.tsx';
+
+A **cache** stores a limited number of results so you can return them instantly
+next time. When it fills up, something has to go. An **LRU (Least Recently Used)**
+cache makes the natural choice: evict the entry that hasn't been touched for the
+longest. The challenge is doing every operation in $O(1)$.
+
+Run a few `put` and `get` calls below. Notice how each access moves the entry to
+the front, and how exceeding the capacity evicts from the back.
+
+<LruCacheVisualizer client:visible />
+
+## Two structures, one cache
+
+A single data structure can't do it alone, so LRU combines two:
+
+- A **hash map** from key to node, giving $O(1)$ lookup of *where* an entry lives.
+- A **doubly linked list** that orders entries by recency: the **front** is the
+  most-recently used, the **back** is the least-recently used.
+
+The hash map answers "is this key here, and where?" The list answers "what should
+I evict?" Because the list is doubly linked, you can unlink any node in $O(1)$
+given a pointer to it — and the hash map hands you exactly that pointer.
+
+## The operations
+
+**`get(key)`** — Look the key up in the map. On a miss, return nothing. On a hit,
+move its node to the front (it's now the most-recently used) and return the value.
+
+**`put(key, value)`** — If the key exists, update its value and move it to the
+front. If it's new, create a node, insert it at the front, and add it to the map.
+Then check the size: if it exceeds the capacity, remove the node at the **back**
+(the least-recently used) and delete its key from the map.
+
+```
+get(key):
+    if key not in map: return MISS
+    node = map[key]
+    move_to_front(node)
+    return node.value
+
+put(key, value):
+    if key in map:
+        map[key].value = value
+        move_to_front(map[key])
+        return
+    node = new Node(key, value)
+    add_front(node); map[key] = node
+    if size > capacity:
+        victim = list.back
+        remove(victim); del map[victim.key]
+```
+
+Every step is constant work — a couple of map operations and a few pointer
+relinks — so both `get` and `put` are $O(1)$.
+
+## Why a doubly linked list?
+
+A singly linked list can't unlink a node in $O(1)$, because you'd need its
+predecessor. The backward pointers let eviction at the tail and promotion from the
+middle both happen in constant time. Many languages ship this combination directly
+(an insertion-ordered map), which is exactly an LRU cache waiting to happen.
+
+## Takeaways
+
+- An LRU cache evicts the entry that hasn't been used for the longest time.
+- It pairs a hash map (O(1) lookup) with a doubly linked list (O(1) reorder and
+  eviction).
+- Every `get` and `put` runs in $O(1)$: touch an entry to promote it to the front,
+  evict from the back when full.

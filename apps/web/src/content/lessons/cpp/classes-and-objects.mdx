@@ -1,0 +1,91 @@
+---
+title: Classes & Objects
+track: cpp
+order: 5
+summary: Bundle data with behavior — constructors, destructors, and encapsulation define an object's whole lifecycle.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppObjectLifecycle from '@/components/viz/CppObjectLifecycle.tsx';
+
+A **class** is a blueprint that bundles **data** (member variables) together with
+the **functions** that operate on that data (member functions). An **object** is a
+concrete instance of that blueprint, living in memory. This pairing of state and
+behavior is the heart of object-oriented programming in C++.
+
+Every object has a lifecycle: it is **constructed**, **used**, and finally
+**destructed** when it goes out of scope. The compiler runs a constructor at
+birth and a destructor at death — automatically. Step through the program below
+to watch an object's members get initialized, mutated by a member function, and
+then cleaned up at the closing brace.
+
+<CppObjectLifecycle client:visible />
+
+## Defining a class
+
+A class groups members and the operations on them. The `public` and `private`
+labels control **encapsulation**: who is allowed to touch each member.
+
+```cpp
+#include <string>
+
+class Account {
+private:                 // hidden implementation details
+    std::string owner_;
+    int cents_;
+
+public:                  // the interface other code may use
+    Account(std::string owner, int cents)   // constructor
+        : owner_(std::move(owner)), cents_(cents) {}
+
+    ~Account() {}        // destructor: runs at end of life
+
+    void deposit(int amount) { cents_ += amount; }
+    int balance() const { return cents_; }   // const: does not modify state
+};
+```
+
+The line after the constructor's name — `: owner_(...), cents_(...)` — is the
+**member initializer list**. It constructs each member directly, which is more
+efficient than assigning to them inside the body.
+
+## Construction and destruction
+
+Constructors acquire whatever the object needs; destructors release it. Because
+the compiler guarantees the destructor runs at scope exit, this is the basis of
+RAII.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `void demo() {
+    Account a("Ada", 500);  // constructor runs here
+    a.deposit(250);         // balance() now returns 750
+    // ...
+}                           // destructor for a runs here, automatically`
+  },
+  {
+    language: 'cpp',
+    code: `// Encapsulation in action
+Account a("Ada", 500);
+a.deposit(250);         // OK: deposit is public
+int b = a.balance();    // OK: balance is public
+
+// a.cents_ = 1000000;  // ERROR: cents_ is private`
+  }
+]} client:visible />
+
+## Why encapsulation matters
+
+By keeping `cents_` private and exposing only `deposit` and `balance`, the class
+controls every change to its state. You could later add validation (reject
+negative deposits) without touching any calling code. The object's invariants
+stay protected because outside code can only go through the public interface.
+
+## Takeaways
+
+- A class bundles data (members) with the functions that act on them; an object is an instance of it.
+- The constructor initializes an object; the destructor cleans it up at scope exit — both run automatically.
+- Prefer the member initializer list (`: x_(v)`) over assignment inside the constructor body.
+- Encapsulation (`private` data, a `public` interface) protects an object's invariants and keeps code maintainable.

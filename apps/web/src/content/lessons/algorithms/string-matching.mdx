@@ -1,0 +1,70 @@
+---
+title: String Matching
+track: algorithms
+order: 14
+summary: Find a pattern inside a text in linear time — KMP never rescans a character by precomputing where to jump after a mismatch.
+difficulty: medium
+---
+
+import StringMatchingVisualizer from '@/components/viz/StringMatchingVisualizer.tsx';
+
+"Does this pattern appear in this text, and where?" The naive approach lines the
+pattern up at every position and compares character by character. When the pattern
+has length `m` and the text length `n`, that is $O(n \cdot m)$ in the worst case —
+because after a mismatch, it throws away everything it learned and slides the
+pattern just one step. **Knuth-Morris-Pratt (KMP)** removes that waste and runs in
+$O(n + m)$.
+
+Step through the search below. Watch the pattern slide under the text, and notice
+that on a mismatch the *text* pointer never moves backward.
+
+<StringMatchingVisualizer client:visible />
+
+## The insight: never rescan the text
+
+When the pattern matches a prefix and then fails, KMP already knows those matched
+characters. If part of that matched prefix is *also* a suffix of itself, the
+pattern can jump forward so that the reusable part lines up — no need to recompare
+the text we already passed.
+
+## The prefix function (failure table)
+
+KMP precomputes, for each position `j` in the pattern, the length of the longest
+**proper prefix** of `pattern[0..j]` that is also a **suffix** of it. Call it
+`lps[j]` (longest prefix-suffix). For the pattern `ABABD`:
+
+```
+index:  0 1 2 3 4
+char:   A B A B D
+lps:    0 0 1 2 0
+```
+
+At index 3 (`ABAB`), the prefix `AB` is also a suffix, so `lps[3] = 2`. When a
+mismatch happens at pattern position `j`, instead of restarting we set
+`j = lps[j-1]` and keep the text pointer fixed. Building this table is itself
+$O(m)$, and during the scan each text character is examined a constant number of
+times, giving the linear total.
+
+## Rabin-Karp: matching by hash
+
+A different idea hashes the pattern and compares it against a rolling hash of each
+text window. A **rolling hash** updates in $O(1)$ as the window slides — drop the
+leaving character, add the entering one — so the average cost is $O(n + m)$. Hash
+equality only suggests a match, so each hit is verified character by character;
+adversarial inputs that force many collisions can degrade it to $O(n \cdot m)$.
+Rabin-Karp shines when searching for **many** patterns at once or matching 2D
+blocks.
+
+## When each fits
+
+- One pattern, guaranteed linear, no hashing → **KMP** (or the similar
+  Boyer-Moore, which is often faster in practice by skipping ahead).
+- Multiple patterns or rolling-window comparisons → **Rabin-Karp**.
+
+## Takeaways
+
+- Naive matching is $O(nm)$ because it re-examines text after every mismatch.
+- KMP's prefix function tells the pattern how far to jump, so the text pointer
+  only ever moves forward — total time $O(n + m)$.
+- Rabin-Karp swaps comparisons for a rolling hash, ideal for many-pattern or 2D
+  search.

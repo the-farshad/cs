@@ -1,0 +1,66 @@
+---
+title: Clustering & k-Means
+track: machine-learning
+order: 6
+summary: Unsupervised learning — group unlabeled points by similarity with the k-means assign-and-move loop.
+difficulty: easy
+---
+
+import KMeansVisualizer from '@/components/viz/KMeansVisualizer.tsx';
+
+So far every model learned from **labeled** examples. **Clustering** is
+**unsupervised**: there are no labels at all, just points, and the goal is to
+discover groups that sit close together. It is how you segment customers, compress
+colors, or find topics in documents without anyone telling you the answer.
+
+The most popular clustering algorithm is **k-means**. Pick the number of groups
+`$k$`, then repeat two steps until nothing changes. Press Run below and watch the
+`$\times$` centroids chase the data; change `$k$` to see how the carving shifts.
+
+<KMeansVisualizer client:visible />
+
+## The two-step loop
+
+k-means alternates between a guess about labels and a guess about centers, each
+improving the other (this is **Lloyd's algorithm**):
+
+1. **Assign** — give every point to its nearest centroid (here, by squared
+   Euclidean distance). Each point picks the closest `$\times$`.
+2. **Move** — slide every centroid to the **mean** of the points just assigned to
+   it. That is where the "means" in the name comes from.
+
+Repeat. Because both steps can only lower the objective, the loop is guaranteed to
+**converge** — usually within a handful of iterations.
+
+## What it is minimizing
+
+k-means greedily reduces the **within-cluster sum of squares** (also called
+*inertia*): the total squared distance from each point to its centroid.
+
+$$ J = \sum_{i=1}^{n} \lVert x_i - \mu_{c(i)} \rVert^2 $$
+
+where `$\mu_{c(i)}$` is the centroid of the cluster point `$x_i$` belongs to. The
+inertia readout under the plot ticks down every step and flattens at convergence.
+
+## The catches
+
+- **You must choose `$k$`.** Too few merges distinct groups; too many splits real
+  ones. The **elbow method** plots inertia versus `$k$` and looks for the bend.
+- **It only finds a local minimum.** The result depends on where the centroids
+  start. In practice you run it several times from different seeds (k-means++ picks
+  smart starts) and keep the lowest inertia.
+- **It assumes round, similar-sized blobs.** Stretched or nested shapes fool it,
+  because every boundary is the midline between two centers.
+
+Despite these limits, k-means is fast, simple, and a superb first tool whenever you
+suspect your data clumps.
+
+Further reading: [scikit-learn — Clustering](https://scikit-learn.org/stable/modules/clustering.html).
+
+## Takeaways
+
+- Clustering is unsupervised: it groups unlabeled points by similarity.
+- k-means alternates **assign-to-nearest** and **move-to-mean** until convergence,
+  minimizing within-cluster squared distance.
+- You must pick `$k$`, restarts help escape bad local minima, and it favors round
+  blobs.

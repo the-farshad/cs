@@ -1,0 +1,82 @@
+---
+title: Skip Lists
+track: data-structures
+order: 15
+summary: A sorted linked list with random express lanes that delivers balanced-tree performance — O(log n) search — with far simpler code.
+difficulty: medium
+---
+
+import SkipListVisualizer from '@/components/viz/SkipListVisualizer.tsx';
+
+A **skip list** is a sorted linked list souped up with extra "express lane" levels
+so you can skip over many nodes at once. It achieves $O(\log n)$ search, insert,
+and delete *on average* — matching a balanced binary search tree — but with much
+simpler code and no rotations. Its balance comes from randomness, not bookkeeping.
+
+Pick a target below and step through the search. Watch it glide right along the top
+lanes and drop down only when the next jump would overshoot.
+
+<SkipListVisualizer client:visible />
+
+## Stacked linked lists
+
+The bottom level (`L0`) is an ordinary sorted linked list containing every
+element. Above it sit sparser levels: each is a sublist that skips over some nodes.
+A node that appears on level $\ell$ also appears on every level below it, forming a
+little tower. Higher levels act like the chapter headings of a book — they let you
+jump close to your target fast, then refine.
+
+## Searching by dropping down
+
+Start at the head of the **top** level and repeat:
+
+- If the **next** node on this level has a key $\le$ the target, move right to it.
+- Otherwise, **drop down** one level and try again.
+
+When you can't move right or down any further, you're either on the target or just
+before where it would be.
+
+```
+search(target):
+    node = head
+    for level from top down to 0:
+        while node.next[level] and node.next[level].key <= target:
+            node = node.next[level]
+    return node if node.key == target else NOT_FOUND
+```
+
+The top lanes cover huge gaps, so each drop roughly halves the remaining search
+space — the same divide-and-conquer that makes balanced trees fast.
+
+## Where the levels come from
+
+Insertion is what keeps a skip list balanced, and it uses a coin flip. A new node
+always joins `L0`. Then you flip a fair coin: on heads, promote it one level up and
+flip again; on tails, stop. So a node reaches level $\ell$ with probability
+$1/2^{\ell}$ — about half the nodes on each level above the one below it.
+
+That geometric distribution gives an **expected $O(\log n)$ levels** and an
+expected $O(\log n)$ nodes visited per search. There's no global rebalancing: each
+insert just decides its own height locally.
+
+## Why use one
+
+- **Simplicity:** no rotations or color-flips like AVL or red-black trees — just
+  pointer splicing.
+- **Concurrency:** the localized, pointer-based updates make lock-free concurrent
+  versions practical, which is why skip lists back several in-memory databases and
+  key-value stores.
+- **Trade-off:** the bounds are *expected*, not worst-case, and the extra forward
+  pointers cost some memory.
+
+## Further reading
+
+- [Skip list on Wikipedia](https://en.wikipedia.org/wiki/Skip_list)
+
+## Takeaways
+
+- A skip list is a sorted linked list with randomly-built express lanes stacked on
+  top.
+- Search moves right on a level, then drops down — giving expected $O(\log n)$ time.
+- Random node heights keep it balanced with no rotations, making it simple and
+  concurrency-friendly.

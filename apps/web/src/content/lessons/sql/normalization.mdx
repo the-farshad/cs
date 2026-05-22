@@ -1,0 +1,70 @@
+---
+title: Normalization
+track: sql
+order: 8
+summary: Decompose a redundant table into 1NF, 2NF, and 3NF to kill update anomalies and store every fact exactly once.
+difficulty: medium
+---
+
+import NormalizationVisualizer from '@/components/viz/NormalizationVisualizer.tsx';
+
+**Normalization** is the process of structuring tables so each fact lives in
+exactly one place. A single wide table feels convenient, but repeated data leads
+to **update anomalies**: change a customer's city and you must edit every row
+that mentions them, or risk leaving the database contradicting itself.
+
+Step through the decomposition below. One redundant order log splits into clean
+tables, and the rose tint — the duplicated data — shrinks at each normal form.
+
+<NormalizationVisualizer client:visible />
+
+## Why redundancy hurts
+
+Three anomalies follow from storing a fact more than once:
+
+- **Update anomaly** — a customer moves city; you must update many rows, and a
+  missed one makes the data inconsistent.
+- **Insertion anomaly** — you cannot record a new customer until they place an
+  order, because customer data only exists alongside order rows.
+- **Deletion anomaly** — deleting the last order for a customer erases the only
+  copy of that customer's details.
+
+## First Normal Form (1NF)
+
+A table is in **1NF** when every cell holds a single, atomic value — no lists, no
+repeating groups. A `products` column holding `Pen x2, Ink x1` violates it: you
+cannot filter or total one product. The fix is one row per product, which makes
+the key a composite `(order_id, product)`.
+
+## Second Normal Form (2NF)
+
+**2NF** applies when the key is composite. It requires that every non-key column
+depend on the **whole** key, not just part of it. In the 1NF table, `customer`
+and `city` depend on `order_id` alone — a **partial dependency** — so they repeat
+on every product line. Move them into their own `orders` table keyed by
+`order_id`, and the repetition is gone.
+
+## Third Normal Form (3NF)
+
+**3NF** removes **transitive dependencies**: a non-key column depending on
+another non-key column. Here `city` depends on `customer`, which depends on
+`order_id`. Give customers their own table so `city` is stored once per customer.
+The classic summary: every non-key column depends on
+
+> the key, the whole key, and nothing but the key.
+
+## When not to normalize
+
+Normalization optimizes for correctness and write efficiency, not read speed.
+Highly normalized schemas need more joins, so analytics and reporting systems
+often **denormalize** on purpose — duplicating data to avoid joins — and accept
+the redundancy in exchange for faster reads. Normalize first; denormalize later,
+deliberately, where measurements justify it.
+
+## Takeaways
+
+- Normalization stores each fact once, eliminating update, insertion, and deletion anomalies.
+- 1NF: atomic cells, no repeating groups.
+- 2NF: no partial dependencies on part of a composite key.
+- 3NF: no transitive dependencies — non-key columns depend only on the key.
+- Denormalization trades that cleanliness for read speed when joins become a bottleneck.

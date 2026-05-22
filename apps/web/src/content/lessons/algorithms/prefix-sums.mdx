@@ -1,0 +1,72 @@
+---
+title: Prefix Sums
+track: algorithms
+order: 16
+summary: Precompute running totals once so any range sum becomes a single subtraction — O(1) queries after O(n) setup, plus difference arrays and the 2D version.
+difficulty: easy
+---
+
+import PrefixSumVisualizer from '@/components/viz/PrefixSumVisualizer.tsx';
+
+Suppose you must answer many "what is the sum of elements from index `l` to `r`?"
+questions on the same array. Adding up the slice each time costs $O(n)$ per query.
+A **prefix-sum array** pays a one-time $O(n)$ to precompute running totals, after
+which every range sum is a single subtraction — $O(1)$.
+
+Move the `l` and `r` sliders, then step through building the prefix array and
+answering the query.
+
+<PrefixSumVisualizer client:visible />
+
+## Building the array
+
+Define `P` so that `P[k]` is the sum of the first `k` elements:
+
+$$P[0] = 0, \qquad P[k] = P[k-1] + A[k-1]$$
+
+So `P[k]` holds the total of `A[0..k-1]`. One left-to-right pass fills the whole
+array in $O(n)$, each entry reusing the previous one.
+
+## The range-sum trick
+
+To get the sum of `A[l..r]` inclusive, take the total up to `r` and remove the part
+before `l`:
+
+$$\sum_{i=l}^{r} A[i] = P[r+1] - P[l]$$
+
+The first term is everything through index `r`; the second is everything before
+index `l`; the leftover is exactly the range. The careful $+1$ offset is why
+keeping `P[0] = 0` is convenient — it makes ranges that start at index 0 work
+without a special case.
+
+## Difference arrays: the inverse
+
+Prefix sums turn an array into its running totals; a **difference array** does the
+reverse and shines when you must add a constant to *many ranges* and only read the
+result at the end. To add `v` to every element in `A[l..r]`, do `D[l] += v` and
+`D[r+1] -= v` — two $O(1)$ updates. After all updates, take the prefix sum of `D`
+to recover the final array. A batch of range-updates that would be $O(n)$ each
+collapses to $O(1)$ each plus one final pass.
+
+## Going 2D
+
+The idea extends to a matrix. Build `P[i][j]` = sum of the rectangle from the
+top-left corner to `(i, j)`. The sum of any axis-aligned sub-rectangle is then four
+lookups via **inclusion-exclusion**:
+
+$$P[r_2][c_2] - P[r_1-1][c_2] - P[r_2][c_1-1] + P[r_1-1][c_1-1]$$
+
+— add the big rectangle, subtract the strip above and the strip to the left, then
+add back the corner you subtracted twice.
+
+## When it applies
+
+Prefix sums need the operation to be **invertible**: subtraction undoes addition.
+Sums, counts, and XOR work. For non-invertible queries like range *minimum*, reach
+for a sparse table or a segment tree instead.
+
+## Takeaways
+
+- Precompute running totals once in $O(n)$; then any range sum is `P[r+1] - P[l]` in $O(1)$.
+- Difference arrays are the inverse: apply many range *updates* in $O(1)$ each, then one prefix pass.
+- The 2D version answers sub-rectangle sums with four corner lookups via inclusion-exclusion.

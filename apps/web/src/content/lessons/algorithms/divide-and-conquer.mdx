@@ -1,0 +1,69 @@
+---
+title: Divide & Conquer
+track: algorithms
+order: 15
+summary: Split a problem into smaller copies of itself, solve those, and combine — the paradigm behind merge sort, fast multiplication, and a clean recurrence for the running time.
+difficulty: medium
+---
+
+import DivideConquerVisualizer from '@/components/viz/DivideConquerVisualizer.tsx';
+
+**Divide and conquer** is a three-move recipe for designing algorithms: **divide**
+the input into smaller subproblems of the same kind, **conquer** each by recursion,
+then **combine** the sub-answers into the answer for the whole. It turns many
+problems that look quadratic into near-linear ones.
+
+The tree below is merge sort. Going *down*, each array splits in half until single
+elements are reached; coming *up*, sorted halves merge together.
+
+<DivideConquerVisualizer client:visible />
+
+## The three moves
+
+Take merge sort. **Divide:** cut the array into two halves. **Conquer:** sort each
+half recursively. **Combine:** merge two sorted halves into one sorted array in a
+single linear pass. The base case — an array of length 1 — is already sorted, so
+recursion bottoms out.
+
+The key is that the *combine* step is cheap. Merging two sorted lists is $O(n)$,
+and that linear cost at each level is what keeps the whole thing efficient.
+
+## Reading the running time
+
+The cost of a divide-and-conquer algorithm follows a **recurrence**:
+
+$$T(n) = a\,T(n/b) + f(n)$$
+
+where the problem splits into `a` subproblems each of size `n/b`, and `f(n)` is the
+non-recursive work to divide and combine. For merge sort, $a = 2$, $b = 2$, and
+$f(n) = O(n)$, giving $T(n) = 2T(n/2) + O(n)$.
+
+Picture the recursion tree: it has $\log_b n$ levels, and at every level the
+combine work sums to $O(n)$. Multiplying gives the famous $O(n \log n)$. The
+**Master Theorem** turns this picture into a formula: the answer depends on
+whether the work is dominated by the leaves ($a$ large), the root ($f(n)$ large),
+or spread evenly across levels (the merge-sort case).
+
+## Beyond sorting
+
+The same shape appears everywhere. **Binary search** is divide and conquer with
+$a = 1$. **Karatsuba** multiplication splits two big numbers and, with an algebraic
+trick, needs only **three** half-size multiplications instead of four — turning the
+schoolbook $O(n^2)$ into about $O(n^{1.585})$ because $a = 3$, $b = 2$.
+**Strassen's** algorithm does the analogous trick for matrices. **Quickselect**
+finds the k-th smallest element by recursing into only one side.
+
+## When it pays off
+
+Divide and conquer wins when subproblems are **independent** (no shared work) and
+the combine step is cheap relative to the whole. If subproblems *overlap* and get
+re-solved, you want **dynamic programming** instead — memoize and stop the
+recursion tree from exploding.
+
+## Takeaways
+
+- The paradigm is split → solve recursively → combine, bottoming out at a base case.
+- Running time follows $T(n) = aT(n/b) + f(n)$; the recursion tree (and Master
+  Theorem) reveal whether it is $O(n\log n)$, linear, or worse.
+- It pays off when subproblems are independent and combining is cheap; overlapping
+  subproblems call for dynamic programming.

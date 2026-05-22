@@ -1,0 +1,71 @@
+---
+title: Dimensionality Reduction & PCA
+track: machine-learning
+order: 9
+summary: Compress many features into a few by projecting onto the directions of greatest variance.
+difficulty: medium
+---
+
+import PCAVisualizer from '@/components/viz/PCAVisualizer.tsx';
+
+Real datasets often have dozens or thousands of features, many of them redundant or
+correlated. **Dimensionality reduction** squeezes them into a handful of new
+features while keeping as much information as possible — making data easier to
+visualize, faster to model, and less prone to the *curse of dimensionality*.
+
+The workhorse is **Principal Component Analysis (PCA)**. It finds new axes, the
+**principal components**, pointing along the directions where the data varies most.
+Below, a tilted 2D cloud gets its `$PC1$` and `$PC2$` axes; toggle the projection to
+collapse every point onto `$PC1$`.
+
+<PCAVisualizer client:visible />
+
+## Variance is information
+
+PCA's core assumption is that **directions of high variance carry the signal** and
+low-variance directions are mostly noise. `$PC1$` is the single line along which the
+points are most spread out. `$PC2$` is the next most-spread direction that is
+**orthogonal** (perpendicular) to `$PC1$`, and so on. Each component is a
+combination of the original features pointing a new way through the space.
+
+## How it works
+
+1. **Center** the data by subtracting the mean of each feature.
+2. Compute the **covariance matrix**, which records how features vary together.
+3. Take its **eigenvectors** and **eigenvalues**. The eigenvectors are the
+   principal-component directions; each eigenvalue `$\lambda_k$` is the variance
+   captured along that direction.
+4. Sort by eigenvalue and keep the top few. **Project** the data onto them — drop a
+   perpendicular from each point onto the chosen axis (the dashed lines in the
+   visualizer).
+
+## Variance explained
+
+Because eigenvalues *are* variances, the fraction kept by component `$k$` is
+
+$$ \text{explained}_k = \frac{\lambda_k}{\sum_j \lambda_j} $$
+
+The plot reports these percentages. If `$PC1$` explains, say, 95% of the variance,
+you can throw away `$PC2$` and represent each 2D point with **one** number, losing
+almost nothing. With high-dimensional data you keep just enough components to reach
+a target like 95% cumulative variance — often a huge reduction.
+
+## Caveats
+
+- PCA is **linear**: it can only rotate and project, so it misses curved structure.
+  Nonlinear methods (used mainly for visualization) handle that.
+- It is **unsupervised** — it maximizes variance, not class separation, so the most
+  spread-out direction is not always the most predictive one.
+- **Scale matters**: standardize features first, or the largest-unit feature
+  dominates every component.
+
+Further reading: [scikit-learn — PCA](https://scikit-learn.org/stable/modules/decomposition.html#pca).
+
+## Takeaways
+
+- Dimensionality reduction compresses many correlated features into a few
+  informative ones.
+- **PCA** projects onto orthogonal directions of maximum variance, found via the
+  eigenvectors of the covariance matrix.
+- Eigenvalues give the **variance explained**, telling you how many components to
+  keep; PCA is linear and unsupervised.

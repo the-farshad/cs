@@ -1,0 +1,68 @@
+---
+title: Decision Trees
+track: machine-learning
+order: 7
+summary: Carve the feature space into regions with a flow-chart of yes/no splits chosen to purify the data.
+difficulty: medium
+---
+
+import DecisionTreeVisualizer from '@/components/viz/DecisionTreeVisualizer.tsx';
+
+A **decision tree** classifies by asking a sequence of simple questions, each of
+the form "is feature `$x_j$` below some threshold?". Every question is an
+**axis-aligned split** that cuts the feature space with a horizontal or vertical
+line, and the answers route a point down to a **leaf** that holds the prediction.
+
+Drag the **max depth** slider below. On the left the plane is sliced into
+rectangles colored by predicted class; on the right the matching tree grows. Depth
+0 is a single guess; each extra level adds another round of cuts.
+
+<DecisionTreeVisualizer client:visible />
+
+## How a split is chosen
+
+At each node the algorithm (the classic one is **CART**) tries every feature and
+every candidate threshold, then keeps the split that makes the two resulting groups
+as **pure** as possible — ideally each side ending up all one class.
+
+Purity is measured by **impurity**, which the split tries to lower. Two common
+measures, for class probabilities `$p_k$` in a node:
+
+$$ \text{Gini} = 1 - \sum_k p_k^2 \qquad \text{Entropy} = -\sum_k p_k \log_2 p_k $$
+
+Both are `$0$` when a node is pure (one class) and largest when classes are evenly
+mixed. The node greedily picks the split with the lowest *weighted* child impurity;
+the drop is the **information gain**. The visualizer reports the root's Gini so you
+can see how mixed the full dataset starts.
+
+## Growing and pruning
+
+The tree keeps splitting until a stopping rule fires — a pure leaf, too few points,
+or a depth cap. Left unchecked it will grow a tiny leaf for every point and
+**overfit**, memorizing noise (slide the depth high and watch the regions shatter
+into slivers). We control this by limiting depth, requiring a minimum number of
+samples per leaf, or **pruning** branches that do not improve validation accuracy.
+
+## Why people like trees
+
+- **Interpretable** — you can read the path of yes/no rules that produced any
+  prediction.
+- **No scaling needed** — splits are thresholds, so units and ranges do not matter.
+- **Non-linear** — stacked axis-aligned cuts approximate curved boundaries with a
+  staircase.
+
+The catch is **instability**: a small change in the data can flip an early split
+and reshape the whole tree. The fix is to average many trees — **random forests**
+and **gradient-boosted trees** do exactly that, trading a little interpretability
+for a lot of accuracy.
+
+Further reading: [scikit-learn — Decision Trees](https://scikit-learn.org/stable/modules/tree.html).
+
+## Takeaways
+
+- A decision tree is a flow-chart of axis-aligned threshold splits ending in leaf
+  predictions.
+- Splits are chosen to reduce impurity (**Gini** or **entropy**); the reduction is
+  information gain.
+- Deep trees overfit, so we cap depth or prune; ensembles like forests fix their
+  instability.

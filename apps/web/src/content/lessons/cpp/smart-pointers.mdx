@@ -1,0 +1,85 @@
+---
+title: Smart Pointers
+track: cpp
+order: 7
+summary: Let ownership manage memory — unique_ptr, shared_ptr, and weak_ptr free resources automatically with RAII.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppSmartPointers from '@/components/viz/CppSmartPointers.tsx';
+
+Raw `new` and `delete` force you to track ownership by hand, which leaks memory the
+moment an early return or exception skips the `delete`. **Smart pointers** from the
+`<memory>` header fix this by tying ownership to RAII: when the owning pointer goes
+out of scope, the managed object is freed for you.
+
+`std::shared_ptr` allows several owners and keeps a **reference count** of how many
+exist. The object lives until that count hits zero. A `std::weak_ptr` can observe
+the object without owning it, so it never bumps the count. Step through the program
+below to watch the count rise on copy, fall at scope exit, and drop to zero on
+`reset` — freeing the object automatically.
+
+<CppSmartPointers client:visible />
+
+## unique_ptr: one exclusive owner
+
+`std::unique_ptr` owns its object alone. It cannot be copied — only **moved** — so
+ownership is always unambiguous. It is the default choice and has zero overhead
+versus a raw pointer.
+
+```cpp
+#include <memory>
+
+auto p = std::make_unique<Widget>();   // p is the sole owner
+use(*p);
+// auto q = p;            // ERROR: cannot copy a unique_ptr
+auto q = std::move(p);    // OK: ownership transfers; p is now null
+// q's Widget is deleted automatically when q goes out of scope
+```
+
+## shared_ptr and weak_ptr: shared ownership
+
+`std::shared_ptr` reference-counts the object across many owners. Use `weak_ptr`
+to break ownership cycles — for example, a child that needs to reach back to its
+parent without keeping it alive.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `auto a = std::make_shared<Widget>();   // count = 1
+{
+    auto b = a;     // copy -> count = 2 (shared ownership)
+    use(*b);
+}                   // b destroyed -> count = 1
+a.reset();          // count = 0 -> Widget deleted here`
+  },
+  {
+    language: 'cpp',
+    code: `// weak_ptr observes without owning
+auto a = std::make_shared<Widget>();
+std::weak_ptr<Widget> w = a;   // count stays 1
+
+if (auto locked = w.lock()) {  // try to get a shared_ptr
+    use(*locked);              // succeeds: object still alive
+}
+a.reset();                     // object freed
+auto gone = w.lock();          // returns nullptr: w has expired`
+  }
+]} client:visible />
+
+## The cycle caveat
+
+Reference counting cannot reclaim a **cycle**. If object A holds a `shared_ptr` to
+B and B holds one back to A, each keeps the other's count at one forever, so
+neither is ever freed — a leak. The fix is to make one of the two links a
+`weak_ptr`, which observes without contributing to the count. Reach for raw `new`
+and `delete` essentially never in modern C++.
+
+## Takeaways
+
+- Smart pointers tie ownership to scope, so memory is freed automatically (RAII), even on exceptions.
+- `unique_ptr` is one exclusive owner (move-only); prefer it by default.
+- `shared_ptr` reference-counts shared ownership; the object dies when the count reaches zero.
+- `weak_ptr` observes without owning — use it to break reference cycles that would otherwise leak.
+- Build them with `make_unique` / `make_shared`; avoid raw `new` and `delete`.

@@ -1,0 +1,70 @@
+---
+title: Convolution & CNNs
+track: machine-learning
+order: 10
+summary: The building block of computer vision — slide a small learnable kernel over an image to extract features.
+difficulty: medium
+---
+
+import ConvolutionVisualizer from '@/components/viz/ConvolutionVisualizer.tsx';
+
+A small image already has thousands of pixels; a fully connected network would need
+a separate weight for every pixel and quickly drown. **Convolutional Neural
+Networks (CNNs)** solve this with one elegant operation — **convolution** — that
+scans the image with a tiny shared filter, the engine behind modern vision.
+
+A **kernel** is a small grid of weights (here `$3 \times 3$`). It slides across the
+input; at each stop it multiplies overlapping values and sums them into one output
+number. Pick a kernel below and step the window to fill the **feature map**.
+
+<ConvolutionVisualizer client:visible />
+
+## The sliding dot product
+
+At every position the kernel computes a weighted sum of the patch it covers:
+
+$$ \text{out}[r,c] = \sum_{i}\sum_{j} \text{img}[r+i,\,c+j]\;\cdot\;\text{kernel}[i,j] $$
+
+Slide one step right, repeat; reach the edge, drop down a row. The grid of results
+is the **feature map**. With a `$3 \times 3$` kernel and no padding, a `$6 \times 6$`
+input shrinks to `$4 \times 4$` because the window cannot hang off the edge (this is
+a *valid* convolution).
+
+## What kernels detect
+
+The kernel's weights decide what pattern lights up. An **edge** kernel has a strong
+positive center against negative neighbors, so it fires where brightness changes
+sharply and stays near zero on flat regions. A **blur** (box) kernel averages the
+patch, smoothing noise. In a CNN these weights are **not hand-designed** — they are
+**learned by gradient descent**, so the network discovers whatever filters best
+reduce its loss.
+
+## Why convolution wins for images
+
+- **Parameter sharing** — the same `$3 \times 3$` kernel is reused at every
+  position, so a layer has a few weights instead of one per pixel.
+- **Translation invariance** — a feature is detected wherever it appears, because
+  the same filter sweeps the whole image.
+- **Locality** — each output depends only on a small neighborhood (its *receptive
+  field*), matching how image structure is local.
+
+## Stacking into a network
+
+One convolutional layer applies **many** kernels, producing a stack of feature
+maps. A **pooling** step (e.g. taking the max over each `$2 \times 2$` block) then
+shrinks them, adding robustness and cutting computation. Stack these layers and the
+features compose into a hierarchy: early layers find edges, middle layers find
+textures and shapes, deep layers find objects — the same edges `$\to$` shapes `$\to$`
+faces idea from the neural-networks lesson, now built directly into the
+architecture.
+
+Further reading: [CS231n — Convolutional Networks](https://cs231n.github.io/convolutional-networks/).
+
+## Takeaways
+
+- Convolution slides a small kernel over an image, computing a dot product at each
+  stop to build a feature map.
+- Kernel weights determine the detected pattern (edge, blur, ...) and in a CNN are
+  **learned**, not hand-set.
+- Parameter sharing, locality, and pooling let stacked conv layers learn a hierarchy
+  of visual features efficiently.

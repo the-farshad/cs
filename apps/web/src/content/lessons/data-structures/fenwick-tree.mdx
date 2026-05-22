@@ -1,0 +1,80 @@
+---
+title: Fenwick Trees (Binary Indexed Trees)
+track: data-structures
+order: 12
+summary: Prefix sums with O(log n) update and query, using almost no extra memory and the i & -i bit trick.
+difficulty: hard
+---
+
+import FenwickTreeVisualizer from '@/components/viz/FenwickTreeVisualizer.tsx';
+
+A **Fenwick tree**, or **Binary Indexed Tree (BIT)**, answers *prefix-sum*
+queries and *point updates* on an array in $O(\log n)$ time. It does the same job
+as a segment tree for sums, but with a single flat array and remarkably little
+code. The magic is an implicit tree encoded in the bits of each index.
+
+Switch between **update** and **prefix query** below and step through the index
+path — watch how each step jumps by `i & -i`.
+
+<FenwickTreeVisualizer client:visible />
+
+## The implicit tree
+
+The tree is stored in a 1-indexed array `tree[1..n]`. Each `tree[i]` holds the sum
+of a contiguous block of the original array ending at `i`. The block length is
+exactly `i & -i` — the value of the **lowest set bit** of `i`. So `tree[6]`
+(binary `110`, lowest bit `2`) covers indices $[5, 6]$, while `tree[8]`
+(binary `1000`, lowest bit `8`) covers the whole range $[1, 8]$.
+
+That `i & -i` expression isolates the least-significant 1-bit using two's
+complement: $-i$ is `~i + 1`, so `i & -i` keeps only the rightmost bit they share.
+
+## Two walks over the bits
+
+**Prefix query** `sum(i)` = sum of $[1, i]$. Start at `i` and repeatedly add
+`tree[i]`, then strip the lowest bit:
+
+```
+sum = 0
+while i > 0:
+    sum += tree[i]
+    i -= i & -i      # remove lowest set bit
+```
+
+Each step clears one bit, so it runs at most $\log_2 n$ times. A range sum
+$[l, r]$ is just `sum(r) - sum(l - 1)`.
+
+**Point update** `add(i, delta)` walks the other direction — toward the cells whose
+blocks *contain* `i`:
+
+```
+while i <= n:
+    tree[i] += delta
+    i += i & -i      # jump to the next covering cell
+```
+
+Adding the lowest bit moves to the next index whose block spans `i`, again in
+$O(\log n)$ steps.
+
+## Fenwick tree vs. segment tree
+
+- **Memory:** a BIT is one array of size $n$; a segment tree typically needs
+  $2n$ to $4n$ nodes.
+- **Constant factor:** the BIT's loops are tiny, so it is usually faster in
+  practice for prefix sums.
+- **Flexibility:** segment trees handle min, max, and arbitrary range updates with
+  lazy propagation. A plain BIT shines for invertible operations like sums and
+  counts (though variants extend it to range updates).
+
+## Further reading
+
+- [Fenwick tree on Wikipedia](https://en.wikipedia.org/wiki/Fenwick_tree)
+
+## Takeaways
+
+- A Fenwick tree gives $O(\log n)$ prefix-sum queries and point updates in a single
+  flat array.
+- Each cell `tree[i]` covers a block of length `i & -i`; query strips bits, update
+  adds them.
+- Prefer it over a segment tree for sums when you want less memory and a smaller
+  constant factor.

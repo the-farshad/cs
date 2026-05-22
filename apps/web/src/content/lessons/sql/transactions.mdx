@@ -1,0 +1,88 @@
+---
+title: Transactions & Isolation
+track: sql
+order: 7
+summary: ACID guarantees, BEGIN/COMMIT/ROLLBACK, and how isolation levels rule out dirty, non-repeatable, and phantom reads.
+difficulty: hard
+---
+
+import TransactionIsolationVisualizer from '@/components/viz/TransactionIsolationVisualizer.tsx';
+
+A **transaction** groups several statements so they succeed or fail as one unit.
+Move money between two accounts and you must debit one and credit the other —
+never just one. Wrap both in a transaction and the database promises all-or-nothing.
+
+Pick an anomaly below and toggle the isolation level. Watch how two concurrent
+transactions, `T1` and `T2`, interleave on a shared row — and how the stronger
+level blocks the conflict instead of letting a bad read through.
+
+<TransactionIsolationVisualizer client:visible />
+
+## ACID
+
+Transactions are defined by four guarantees:
+
+- **Atomicity** — all statements commit, or none do. A failure mid-way rolls back.
+- **Consistency** — a transaction moves the database from one valid state to another, preserving constraints.
+- **Isolation** — concurrent transactions do not step on each other; the result matches some serial order.
+- **Durability** — once committed, the change survives a crash.
+
+## Controlling them
+
+The control statements are small:
+
+```sql
+BEGIN;                                  -- open a transaction
+UPDATE accounts SET balance = balance - 30 WHERE id = 1;
+UPDATE accounts SET balance = balance + 30 WHERE id = 2;
+COMMIT;                                 -- make it permanent
+```
+
+If anything looks wrong before the `COMMIT`, you abandon the whole unit:
+
+```sql
+ROLLBACK;   -- discard every change since BEGIN
+```
+
+Many drivers run in autocommit mode, wrapping each statement in its own implicit
+transaction. `BEGIN` is what lets you span several.
+
+## The cost of concurrency
+
+Isolation is the hard one. Run transactions in parallel and three classic
+**read anomalies** can appear — the visualizer walks each:
+
+- **Dirty read** — T1 reads a value T2 wrote but has not committed. If T2 rolls
+  back, T1 acted on data that never existed.
+- **Non-repeatable read** — T1 reads a row, T2 commits a change, T1 reads the
+  same row again and gets a different value within one transaction.
+- **Phantom read** — T1 runs a range scan (`WHERE salary > 100k`), T2 commits a
+  new matching row, and T1's identical scan now returns extra rows.
+
+## Isolation levels
+
+The SQL standard names four levels, each ruling out more anomalies — at the cost
+of more locking or aborts:
+
+| Level | Dirty | Non-repeatable | Phantom |
+|---|---|---|---|
+| READ UNCOMMITTED | possible | possible | possible |
+| READ COMMITTED | no | possible | possible |
+| REPEATABLE READ | no | no | possible |
+| SERIALIZABLE | no | no | no |
+
+`SERIALIZABLE` is the strongest: the outcome is guaranteed to equal *some* serial
+ordering of the transactions, so every anomaly disappears. You pay for it with
+reduced concurrency, so production systems often run at `READ COMMITTED` and add
+explicit locking only where correctness demands it.
+
+## Takeaways
+
+- A transaction is an atomic, all-or-nothing unit: `BEGIN` … `COMMIT` / `ROLLBACK`.
+- ACID = Atomicity, Consistency, Isolation, Durability.
+- Concurrency causes dirty, non-repeatable, and phantom reads.
+- Higher isolation levels remove more anomalies but reduce concurrency; `SERIALIZABLE` removes all.
+
+## Further reading
+
+- [PostgreSQL: Transaction Isolation](https://www.postgresql.org/docs/current/transaction-iso.html)

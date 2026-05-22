@@ -1,0 +1,67 @@
+---
+title: Shortest Paths
+track: algorithms
+order: 13
+summary: Dijkstra and Bellman-Ford find the cheapest route in a weighted graph by repeatedly relaxing edges — and only one of them survives negative weights.
+difficulty: medium
+---
+
+import ShortestPathVisualizer from '@/components/viz/ShortestPathVisualizer.tsx';
+
+On an **unweighted** graph, breadth-first search already finds shortest paths.
+But once edges carry **weights** — distances, times, costs — counting hops is no
+longer enough; a two-hop route can be cheaper than a one-hop one. The two classic
+single-source shortest-path algorithms, **Dijkstra** and **Bellman-Ford**, both
+rest on a single operation called **edge relaxation**.
+
+Step through both below. Watch the distance label above each node fall as edges
+relax, and toggle the negative edge to see where Dijkstra breaks.
+
+<ShortestPathVisualizer client:visible />
+
+## Relaxation
+
+Keep a tentative distance `dist[v]` for every node, starting at $0$ for the
+source and $\infty$ for the rest. To **relax** an edge $u \to v$ of weight $w$,
+ask: is going through `u` better than what we have?
+
+$$\text{if } dist[u] + w < dist[v]: \quad dist[v] \leftarrow dist[u] + w$$
+
+Every shortest-path algorithm here is just relaxation applied in a clever order.
+
+## Dijkstra
+
+Dijkstra always **settles the closest unsettled node** next. The moment a node is
+settled, its distance is final, so it relaxes the node's out-edges once and never
+revisits it. Using a binary heap as the priority queue, the cost is
+$O((V + E)\log V)$.
+
+The catch: settling-is-final assumes that adding an edge can never *lower* a
+distance. With a **negative** edge weight that assumption fails — a node settled
+early might later be reachable more cheaply. Toggle the negative edge in the
+visualizer and Dijkstra can report a wrong answer.
+
+## Bellman-Ford
+
+Bellman-Ford makes no such assumption. It simply relaxes **every** edge, and
+repeats that for $V - 1$ rounds. Because a shortest path visits at most $V - 1$
+edges, $V - 1$ rounds are always enough for the distances to settle. That brute
+honesty costs $O(V \cdot E)$ — slower than Dijkstra — but it **handles negative
+edges**.
+
+It earns one more power: run a single extra round, and if any distance still
+improves, the graph has a **negative-weight cycle** reachable from the source, so
+no finite shortest path exists. Dijkstra cannot detect this at all.
+
+## Choosing one
+
+- All weights non-negative and you want speed → **Dijkstra**.
+- Negative edges possible, or you need to detect negative cycles → **Bellman-Ford**.
+- For *all-pairs* shortest paths on a dense graph, **Floyd-Warshall** runs three
+  nested loops in $O(V^3)$.
+
+## Takeaways
+
+- Both algorithms reduce to repeated edge **relaxation**; only the *order* differs.
+- Dijkstra settles the closest node first and is fast, but assumes non-negative weights.
+- Bellman-Ford relaxes all edges $V-1$ times, handling negative edges and detecting negative cycles.

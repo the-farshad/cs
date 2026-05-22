@@ -1,0 +1,69 @@
+---
+title: Strongly Connected Components
+track: algorithms
+order: 17
+summary: Group the nodes of a directed graph into maximal sets where everyone can reach everyone — Kosaraju finds them with two depth-first passes.
+difficulty: medium
+---
+
+import SccVisualizer from '@/components/viz/SccVisualizer.tsx';
+
+In a directed graph, two nodes are **mutually reachable** if there is a path from
+each to the other. A **strongly connected component (SCC)** is a maximal set of
+nodes that are all mutually reachable. SCCs reveal the cyclic structure of a graph:
+deadlock cycles among processes, groups of mutually-citing pages, or feedback loops
+in a dependency graph.
+
+Step through the two passes below. The first pass explores the graph; the second
+colors each component.
+
+<SccVisualizer client:visible />
+
+## Why this is subtle
+
+Reachability in a directed graph is one-directional. `A` reaching `B` says nothing
+about `B` reaching `A`. Collapsing every SCC into a single super-node always yields
+a **DAG** — the *condensation* of the graph — because if two components could reach
+each other, they would have been one component. That DAG is often what you actually
+want: a clean acyclic skeleton you can topologically sort.
+
+## Kosaraju's algorithm
+
+Kosaraju finds all SCCs with two depth-first searches:
+
+1. **Pass 1.** Run DFS on the original graph. When a node *finishes* (all its
+   descendants are explored), push it onto a stack. This orders nodes by decreasing
+   finish time.
+2. **Reverse the graph.** Flip the direction of every edge to get the transpose.
+3. **Pass 2.** Pop nodes off the stack and, for each unvisited one, run DFS on the
+   reversed graph. Every DFS tree you grow is exactly one SCC.
+
+The magic is the finish-time order. The last node to finish lies in a "source" SCC
+of the condensation; reversing the edges makes that component a sink, so DFS from it
+cannot leak into any other component. Each tree is therefore self-contained. Both
+passes are linear, so the whole algorithm is $O(V + E)$.
+
+## Tarjan's algorithm
+
+**Tarjan's** algorithm finds the same components in a **single** DFS. It tracks each
+node's discovery index and a `lowlink` — the smallest index reachable from its
+subtree using one back-edge. A node whose `lowlink` equals its own index is the
+**root** of an SCC, and the component is the run of nodes sitting above it on an
+explicit stack. One pass, also $O(V + E)$ — fewer traversals than Kosaraju, at the
+cost of slightly trickier bookkeeping.
+
+## What SCCs unlock
+
+Once you have the SCCs and their condensation DAG, hard problems get easy:
+**2-SAT** is solvable by checking that no variable shares an SCC with its negation;
+cycle-aware scheduling runs a topological sort on the condensation; and you can
+count how many components are unreachable or form a single sink.
+
+## Takeaways
+
+- An SCC is a maximal set of mutually reachable nodes; collapsing them yields an
+  acyclic condensation DAG.
+- Kosaraju uses two DFS passes — finish-order on the original graph, then DFS on the
+  transpose — in $O(V + E)$.
+- Tarjan finds the same components in one pass using discovery indices and
+  `lowlink` values.

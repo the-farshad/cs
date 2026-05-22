@@ -1,0 +1,95 @@
+---
+title: Inheritance & Polymorphism
+track: cpp
+order: 6
+summary: Share behavior through base classes and let virtual functions pick the right override at run time.
+difficulty: medium
+---
+
+import CodeTabs from '@/components/ui/CodeTabs.tsx';
+import CppVtable from '@/components/viz/CppVtable.tsx';
+
+**Inheritance** lets a derived class reuse and extend a base class. **Polymorphism**
+goes further: through a base-class pointer or reference, a `virtual` function call
+runs the *derived* version that matches the object's real type — a decision made
+at run time, not compile time. This is called **dynamic dispatch**.
+
+How does the program know which override to run when all it has is a `Shape*`?
+Each object carries a hidden pointer (the **vptr**) to a per-class table of
+function pointers (the **vtable**). A virtual call reads the vptr, looks up the
+right slot, and jumps to the override. Pick a dynamic type below and step through
+the lookup.
+
+<CppVtable client:visible />
+
+## Base and derived classes
+
+A derived class lists its base after a colon. Mark functions you intend to
+override as `virtual` in the base, and `override` in the derived class so the
+compiler can check you actually match the signature.
+
+```cpp
+#include <iostream>
+
+struct Shape {
+    virtual double area() const = 0;   // pure virtual -> abstract base
+    virtual ~Shape() = default;        // virtual destructor (important!)
+};
+
+struct Circle : Shape {
+    double r;
+    explicit Circle(double r) : r(r) {}
+    double area() const override { return 3.14159 * r * r; }
+};
+
+struct Square : Shape {
+    double s;
+    explicit Square(double s) : s(s) {}
+    double area() const override { return s * s; }
+};
+```
+
+## Dynamic dispatch in action
+
+The static type is `Shape*`, but the call resolves to whatever the object really
+is. Without `virtual`, the call would bind to `Shape::area` at compile time and
+ignore the override entirely.
+
+<CodeTabs tabs={[
+  {
+    language: 'cpp',
+    code: `#include <memory>
+#include <vector>
+
+std::vector<std::unique_ptr<Shape>> shapes;
+shapes.push_back(std::make_unique<Circle>(3.0));
+shapes.push_back(std::make_unique<Square>(4.0));
+
+for (const auto& s : shapes) {
+    // One call site, two different functions run:
+    std::cout << s->area() << "\\n";   // 28.27, then 16.00
+}`
+  },
+  {
+    language: 'cpp',
+    code: `// Why the destructor must be virtual
+Shape* s = new Circle(3.0);
+delete s;   // calls ~Circle() ONLY if ~Shape() is virtual.
+            // Otherwise: undefined behavior + a leak of Circle's parts.`
+  }
+]} client:visible />
+
+## The cost and the rule
+
+Each virtual call costs one extra pointer indirection through the vtable — tiny,
+but not free. The payoff is huge: you can add a new `Shape` subclass and existing
+loops keep working unchanged. One firm rule: **any class meant to be used as a
+polymorphic base needs a `virtual` destructor**, so deleting through a base
+pointer destroys the whole object.
+
+## Takeaways
+
+- Inheritance shares and extends behavior; a derived class lists its base after `:`.
+- `virtual` functions enable dynamic dispatch — the override matching the object's real type runs.
+- Dispatch works via a hidden vptr in each object pointing to its class vtable of function pointers.
+- Always give a polymorphic base class a `virtual` destructor.
