@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { ICONS } from '@/lib/icons';
 
 type IconProps = {
@@ -5,9 +6,10 @@ type IconProps = {
   size?: number;
   className?: string;
   strokeWidth?: number;
+  style?: CSSProperties;
 };
 
-export default function Icon({ name, size = 24, className = '', strokeWidth = 2 }: IconProps) {
+export default function Icon({ name, size = 24, className = '', strokeWidth = 2, style }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -20,6 +22,7 @@ export default function Icon({ name, size = 24, className = '', strokeWidth = 2 
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: ICONS[name] ?? '' }}
     />

@@ -92,7 +92,7 @@ export default function DequeVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { buf: new Array(CAP).fill(null), head: 0, tail: 0, size: 0 };
 
   const val = () => Number(input);

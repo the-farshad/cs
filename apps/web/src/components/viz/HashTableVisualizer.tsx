@@ -43,7 +43,7 @@ export default function HashTableVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 12, true);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length, 12, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { buckets: Array.from({ length: SIZE }, () => []) };
 
   const count = frame.buckets.reduce((s, b) => s + b.length, 0);

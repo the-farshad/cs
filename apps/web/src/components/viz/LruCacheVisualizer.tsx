@@ -76,7 +76,7 @@ export default function LruCacheVisualizer() {
   const [value, setValue] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { order: [] };
 
   const k = () => key.trim().toUpperCase();

@@ -120,7 +120,7 @@ export default function UnionFindVisualizer() {
   const [b, setB] = useState(7);
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(
     frames.length,
     2,
   );

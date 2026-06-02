@@ -18,6 +18,18 @@ const XMAX = 1;
 const YMIN = -0.4;
 const YMAX = 1.25;
 
+// Integer power by repeated multiplication. Unlike `x ** j` (Math.pow), which is
+// not required to be correctly rounded and can differ by 1 ULP across JS engines,
+// this uses only IEEE-754 multiplication, so it is bit-identical on every engine.
+// That keeps the (ill-conditioned, degree-9) fit's displayed MSE/weight-norm the
+// same during SSR and client hydration — otherwise a last-bit divergence gets
+// amplified into different digits and triggers a React hydration mismatch (#418).
+const ipow = (x: number, n: number): number => {
+  let r = 1;
+  for (let i = 0; i < n; i++) r *= x;
+  return r;
+};
+
 // Solve (XᵀX + λI) w = Xᵀy via Gaussian elimination. Tiny systems → fine.
 function solve(A: number[][], b: number[]): number[] {
   const n = b.length;
@@ -43,7 +55,7 @@ function fitPoly(degree: number, lambda: number): number[] {
   const XtX = Array.from({ length: m }, () => new Array(m).fill(0));
   const Xty = new Array(m).fill(0);
   for (const { x, y } of DATA) {
-    const powers = Array.from({ length: m }, (_, j) => x ** j);
+    const powers = Array.from({ length: m }, (_, j) => ipow(x, j));
     for (let i = 0; i < m; i++) {
       Xty[i] += powers[i] * y;
       for (let j = 0; j < m; j++) XtX[i][j] += powers[i] * powers[j];
@@ -54,7 +66,7 @@ function fitPoly(degree: number, lambda: number): number[] {
   return solve(XtX, Xty);
 }
 
-const evalPoly = (w: number[], x: number) => w.reduce((s, c, j) => s + c * x ** j, 0);
+const evalPoly = (w: number[], x: number) => w.reduce((s, c, j) => s + c * ipow(x, j), 0);
 
 export default function RegularizationVisualizer() {
   const [degree, setDegree] = useState(9);

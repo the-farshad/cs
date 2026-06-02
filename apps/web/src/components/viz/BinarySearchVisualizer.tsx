@@ -37,7 +37,7 @@ export default function BinarySearchVisualizer() {
   }));
 
   const frames = useMemo<BSFrame[]>(() => Array.from(search(data, target)), [data, target]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset } = useStepper(frames.length, 3);
   const frame = frames[Math.min(index, frames.length - 1)];
 
   const newArray = () => {

@@ -81,8 +81,6 @@ export default function RegexMatchVisualizer() {
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
   const frame = frames[Math.min(index, frames.length - 1)] ?? frames[0];
 
-  const stateList = ['S0', 'S1', 'S2'];
-
   return (
     <div className="rounded-xl border border-edge bg-surface p-4 sm:p-6">
       <div className="mb-3 text-sm text-muted">

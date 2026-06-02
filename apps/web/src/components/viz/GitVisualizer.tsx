@@ -73,7 +73,7 @@ export default function GitVisualizer() {
   const [name, setName] = useState('feature');
 
   const frames = useMemo(() => replay(cmds), [cmds]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 2, true);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length, 2, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? frames[0];
 
   const add = (cmd: string) => setCmds((c) => [...c, cmd]);

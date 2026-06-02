@@ -16,9 +16,9 @@ const THETA0 = 2.4; // initial angle (rad), near horizontal
 
 type State = { theta: number; omega: number; t: number };
 
-function simulate(length: number, damping: number, mass: number): State[] {
-  // Mass cancels in θ'' for a point pendulum, but it scales the KINETIC energy
-  // we report, so we keep it as a parameter to make the dynamics concrete.
+function simulate(length: number, damping: number): State[] {
+  // Mass cancels from θ'' for a point pendulum, so it never enters the motion;
+  // it only scales the energy the caller reports.
   let theta = THETA0;
   let omega = 0;
   const out: State[] = [{ theta, omega, t: 0 }];
@@ -44,7 +44,7 @@ export default function PendulumDynamics() {
   const [damping, setDamping] = useState(0.4);
   const [mass, setMass] = useState(1.2);
 
-  const states = useMemo(() => simulate(length, damping, mass), [length, damping, mass]);
+  const states = useMemo(() => simulate(length, damping), [length, damping]);
   const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(states.length, 30);
   const k = Math.min(index, states.length - 1);
   const s = states[k];

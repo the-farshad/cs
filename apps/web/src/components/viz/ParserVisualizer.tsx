@@ -177,7 +177,7 @@ const btn =
 export default function ParserVisualizer() {
   const [src, setSrc] = useState(SAMPLES[0]);
   const { steps, root } = useMemo(() => parse(tokenize(src)), [src]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(steps.length, 2);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset } = useStepper(steps.length, 2);
   const i = Math.min(index, steps.length - 1);
   const step = steps[i];
 

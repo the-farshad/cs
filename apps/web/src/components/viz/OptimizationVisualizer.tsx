@@ -126,7 +126,7 @@ export default function OptimizationVisualizer() {
   const [key, setKey] = useState('a');
   const preset = PRESETS[key];
   const frames = useMemo(() => optimize(preset.program, new Set(preset.used)), [preset]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 2);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset } = useStepper(frames.length, 2);
   const frame = frames[Math.min(index, frames.length - 1)];
 
   const original = frames[0];

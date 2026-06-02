@@ -22,15 +22,11 @@ const EDGES: [number, number][] = [
 
 const lbl = (i: number) => NODES[i].label;
 
-const btn =
-  'inline-flex items-center gap-1.5 rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
-
 export default function GraphRepresentationVisualizer() {
   const [view, setView] = useState<View>('both');
   // Selected edge as a normalized "u-v" key (u < v), or null.
   const [sel, setSel] = useState<string | null>('1-3');
 
-  const n = NODES.length;
   const key = (u: number, v: number) => (u < v ? `${u}-${v}` : `${v}-${u}`);
 
   // Adjacency list (sorted neighbours).

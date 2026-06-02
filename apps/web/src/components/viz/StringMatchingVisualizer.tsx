@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useStepper } from './useStepper';
 import Icon from '@/components/ui/Icon';
 

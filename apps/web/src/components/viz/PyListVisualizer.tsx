@@ -70,7 +70,7 @@ export default function PyListVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 8, true);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length, 8, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { items: [], capacity: 0, note: '' };
 
   const ok = () => input.trim() !== '' && !Number.isNaN(Number(input));

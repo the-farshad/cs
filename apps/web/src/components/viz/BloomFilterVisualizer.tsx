@@ -104,7 +104,7 @@ export default function BloomFilterVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length);
   const frame = frames[Math.min(index, frames.length - 1)] ?? { bits: new Array(M).fill(false) };
 
   const word = () => input.trim().toLowerCase();

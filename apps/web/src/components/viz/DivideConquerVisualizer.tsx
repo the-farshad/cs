@@ -65,7 +65,7 @@ function buildTree(): { nodes: TreeNode[]; root: number } {
   function layout(id: number): number {
     const n = nodes[id];
     n.y = 40 + n.depth * 78;
-    if (n.left === undefined) {
+    if (n.left === undefined || n.right === undefined) {
       n.x = leafX * slot + slot / 2;
       leafX++;
       return n.x;
@@ -103,7 +103,7 @@ function buildFrames(nodes: TreeNode[], root: number): Frame[] {
   // recursive walk that emits split (pre) and combine (post) frames
   function go(id: number): number[] {
     const n = nodes[id];
-    if (n.left === undefined) {
+    if (n.left === undefined || n.right === undefined) {
       status[id] = 'solve';
       n.sorted = [...n.values];
       shown.add(id);

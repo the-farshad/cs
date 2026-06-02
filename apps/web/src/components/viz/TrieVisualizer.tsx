@@ -177,7 +177,7 @@ export default function TrieVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops), [ops]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(
     frames.length,
     3,
   );

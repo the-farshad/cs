@@ -44,7 +44,7 @@ export default function StackQueueVisualizer() {
   const [input, setInput] = useState('');
 
   const frames = useMemo(() => buildFrames(ops, mode), [ops, mode]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length, 3);
 
   // Auto-play the fill-then-drain cycle and loop it, so the full behavior is always visible.
   useEffect(() => {

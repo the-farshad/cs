@@ -4,15 +4,6 @@ import Icon from '@/components/ui/Icon';
 
 const N = 8; // number of items in the search space
 
-// One Grover iteration on a real amplitude vector:
-//   1. oracle: flip the sign of the marked item's amplitude
-//   2. diffusion: invert every amplitude about the mean ( a -> 2*mean - a )
-function groverStep(amps: number[], marked: number): number[] {
-  const oracled = amps.map((a, i) => (i === marked ? -a : a));
-  const mean = oracled.reduce((s, a) => s + a, 0) / oracled.length;
-  return oracled.map((a) => 2 * mean - a);
-}
-
 // Optimal iteration count for an N-item search: round( (π/4)·√N ).
 function optimalIters(n: number): number {
   return Math.max(1, Math.round((Math.PI / 4) * Math.sqrt(n)));

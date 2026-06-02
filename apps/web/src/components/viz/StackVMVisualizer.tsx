@@ -78,7 +78,7 @@ export default function StackVMVisualizer() {
   const [key, setKey] = useState('a');
   const code = useMemo(() => compile(PRESETS[key].ast), [key]);
   const frames = useMemo(() => run(code), [code]);
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 3);
+  const { index, playing, fps, setFps, play, pause, next, prev, reset } = useStepper(frames.length, 3);
   const frame = frames[Math.min(index, frames.length - 1)];
 
   return (

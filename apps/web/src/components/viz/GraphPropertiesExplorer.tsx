@@ -1,8 +1,4 @@
 import { useMemo, useState } from 'react';
-import Icon from '@/components/ui/Icon';
-
-const btn =
-  'inline-flex items-center gap-1.5 rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
 
 type Mode = 'degree' | 'connectivity' | 'coloring';
 

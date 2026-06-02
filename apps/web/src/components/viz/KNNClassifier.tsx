@@ -30,9 +30,6 @@ const PAD = 32;
 
 const COLORS = ['#38bdf8', '#f43f5e']; // class 0 sky, class 1 rose
 
-const btn =
-  'inline-flex items-center gap-1.5 rounded border border-edge px-3 py-1 text-sm text-fg transition hover:border-accent hover:text-accent disabled:opacity-40 disabled:hover:border-edge disabled:hover:text-fg';
-
 export default function KNNClassifier() {
   const [qx, setQx] = useState(5);
   const [qy, setQy] = useState(4.5);

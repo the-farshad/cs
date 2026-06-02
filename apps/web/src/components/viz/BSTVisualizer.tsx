@@ -20,7 +20,7 @@ export default function BSTVisualizer() {
   const searchF = useMemo(() => (mode === 'search' && target != null ? searchFrames(root, target) : []), [mode, target, root]);
   const frames = mode === 'search' ? searchF : buildF;
 
-  const { index, playing, fps, setFps, play, pause, next, prev, reset, seek } = useStepper(frames.length, 12, true);
+  const { index, playing, fps, setFps, play, pause, next, prev, seek } = useStepper(frames.length, 12, true);
   const frame = frames[Math.min(index, frames.length - 1)] ?? EMPTY;
 
   const add = () => {
