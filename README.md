@@ -62,11 +62,6 @@ npm run build    # static build to dist/
 npx tsx scripts/verify.ts   # run the algorithm correctness checks
 ```
 
-## Roadmap
-
-A backend (accounts and cross-device progress sync, plus a compiled-language judge
-for C++/Java via Judge0) is planned; the site works fully without it.
-
 ## License
 
 GPL-3.0 — see [LICENSE](LICENSE).

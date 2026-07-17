@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import ThemeSwitcher from '../components/ui/ThemeSwitcher.tsx';
 import FontSwitcher from '../components/ui/FontSwitcher.tsx';
-import AuthButton from '../components/ui/AuthButton.tsx';
 import Icon from '@/components/ui/Icon.astro';
 import { VERSION, REPO_URL } from '@/lib/site';
 
@@ -47,9 +46,9 @@ const themeInit = `(()=>{try{var d=document.documentElement;var t=localStorage.g
         <nav class="flex items-center gap-3 text-sm text-muted">
           <a href="/problems" class="hidden hover:text-fg sm:inline">Problems</a>
           <a href="/#tracks" class="hidden hover:text-fg sm:inline">Tracks</a>
+          <a href="/settings" class="hidden hover:text-fg sm:inline">Progress</a>
           <ThemeSwitcher client:load />
           <FontSwitcher client:load />
-          <AuthButton client:load />
         </nav>
       </div>
     </header>
